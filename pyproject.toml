@@ -1,0 +1,78 @@
+[tool.poetry]
+name = "protoletariat"
+version = "0.1.0"
+packages = [{ include = "protoletariat" }]
+homepage = "https://github.com/cpcloud/protoletariat"
+repository = "https://github.com/cpcloud/protoletariat"
+description = "Python protocol buffers for the rest of us"
+authors = ["Phillip Cloud <417981+cpcloud@users.noreply.github.com>"]
+maintainers = ["Phillip Cloud <417981+cpcloud@users.noreply.github.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+classifiers = [
+  "Operating System :: OS Independent",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7.1,<4"
+toolz = "^0.11"
+click = "^8.0.1"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+flake8 = "^4.0.0"
+isort = "^5.9.3"
+mypy = "^0.910"
+# TODO: > 0.5.5 installs a conflicting entry point with jupyter_client
+pydocstyle = "^6.1.1"
+pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+pytest-mock = "^3.6.1"
+pytest-randomly = "^3.10.1"
+pyupgrade = "^2.26.0"
+
+[tool.poetry.scripts]
+protol = "protoletariat.__main__:main"
+
+[tool.semantic_release]
+version_toml = "pyproject.toml:tool.poetry.version"
+version_variable = ["protoletariat/__init__.py:__version__"]
+branch = "master"
+upload_to_pypi = true
+upload_to_release = true
+build_command = "poetry build"
+commit_subject = "chore(release): {version}"
+commit_author = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+changelog_file = "CHANGELOG.md"
+
+[tool.pytest.ini_options]
+xfail_strict = true
+addopts = [
+  "--ignore=site-packages",
+  "--ignore=dist-packages",
+  "--strict-markers"
+]
+norecursedirs = ["site-packages", "dist-packages"]
+
+[tool.black]
+line_length = 88
+skip_string_normalization = true
+
+[tool.isort]
+ensure_newline_before_comments = true
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+profile = "black"
+
+[tool.pydocstyle]
+inherit = false
+convention = "numpy"
+match_dir = "ibis"
+add_ignore = ["D100", "D101", "D102", "D103", "D104", "D105"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
