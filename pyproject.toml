@@ -18,7 +18,6 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 click = "^8.0.1"
-rope = "^0.21.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
