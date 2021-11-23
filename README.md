@@ -87,6 +87,6 @@ Options:
                                   modified imports
   --create-init / --dont-create-init
                                   Create an __init__.py file under the
-                                  `generated_python-dir` directory
+                                  `generated-python-dir` directory
   --help                          Show this message and exit.
 ```
