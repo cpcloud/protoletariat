@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.2.1 (2021-11-23)
+### Fix
+* Fix docker image build ([`ffb262a`](https://github.com/cpcloud/protoletariat/commit/ffb262a905856b899747432530e026b0500dbf71))
+
+### Documentation
+* Fix typo ([`8a32b6b`](https://github.com/cpcloud/protoletariat/commit/8a32b6bc8d6a19e948e6475db28ec48b6b476f03))
+* Describe how the thing works ([`bb05a58`](https://github.com/cpcloud/protoletariat/commit/bb05a589feff384f0b616166418b8309985b7567))
+* More help ([`95b9f2a`](https://github.com/cpcloud/protoletariat/commit/95b9f2ac7f79494d3d8481b3b46c842f4f43f676))
+* More readme ([`c57245b`](https://github.com/cpcloud/protoletariat/commit/c57245be0f842fe94e0a819b8d0c38a9d193ce78))
+
 ## v0.2.0 (2021-11-23)
 ### Feature
 * Implement translation with rewrites ([`f7f05ce`](https://github.com/cpcloud/protoletariat/commit/f7f05cedd5f5bbaf8a85a1de7abbab7342ed2047))
