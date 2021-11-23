@@ -67,8 +67,10 @@ Usage: protol [OPTIONS] PROTO_FILES...
 
 Options:
   -g, --generated-python-dir DIRECTORY
+                                  Directory containing generated Python code
                                   [required]
-  -p, --proto-path DIRECTORY      [required]
+  -p, --proto-path DIRECTORY      Protobuf file search path(s). Accepts
+                                  multiple values.  [required]
   --overwrite / --no-overwrite    Overwrite all generated Python files with
                                   modified imports
   --create-init / --dont-create-init
