@@ -29,8 +29,8 @@ jobs:
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
-          name: nix-community
-          extraPullNames: poetry2nix
+          name: protoletariat
+          extraPullNames: nix-community,poetry2nix
 
       - name: Get current commit
         id: get_current_commit

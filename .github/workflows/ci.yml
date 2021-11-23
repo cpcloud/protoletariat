@@ -31,7 +31,8 @@ jobs:
       - name: Setup Cachix
         uses: cachix/cachix-action@v10
         with:
-          name: numbsql
+          name: protoletariat
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
       - name: Build package and run tests
