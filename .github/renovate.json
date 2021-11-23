@@ -1,0 +1,8 @@
+{
+  "schedule": ["before 2am"],
+  "rangeStrategy": "auto",
+  "extends": ["config:base"],
+  "semanticCommits": "enabled",
+  "lockFileMaintenance": { "enabled": true },
+  "automerge": true
+}
