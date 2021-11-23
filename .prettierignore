@@ -1,0 +1,4 @@
+.direnv
+.mypy_cache
+.pre-commit-config.yaml
+CHANGELOG.md
