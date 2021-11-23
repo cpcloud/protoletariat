@@ -122,3 +122,79 @@ def test_cli(cli, tmp_path, this_proto, other_proto, baz_bizz_buzz_other_proto):
     lines = result.stdout.splitlines()
     assert 'from . import other_pb2 as other__pb2' in lines
     assert 'from .baz import bizz_buzz_pb2 as baz_dot_bizz__buzz__pb2' in lines
+
+
+@pytest.fixture
+def thing1(tmp_path):
+    code = """
+// thing1.proto
+syntax = "proto3";
+
+import "thing2.proto";
+
+package things;
+
+message Thing1 {
+  Thing2 thing2 = 1;
+}
+"""
+    p = tmp_path.joinpath("thing1.proto")
+    p.write_text(code)
+    return p
+
+
+@pytest.fixture
+def thing2(tmp_path):
+    code = """
+// thing2.proto
+syntax = "proto3";
+
+package things;
+
+message Thing2 {
+  string data = 1;
+}
+"""
+    p = tmp_path.joinpath("thing2.proto")
+    p.write_text(code)
+    return p
+
+
+def test_example(cli, tmp_path, thing1, thing2):
+    out = tmp_path.joinpath("out")
+    out.mkdir()
+    subprocess.run(
+        [
+            "protoc",
+            str(thing1),
+            str(thing2),
+            "--proto_path",
+            str(thing1.parent),
+            "--proto_path",
+            str(thing2.parent),
+            "--python_out",
+            str(out),
+        ]
+    )
+
+    result = cli.invoke(
+        main,
+        [
+            "-g",
+            str(out),
+            "-p",
+            str(thing1.parent),
+            "-p",
+            str(thing2.parent),
+            str(thing1),
+            str(thing2),
+            "--no-overwrite",
+            "--create-init",
+        ],
+    )
+    assert result.exit_code == 0
+
+    lines = result.stdout.splitlines()
+    assert 'from . import thing2_pb2 as thing2__pb2' in lines
+
+    assert out.joinpath("__init__.py").exists()
