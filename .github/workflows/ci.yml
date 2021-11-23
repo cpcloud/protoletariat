@@ -66,7 +66,10 @@ jobs:
         run: pip3 install poetry2conda
 
       - name: Generate conda environment file
-        run: poetry2conda --dev pyproject.toml - | tee environment.yaml
+        run: |
+          set -euo pipefail
+
+          poetry2conda --dev pyproject.toml - | tee environment.yaml
 
       - name: Setup conda
         uses: conda-incubator/setup-miniconda@v2
