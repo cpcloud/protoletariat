@@ -24,7 +24,7 @@
     , nixpkgs
     , flake-utils
     , pre-commit-hooks
-    , poetry2nix
+    , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
@@ -51,7 +51,7 @@
       };
     in
     rec {
-      packages.protoletariat = poetry2nix.mkPoetryApplication {
+      packages.protoletariat = pkgs.poetry2nix.mkPoetryApplication {
         python = pkgs.python3;
 
         pyproject = ./pyproject.toml;
@@ -64,6 +64,16 @@
             inherit (pkgs) lib stdenv;
           }
         );
+
+        checkInputs = [ pkgs.protobuf ];
+
+        checkPhase = ''
+          runHook preCheck
+          pytest
+          runHook postCheck
+        '';
+
+        pythonImportsCheck = [ "protoletariat" ];
       };
 
       defaultPackage = packages.protoletariat;
