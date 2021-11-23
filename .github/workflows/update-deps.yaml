@@ -34,7 +34,7 @@ jobs:
 
       - name: Get current commit
         id: get_current_commit
-        uses: cpcloud/flake-dep-info-action@v1.0.2
+        uses: cpcloud/flake-dep-info-action@v1.1.0
         with:
           input: ${{ matrix.input }}
 
@@ -43,7 +43,7 @@ jobs:
 
       - name: Get new commit
         id: get_new_commit
-        uses: cpcloud/flake-dep-info-action@v1.0.2
+        uses: cpcloud/flake-dep-info-action@v1.1.0
         with:
           input: ${{ matrix.input }}
 
