@@ -24,11 +24,8 @@ black = "^21.9b0"
 flake8 = "^4.0.0"
 isort = "^5.9.3"
 mypy = "^0.910"
-# TODO: > 0.5.5 installs a conflicting entry point with jupyter_client
 pydocstyle = "^6.1.1"
 pytest = "^6.2.5"
-pytest-cov = "^3.0.0"
-pytest-mock = "^3.6.1"
 pytest-randomly = "^3.10.1"
 pyupgrade = "^2.26.0"
 
