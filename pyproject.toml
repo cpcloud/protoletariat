@@ -37,7 +37,7 @@ protol = "protoletariat.__main__:main"
 [tool.semantic_release]
 version_toml = "pyproject.toml:tool.poetry.version"
 version_variable = ["protoletariat/__init__.py:__version__"]
-branch = "master"
+branch = "main"
 upload_to_pypi = true
 upload_to_release = true
 build_command = "poetry build"
