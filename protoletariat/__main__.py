@@ -57,6 +57,7 @@ def get_file_descriptor_set(
         exists=True,
         path_type=Path,
     ),
+    help="Directory containing generated Python code",
 )
 @click.option(
     "-p",
@@ -69,6 +70,7 @@ def get_file_descriptor_set(
         exists=True,
         path_type=Path,
     ),
+    help="Protobuf file search path(s). Accepts multiple values.",
 )
 @click.argument(
     "proto_files",
