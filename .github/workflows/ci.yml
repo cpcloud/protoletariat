@@ -16,6 +16,10 @@ jobs:
         os:
           - ubuntu-latest
           - macos-11
+        python-version:
+          - "37"
+          - "38"
+          - "39"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -36,7 +40,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: Build package and run tests
-        run: nix build --print-build-logs --keep-going
+        run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}'
   conda:
     strategy:
       fail-fast: false

@@ -49,10 +49,8 @@
           }
         );
       };
-    in
-    rec {
-      packages.protoletariat = pkgs.poetry2nix.mkPoetryApplication {
-        python = pkgs.python3;
+      mkApp = python: pkgs.poetry2nix.mkPoetryApplication {
+        inherit python;
 
         pyproject = ./pyproject.toml;
         poetrylock = ./poetry.lock;
@@ -75,6 +73,12 @@
 
         pythonImportsCheck = [ "protoletariat" ];
       };
+    in
+    rec {
+      packages.protoletariat37 = mkApp pkgs.python37;
+      packages.protoletariat38 = mkApp pkgs.python38;
+      packages.protoletariat39 = mkApp pkgs.python39;
+      packages.protoletariat = mkApp pkgs.python3;
 
       defaultPackage = packages.protoletariat;
 
