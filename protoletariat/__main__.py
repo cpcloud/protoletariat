@@ -113,11 +113,7 @@ def main(
     for fd in filter(lambda fd: fd.dependency, fdset.file):
         fd_name = fd.name
         stem = proto_suffix_pattern.sub("", fd_name)
-        python_file = (
-            generated_python_dir.joinpath(fd_name)
-            .with_stem(f"{stem}_pb2")
-            .with_suffix(".py")
-        )
+        python_file = generated_python_dir.joinpath(fd_name).with_name(f"{stem}_pb2.py")
         raw_code = python_file.read_text()
         module = ast.parse(raw_code)
         new_module = rewriter.visit(module)
