@@ -19,6 +19,7 @@ classifiers = [
 python = ">=3.9,<3.11"
 astor = "^0.8.1"
 click = "^8.0.1"
+protobuf = "^3.19.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
