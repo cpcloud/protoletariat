@@ -91,7 +91,7 @@
         name = "protoletariat";
         config = {
           Entrypoint = [ "${packages.protoletariat}/bin/protol" ];
-          Command = [ "${pkgs.protoletariat}/bin/protol" ];
+          Command = [ "${packages.protoletariat}/bin/protol" ];
         };
       };
 
