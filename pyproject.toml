@@ -68,6 +68,7 @@ line_length = 88
 multi_line_output = 3
 include_trailing_comma = true
 profile = "black"
+skip_glob = [".direnv/*", "result/*", "result-*"]
 
 [tool.pydocstyle]
 inherit = false
