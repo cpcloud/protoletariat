@@ -76,6 +76,27 @@ convention = "numpy"
 match_dir = "ibis"
 add_ignore = ["D100", "D101", "D102", "D103", "D104", "D105"]
 
+[tool.mypy]
+ignore_missing_imports = true
+# untyped things
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+# Any handling
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_any_explicit = false
+disallow_any_generics = false
+disallow_subclassing_any = false
+# None/Optional handling
+no_implicit_optional = true
+# show more context on failure
+show_error_context = true
+# show codes in case we end up needing to ignore
+show_error_codes = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
