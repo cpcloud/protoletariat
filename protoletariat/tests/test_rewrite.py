@@ -1,10 +1,19 @@
+import json
+import os
 import subprocess
+from pathlib import Path
+from typing import Iterable
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 from protoletariat.__main__ import main
 from protoletariat.rewrite import build_import_rewrite
+
+
+def check_import_lines(result: Result, expected_lines: Iterable[str]) -> None:
+    lines = result.stdout.splitlines()
+    assert set(expected_lines) <= set(lines)
 
 
 @pytest.mark.parametrize(
@@ -19,18 +28,18 @@ from protoletariat.rewrite import build_import_rewrite
         ),
     ],
 )
-def test_build_import_rewrite(case, expected):
+def test_build_import_rewrite(case: str, expected: str) -> None:
     old, new = build_import_rewrite(case)
     assert new == expected
 
 
 @pytest.fixture
-def cli():
+def cli() -> CliRunner:
     return CliRunner()
 
 
 @pytest.fixture
-def this_proto(tmp_path):
+def this_proto(tmp_path: Path) -> Path:
     code = """
 syntax = "proto3";
 
@@ -50,7 +59,7 @@ message Test {
 
 
 @pytest.fixture
-def other_proto(tmp_path):
+def other_proto(tmp_path: Path) -> Path:
     code = """
 syntax = "proto3";
 
@@ -64,7 +73,7 @@ message Other {}
 
 
 @pytest.fixture
-def baz_bizz_buzz_other_proto(tmp_path):
+def baz_bizz_buzz_other_proto(tmp_path: Path) -> Path:
     code = """
 syntax = "proto3";
 
@@ -79,7 +88,13 @@ message BuzzBuzz {}
     return p
 
 
-def test_cli(cli, tmp_path, this_proto, other_proto, baz_bizz_buzz_other_proto):
+def test_cli(
+    cli: CliRunner,
+    tmp_path: Path,
+    this_proto: Path,
+    other_proto: Path,
+    baz_bizz_buzz_other_proto: Path,
+) -> None:
     # 1. generated code using protoc
     out = tmp_path.joinpath("out")
     out.mkdir()
@@ -105,6 +120,8 @@ def test_cli(cli, tmp_path, this_proto, other_proto, baz_bizz_buzz_other_proto):
         [
             "-g",
             str(out),
+            "--no-overwrite",
+            "protoc",
             "-p",
             str(this_proto.parent),
             "-p",
@@ -114,18 +131,20 @@ def test_cli(cli, tmp_path, this_proto, other_proto, baz_bizz_buzz_other_proto):
             str(this_proto),
             str(other_proto),
             str(baz_bizz_buzz_other_proto),
-            "--no-overwrite",
         ],
     )
     assert result.exit_code == 0
 
-    lines = result.stdout.splitlines()
-    assert 'from . import other_pb2 as other__pb2' in lines
-    assert 'from .baz import bizz_buzz_pb2 as baz_dot_bizz__buzz__pb2' in lines
+    expected_lines = [
+        "from . import other_pb2 as other__pb2",
+        "from .baz import bizz_buzz_pb2 as baz_dot_bizz__buzz__pb2",
+    ]
+
+    check_import_lines(result, expected_lines)
 
 
 @pytest.fixture
-def thing1(tmp_path):
+def thing1(tmp_path: Path) -> Path:
     code = """
 // thing1.proto
 syntax = "proto3";
@@ -144,7 +163,7 @@ message Thing1 {
 
 
 @pytest.fixture
-def thing2(tmp_path):
+def thing2(tmp_path: Path) -> Path:
     code = """
 // thing2.proto
 syntax = "proto3";
@@ -160,7 +179,12 @@ message Thing2 {
     return p
 
 
-def test_example(cli, tmp_path, thing1, thing2):
+def test_example_protoc(
+    cli: CliRunner,
+    tmp_path: Path,
+    thing1: Path,
+    thing2: Path,
+) -> None:
     out = tmp_path.joinpath("out")
     out.mkdir()
     subprocess.run(
@@ -182,19 +206,88 @@ def test_example(cli, tmp_path, thing1, thing2):
         [
             "-g",
             str(out),
+            "--no-overwrite",
+            "--create-init",
+            "protoc",
             "-p",
             str(thing1.parent),
             "-p",
             str(thing2.parent),
             str(thing1),
             str(thing2),
-            "--no-overwrite",
-            "--create-init",
         ],
     )
     assert result.exit_code == 0
 
-    lines = result.stdout.splitlines()
-    assert 'from . import thing2_pb2 as thing2__pb2' in lines
+    expected_lines = ["from . import thing2_pb2 as thing2__pb2"]
+    check_import_lines(result, expected_lines)
+
+    assert out.joinpath("__init__.py").exists()
+
+
+def test_example_buf(
+    cli: CliRunner,
+    tmp_path: Path,
+    thing1: Path,
+    thing2: Path,
+) -> None:
+    out = tmp_path.joinpath("out")
+    out.mkdir()
+
+    os.chdir(tmp_path)
+    with tmp_path.joinpath("buf.yaml").open(mode="w") as f:
+        json.dump(
+            {
+                "version": "v1",
+                "lint": {"use": ["DEFAULT"]},
+                "breaking": {"use": ["FILE"]},
+            },
+            f,
+        )
+
+    with tmp_path.joinpath("buf.gen.yaml").open(mode="w") as f:
+        json.dump(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "python",
+                        "out": str(out),
+                    }
+                ],
+            },
+            f,
+        )
+
+    subprocess.check_call(
+        [
+            "protoc",
+            str(thing1),
+            str(thing2),
+            "--proto_path",
+            str(thing1.parent),
+            "--proto_path",
+            str(thing2.parent),
+            "--python_out",
+            str(out),
+        ],
+    )
+
+    assert list(out.rglob("*.py"))
+
+    result = cli.invoke(
+        main,
+        [
+            "-g",
+            str(out),
+            "--no-overwrite",
+            "--create-init",
+            "buf",
+        ],
+    )
+    assert result.exit_code == 0
+
+    expected_lines = ["from . import thing2_pb2 as thing2__pb2"]
+    check_import_lines(result, expected_lines)
 
     assert out.joinpath("__init__.py").exists()
