@@ -164,6 +164,7 @@
 
       devShell = pkgs.mkShell {
         nativeBuildInputs = (with pkgs; [
+          buf
           commitizen
           poetry
           protobuf
