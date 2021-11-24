@@ -103,22 +103,19 @@ def build_import_rewrite(dep: str) -> Replacement:
     """
     parts = dep.split("/")
 
-    import_parts = []
-    for part in parts[:-1]:
-        import_parts.append(part)
+    *import_parts, part = parts
 
     if not import_parts:
-        (part,) = parts
         old = f"import {part}_pb2 as {part}__pb2"
         new = f"from . import {part}_pb2 as {part}__pb2"
     else:
-        last_piece = "__".join(f"{parts[-1]}_pb2".split("_"))
+        last_part = "__".join(f"{part}_pb2".split("_"))
 
         from_ = ".".join(import_parts)
-        as_ = f"{'_dot_'.join(import_parts)}_dot_{last_piece}"
+        as_ = f"{'_dot_'.join(import_parts)}_dot_{last_part}"
 
-        old = f"from {from_} import {parts[-1]}_pb2 as {as_}"
-        new = f"from .{from_} import {parts[-1]}_pb2 as {as_}"
+        old = f"from {from_} import {part}_pb2 as {as_}"
+        new = f"from .{from_} import {part}_pb2 as {as_}"
 
     return Replacement(old=old, new=new)
 
