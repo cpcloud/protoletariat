@@ -46,7 +46,7 @@ def get_file_descriptor_set(
         os.remove(f.name)
 
 
-@click.command(help="Rewrite protoc-generated imports for use by the proletariat.")
+@click.command(help="Rewrite protoc-generated imports for use by the protoletariat.")
 @click.option(
     "-g",
     "--generated-python-dir",
