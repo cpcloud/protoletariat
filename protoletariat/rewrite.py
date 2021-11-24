@@ -137,8 +137,8 @@ def register_import_rewrite(replacement: Replacement) -> None:
 class ImportRewriter(ast.NodeTransformer):
     """A NodeTransformer to apply rewrite rules."""
 
-    def visit_Import(self, node: ast.Import) -> ast.ImportFrom:
+    def visit_Import(self, node: ast.Import) -> ast.AST:
         return rewrite(node)
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.ImportFrom:
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.AST:
         return rewrite(node)
