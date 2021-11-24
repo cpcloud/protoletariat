@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.1 (2021-11-24)
+### Fix
+* Generate packages in the output directory ([`a00cc06`](https://github.com/cpcloud/protoletariat/commit/a00cc0651ee4244500443aca9b561278783d0587))
+* Fix package relative imports ([`ae75384`](https://github.com/cpcloud/protoletariat/commit/ae753840f201478b373d38670bd9ee570079b4dc))
+
+### Documentation
+* Put a link to the pypi package in the badge ([`2053313`](https://github.com/cpcloud/protoletariat/commit/2053313726948bee12b25268b0584b5e3dd5a98e))
+* Use shields.io instead of fury.io ([`7ae2261`](https://github.com/cpcloud/protoletariat/commit/7ae22611406fc8a210c459c3cf7299091458b0ae))
+* Add status badges for CI and PyPI ([`318ba9f`](https://github.com/cpcloud/protoletariat/commit/318ba9f20c369c7a8b6161a5140b07b7787194f9))
+
 ## v0.3.0 (2021-11-24)
 ### Feature
 * **cli:** Add support for generating FileDescriptorSet blobs using `buf` ([`2d072b7`](https://github.com/cpcloud/protoletariat/commit/2d072b7168521c33986a57a9b2f993522664f87b))
