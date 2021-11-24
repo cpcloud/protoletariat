@@ -91,6 +91,7 @@ class Buf(FileDescriptorSetGenerator):
                 self.fdset_generator_binary,
                 "build",
                 "--as-file-descriptor-set",
+                "--exclude-source-info",
                 "--output",
                 "-",
             ]
