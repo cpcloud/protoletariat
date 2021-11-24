@@ -89,7 +89,7 @@ class Rewriter:
 rewrite = Rewriter()
 
 
-def build_import_rewrite(dep: str) -> Replacement:
+def build_import_rewrite(proto: str, dep: str) -> Replacement:
     """Construct a replacement import for `dep`.
 
     Parameters
@@ -107,9 +107,12 @@ def build_import_rewrite(dep: str) -> Replacement:
 
     *import_parts, part = parts
 
+    # compute the number of dots needed to get to the package root
+    num_leading_dots = proto.count("/") + 1
+    leading_dots = "." * num_leading_dots
     if not import_parts:
         old = f"import {part}_pb2 as {part}__pb2"
-        new = f"from . import {part}_pb2 as {part}__pb2"
+        new = f"from {leading_dots} import {part}_pb2 as {part}__pb2"
     else:
         last_part = "__".join(f"{part}_pb2".split("_"))
 
@@ -117,7 +120,7 @@ def build_import_rewrite(dep: str) -> Replacement:
         as_ = f"{'_dot_'.join(import_parts)}_dot_{last_part}"
 
         old = f"from {from_} import {part}_pb2 as {as_}"
-        new = f"from .{from_} import {part}_pb2 as {as_}"
+        new = f"from {leading_dots}{from_} import {part}_pb2 as {as_}"
 
     return Replacement(old=old, new=new)
 

@@ -1,6 +1,7 @@
+import importlib
 import json
-import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -22,19 +23,36 @@ def check_proto_out(out: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    ("case", "expected"),
+    ("proto", "dep", "expected"),
     [
-        ("foo", "from . import foo_pb2 as foo__pb2"),
-        ("foo/bar", "from .foo import bar_pb2 as foo_dot_bar__pb2"),
-        ("foo/bar/baz", "from .foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2"),
+        ("a", "foo", "from . import foo_pb2 as foo__pb2"),
+        ("a/b", "foo", "from .. import foo_pb2 as foo__pb2"),
+        ("a", "foo/bar", "from .foo import bar_pb2 as foo_dot_bar__pb2"),
+        ("a/b", "foo/bar", "from ..foo import bar_pb2 as foo_dot_bar__pb2"),
         (
+            "a",
+            "foo/bar/baz",
+            "from .foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+        ),
+        (
+            "a/b",
+            "foo/bar/baz",
+            "from ..foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+        ),
+        (
+            "a",
             "foo/bar/bizz_buzz",
             "from .foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
         ),
+        (
+            "a/b",
+            "foo/bar/bizz_buzz",
+            "from ..foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
+        ),
     ],
 )
-def test_build_import_rewrite(case: str, expected: str) -> None:
-    old, new = build_import_rewrite(case)
+def test_build_import_rewrite(proto: str, dep: str, expected: str) -> None:
+    old, new = build_import_rewrite(proto, dep)
     assert new == expected
 
 
@@ -99,9 +117,10 @@ def test_cli(
     this_proto: Path,
     other_proto: Path,
     baz_bizz_buzz_other_proto: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # 1. generated code using protoc
-    out = tmp_path.joinpath("out")
+    out = tmp_path.joinpath("out_cli")
     out.mkdir()
     subprocess.run(
         [
@@ -149,10 +168,39 @@ def test_cli(
 
     check_import_lines(result, expected_lines)
 
+    result = cli.invoke(
+        main,
+        [
+            "-g",
+            str(out),
+            "--overwrite",
+            "--create-init",
+            "protoc",
+            "-p",
+            str(this_proto.parent),
+            "-p",
+            str(other_proto.parent),
+            "-p",
+            str(baz_bizz_buzz_other_proto.parent),
+            str(this_proto),
+            str(other_proto),
+            str(baz_bizz_buzz_other_proto),
+        ],
+    )
+    assert result.exit_code == 0
+
+    with monkeypatch.context() as m:
+        m.syspath_prepend(str(tmp_path))
+        importlib.import_module("out_cli")
+        importlib.import_module("out_cli.other_pb2")
+        importlib.import_module("out_cli.this_pb2")
+
+    assert str(tmp_path) not in sys.path
+
 
 @pytest.fixture
-def thing1(tmp_path: Path) -> Path:
-    code = """
+def thing1_text() -> str:
+    return """
 // thing1.proto
 syntax = "proto3";
 
@@ -164,13 +212,31 @@ message Thing1 {
   Thing2 thing2 = 1;
 }
 """
+
+
+@pytest.fixture
+def thing1(thing1_text: str, tmp_path: Path) -> Path:
     p = tmp_path.joinpath("thing1.proto")
-    p.write_text(code)
+    p.write_text(thing1_text)
     return p
 
 
 @pytest.fixture
-def thing2(tmp_path: Path) -> Path:
+def thing2_text() -> str:
+    return """
+// thing2.proto
+syntax = "proto3";
+
+package things;
+
+message Thing2 {
+  string data = 1;
+}
+"""
+
+
+@pytest.fixture
+def thing2(thing2_text: str, tmp_path: Path) -> Path:
     code = """
 // thing2.proto
 syntax = "proto3";
@@ -184,6 +250,36 @@ message Thing2 {
     p = tmp_path.joinpath("thing2.proto")
     p.write_text(code)
     return p
+
+
+@pytest.fixture
+def thing1_nested_text() -> str:
+    return """
+// thing1.proto
+syntax = "proto3";
+
+import "a/b/c/thing2.proto";
+
+package thing1.a;
+
+message Thing1 {
+  thing2.a.b.c.Thing2 thing2 = 1;
+}
+"""
+
+
+@pytest.fixture
+def thing2_nested_text() -> str:
+    return """
+// thing2.proto
+syntax = "proto3";
+
+package thing2.a.b.c;
+
+message Thing2 {
+  string data = 1;
+}
+"""
 
 
 def test_example_protoc(
@@ -237,11 +333,12 @@ def test_example_buf(
     tmp_path: Path,
     thing1: Path,
     thing2: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     out = tmp_path.joinpath("out")
     out.mkdir()
 
-    os.chdir(tmp_path)
+    monkeypatch.chdir(tmp_path)
     with tmp_path.joinpath("buf.yaml").open(mode="w") as f:
         json.dump(
             {
@@ -298,3 +395,85 @@ def test_example_buf(
     check_import_lines(result, expected_lines)
 
     assert out.joinpath("__init__.py").exists()
+
+
+def test_nested_buf(
+    cli: CliRunner,
+    tmp_path: Path,
+    thing1_nested_text: str,
+    thing2_nested_text: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    out = tmp_path.joinpath("out_nested")
+    out.mkdir()
+
+    c = tmp_path / "a" / "b" / "c"
+    c.mkdir(parents=True, exist_ok=True)
+
+    thing2 = c / "thing2.proto"
+    thing2.write_text(thing2_nested_text)
+
+    d = tmp_path / "d"
+    d.mkdir()
+
+    thing1 = d / "thing1.proto"
+    thing1.write_text(thing1_nested_text)
+
+    monkeypatch.chdir(tmp_path)
+    with tmp_path.joinpath("buf.yaml").open(mode="w") as f:
+        json.dump(
+            {
+                "version": "v1",
+                "lint": {"use": ["DEFAULT"]},
+                "breaking": {"use": ["FILE"]},
+            },
+            f,
+        )
+
+    with tmp_path.joinpath("buf.gen.yaml").open(mode="w") as f:
+        json.dump(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "python",
+                        "out": str(out),
+                    },
+                ],
+            },
+            f,
+        )
+
+    subprocess.check_call(
+        [
+            "protoc",
+            str(thing1),
+            str(thing2),
+            "--proto_path",
+            str(tmp_path),
+            "--python_out",
+            str(out),
+        ],
+    )
+
+    check_proto_out(out)
+
+    result = cli.invoke(
+        main,
+        [
+            "-g",
+            str(out),
+            "--overwrite",
+            "--create-init",
+            "buf",
+        ],
+    )
+    assert result.exit_code == 0
+
+    # check that we can import nested things
+    with monkeypatch.context() as m:
+        m.syspath_prepend(str(tmp_path))
+
+        importlib.import_module("out_nested")
+        importlib.import_module("out_nested.a.b.c.thing2_pb2")
+        importlib.import_module("out_nested.d.thing1_pb2")
