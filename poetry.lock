@@ -359,6 +359,25 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "types-futures"
+version = "3.3.1"
+description = "Typing stubs for futures"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "types-protobuf"
+version = "3.18.1"
+description = "Typing stubs for protobuf"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+types-futures = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "4.0.0"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -381,7 +400,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.11"
-content-hash = "df41159cb747b7aabdf9c32b8fe428665a449bf4d690acd20c361ee4013a582f"
+content-hash = "b3181813102ecddaa5b4103f56b17c38947ecb275ebbae571a84128b7b574e2f"
 
 [metadata.files]
 astor = [
@@ -629,6 +648,14 @@ typed-ast = [
     {file = "typed_ast-1.4.3-cp39-cp39-win32.whl", hash = "sha256:209596a4ec71d990d71d5e0d312ac935d86930e6eecff6ccc7007fe54d703808"},
     {file = "typed_ast-1.4.3-cp39-cp39-win_amd64.whl", hash = "sha256:9c6d1a54552b5330bc657b7ef0eae25d00ba7ffe85d9ea8ae6540d2197a3788c"},
     {file = "typed_ast-1.4.3.tar.gz", hash = "sha256:fb1bbeac803adea29cedd70781399c99138358c26d05fcbd23c13016b7f5ec65"},
+]
+types-futures = [
+    {file = "types-futures-3.3.1.tar.gz", hash = "sha256:bbdad92cec642693bac10fbbecf834776009db7782d91dc293bdd123be73186d"},
+    {file = "types_futures-3.3.1-py3-none-any.whl", hash = "sha256:b4bb97d1a028679929a8da2e9e63a5caccc6f68d0d6a456c41fd00e32764f144"},
+]
+types-protobuf = [
+    {file = "types-protobuf-3.18.1.tar.gz", hash = "sha256:6696bf3cabc51dcc076e8de025c405dbdea7488c5268c2febd14527dac82c233"},
+    {file = "types_protobuf-3.18.1-py3-none-any.whl", hash = "sha256:364f6437238a99a2f868bc60777c6a149d8540c902e4dba581ad71e5687735c8"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},
