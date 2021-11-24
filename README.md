@@ -58,16 +58,16 @@ The `out/thing1_pb2.py` file should show a diff containing at least these lines:
 
 ## How it works
 
-At a high level, `protoletariat` converts absolute imports to relative imports.
+At a high level `protoletariat` converts absolute imports to relative imports.
 
-However, it doesn't just convert any absolute import to a relative import.
+However, it doesn't convert just any absolute import to a relative import.
 
 The `protol` tool will only convert imports that were generated from `.proto` files. It
 does this by inspecting `FileDescriptorProtos` from the protobuf files.
 
-The core mechanism is implemented using a simplified form of pattern matching,
-that looks at the Python AST, and if an import pattern is matched and
-corresponding rewrite rule is fired.
+The core rewrite mechanism is implemented using a simplified form of pattern
+matching, that looks at the Python AST, and if an import pattern is matched a
+corresponding rewrite rule is invoked.
 
 ## Help
 
