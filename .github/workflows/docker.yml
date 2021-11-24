@@ -29,7 +29,7 @@ jobs:
         id: meta
         with:
           images: |
-            protoletariat
+            ${{ github.repository_owner }}/protoletariat
           tags: |
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
