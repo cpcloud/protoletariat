@@ -63,7 +63,7 @@
           }
         );
 
-        checkInputs = [ pkgs.protobuf ];
+        checkInputs = with pkgs; [ buf protobuf ];
 
         checkPhase = ''
           runHook preCheck
