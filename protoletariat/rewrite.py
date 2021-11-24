@@ -16,7 +16,7 @@ def _is_iterable(value: Any) -> bool:
     return not isinstance(value, str) and isinstance(value, collections.Iterable)
 
 
-def matches(value: Node, pattern: Node):
+def matches(value: Node, pattern: Node) -> bool:
     """Check whether `value` matches `pattern`.
 
     Parameters
