@@ -1,5 +1,8 @@
 # Protocol Buffers for the Rest of Us
 
+[![CI](https://github.com/cpcloud/protoletariat/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cpcloud/protoletariat/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/protoletariat.svg)](https://badge.fury.io/py/protoletariat)
+
 ## Motivation
 
 `protoletariat` has one goal: fixing the broken imports for the Python code
