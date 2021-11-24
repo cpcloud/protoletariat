@@ -1,7 +1,7 @@
 # Protocol Buffers for the Rest of Us
 
 [![CI](https://github.com/cpcloud/protoletariat/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cpcloud/protoletariat/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/protoletariat.svg)](https://badge.fury.io/py/protoletariat)
+![PyPI](https://img.shields.io/pypi/v/protoletariat?color=blue)
 
 ## Motivation
 
