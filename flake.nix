@@ -65,6 +65,11 @@
 
         checkInputs = with pkgs; [ buf protobuf ];
 
+        preCheck = ''
+          export HOME
+          HOME="$(mktemp -d)"
+        '';
+
         checkPhase = ''
           runHook preCheck
           pytest
