@@ -13,7 +13,8 @@ class Replacement(NamedTuple):
     new: str
 
 
-def _is_iterable(value: Any) -> bool:
+def _is_iterable(value: Any) -> bool:  # type: ignore[misc]
+    """Return whether `value` is a non-string iterable."""
     return not isinstance(value, str) and isinstance(value, collections.abc.Iterable)
 
 
