@@ -2,51 +2,30 @@
 
 from __future__ import annotations
 
-import ast
-import itertools
-import os
-import re
-import subprocess
-import tempfile
 from pathlib import Path
-from typing import Iterable
+from typing import Callable
 
-import astor
 import click
-from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
-from .rewrite import ImportRewriter, build_import_rewrite, register_import_rewrite
-
-
-def get_file_descriptor_set(
-    paths: Iterable[Path],
-    proto_paths: Iterable[Path],
-) -> FileDescriptorSet:
-    """Parse the proto files in `paths` into a `FileDescriptorSet`."""
-    with tempfile.NamedTemporaryFile(delete=False) as f:
-        subprocess.check_output(
-            [
-                "protoc",
-                "--include_imports",
-                "--descriptor_set_out",
-                f"{f.name}",
-                *itertools.chain.from_iterable(
-                    [
-                        "--proto_path",
-                        str(proto_path),
-                    ]
-                    for proto_path in proto_paths
-                ),
-                *map(str, paths),
-            ]
-        )
-    try:
-        return FileDescriptorSet.FromString(Path(f.name).read_bytes())
-    finally:
-        os.remove(f.name)
+from .fdsetgen import Buf, Protoc
 
 
-@click.command(help="Rewrite protoc-generated imports for use by the protoletariat.")
+def _overwrite(python_file: Path, code: str) -> None:
+    python_file.write_text(code)
+
+
+def _echo(_: Path, code: str) -> None:
+    click.echo(code)
+
+
+def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
+    return _overwrite if overwrite else _echo
+
+
+@click.group(
+    help="Rewrite protoc or buf-generated imports for use by the protoletariat.",
+    context_settings=dict(max_content_width=88),
+)
 @click.option(
     "-g",
     "--generated-python-dir",
@@ -59,6 +38,36 @@ def get_file_descriptor_set(
     ),
     help="Directory containing generated Python code",
 )
+@click.option(
+    "--overwrite/--no-overwrite",
+    default=False,
+    help="Overwrite all relevant files under `generated_python_dir`",
+    show_default=True,
+)
+@click.option(
+    "--create-init/--dont-create-init",
+    default=False,
+    help="Create an empty __init__.py file under `generated_python_dir`",
+    show_default=True,
+)
+@click.pass_context
+def main(
+    ctx: click.Context,
+    generated_python_dir: Path,
+    overwrite: bool,
+    create_init: bool,
+) -> None:
+    ctx.ensure_object(dict)
+    ctx.obj.update(
+        dict(
+            generated_python_dir=generated_python_dir,
+            overwrite_callback=_make_callback(overwrite),
+            create_init=create_init,
+        )
+    )
+
+
+@main.command(help="Use protoc to generate the FileDescriptorSet blob")
 @click.option(
     "-p",
     "--proto-path",
@@ -84,48 +93,37 @@ def get_file_descriptor_set(
     ),
 )
 @click.option(
-    "--overwrite/--no-overwrite",
-    default=False,
-    help="Overwrite all generated Python files with modified imports",
+    "--protoc-path",
+    envvar="PROTOC_PATH",
+    type=str,
+    default="protoc",
+    show_default=True,
+    show_envvar=True,
+    help="Path to the `protoc` executable",
 )
-@click.option(
-    "--create-init/--dont-create-init",
-    default=False,
-    help="Create an __init__.py file under the `generated_python-dir` directory",
-)
-def main(
-    generated_python_dir: Path,
+@click.pass_context
+def protoc(
+    ctx: click.Context,
     proto_path: list[Path],
-    overwrite: bool,
     proto_files: list[Path],
-    create_init: bool,
+    protoc_path: str,
 ) -> None:
-    fdset = get_file_descriptor_set(proto_files, proto_path)
-    proto_suffix_pattern = re.compile(r"\.proto$")
+    Protoc(protoc_path, proto_files, proto_path).fix_imports(**ctx.obj)
 
-    for fd in fdset.file:
-        for dep in fd.dependency:
-            register_import_rewrite(
-                build_import_rewrite(proto_suffix_pattern.sub("", dep))
-            )
 
-    rewriter = ImportRewriter()
-
-    # only rewrite things with dependencies
-    for fd in filter(lambda fd: fd.dependency, fdset.file):
-        fd_name = fd.name
-        stem = proto_suffix_pattern.sub("", fd_name)
-        python_file = generated_python_dir.joinpath(fd_name).with_name(f"{stem}_pb2.py")
-        raw_code = python_file.read_text()
-        module = ast.parse(raw_code)
-        new_module = rewriter.visit(module)
-        new_code = astor.to_source(new_module)
-        if overwrite:
-            python_file.write_text(new_code)
-        else:
-            click.echo(new_code)
-    if create_init:
-        generated_python_dir.joinpath("__init__.py").touch(exist_ok=True)
+@main.command(help="Use buf to generate the FileDescriptorSet blob")
+@click.option(
+    "--buf-path",
+    envvar="BUF_PATH",
+    type=str,
+    default="buf",
+    show_default=True,
+    show_envvar=True,
+    help="Path to the `buf` executable",
+)
+@click.pass_context
+def buf(ctx: click.Context, buf_path: str) -> None:
+    Buf(buf_path).fix_imports(**ctx.obj)
 
 
 if __name__ == "__main__":
