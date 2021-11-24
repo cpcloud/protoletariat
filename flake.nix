@@ -152,6 +152,12 @@
               entry = "pyupgrade --py37-plus";
               types = [ "python" ];
             };
+
+            mypy = {
+              enable = true;
+              entry = "mypy";
+              types = [ "python" ];
+            };
           };
         };
       };
