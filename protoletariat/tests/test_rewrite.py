@@ -16,6 +16,11 @@ def check_import_lines(result: Result, expected_lines: Iterable[str]) -> None:
     assert set(expected_lines) <= set(lines)
 
 
+def check_proto_out(out: Path) -> None:
+    assert list(out.rglob("*.py"))
+    assert all(path.read_text() for path in out.rglob("*.py"))
+
+
 @pytest.mark.parametrize(
     ("case", "expected"),
     [
@@ -114,6 +119,8 @@ def test_cli(
             str(out),
         ]
     )
+
+    check_proto_out(out)
 
     result = cli.invoke(
         main,
@@ -273,7 +280,7 @@ def test_example_buf(
         ],
     )
 
-    assert list(out.rglob("*.py"))
+    check_proto_out(out)
 
     result = cli.invoke(
         main,
