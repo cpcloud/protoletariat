@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.3.0 (2021-11-24)
+### Feature
+* **cli:** Add support for generating FileDescriptorSet blobs using `buf` ([`2d072b7`](https://github.com/cpcloud/protoletariat/commit/2d072b7168521c33986a57a9b2f993522664f87b))
+
+### Fix
+* Remove warning from collections usage ([`7e0847e`](https://github.com/cpcloud/protoletariat/commit/7e0847e2fad40c198289ec564e4eaca895baf788))
+
+### Documentation
+* Fix typo in last "how it works" paragraph ([`3f8efde`](https://github.com/cpcloud/protoletariat/commit/3f8efde92bae74a59b641ecdcae8715e89418bbc))
+* Update readme with CLI help changes ([`74b5648`](https://github.com/cpcloud/protoletariat/commit/74b5648e3f6a33d47cb0eea3e6e574fb95a9f55a))
+* Fix typo ([`33a1505`](https://github.com/cpcloud/protoletariat/commit/33a15056eaff9e8b55f18fb30ad4ff0631bf9512))
+
 ## v0.2.1 (2021-11-23)
 ### Fix
 * Fix docker image build ([`ffb262a`](https://github.com/cpcloud/protoletariat/commit/ffb262a905856b899747432530e026b0500dbf71))
