@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import collections
+import collections.abc
 from typing import Any, Callable, NamedTuple, Sequence, Union
 
 Node = Union[ast.AST, Sequence[ast.AST]]
@@ -13,7 +14,7 @@ class Replacement(NamedTuple):
 
 
 def _is_iterable(value: Any) -> bool:
-    return not isinstance(value, str) and isinstance(value, collections.Iterable)
+    return not isinstance(value, str) and isinstance(value, collections.abc.Iterable)
 
 
 def matches(value: Node, pattern: Node) -> bool:
@@ -33,10 +34,10 @@ def matches(value: Node, pattern: Node) -> bool:
     # recur into lists
     if _is_iterable(value) and _is_iterable(pattern):
         assert isinstance(
-            value, collections.Iterable
+            value, collections.abc.Iterable
         ), f"value is not a non-str iterable {type(value).__name__}"
         assert isinstance(
-            pattern, collections.Iterable
+            pattern, collections.abc.Iterable
         ), f"pattern is not a non-str iterable {type(pattern).__name__}"
         return all(map(matches, value, pattern))
 
