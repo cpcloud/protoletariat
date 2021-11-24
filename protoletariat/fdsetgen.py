@@ -33,9 +33,10 @@ class FileDescriptorSetGenerator(abc.ABC):
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
+            fd_name = _PROTO_SUFFIX_PATTERN.sub(r"\1", fd.name)
             for dep in fd.dependency:
                 register_import_rewrite(
-                    build_import_rewrite(_PROTO_SUFFIX_PATTERN.sub(r"\1", dep))
+                    build_import_rewrite(fd_name, _PROTO_SUFFIX_PATTERN.sub(r"\1", dep))
                 )
 
         rewriter = ImportRewriter()
