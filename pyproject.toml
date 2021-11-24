@@ -84,12 +84,12 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 # Any handling
-disallow_any_unimported = false
+disallow_any_unimported = true
 disallow_any_expr = false
-disallow_any_decorated = false
-disallow_any_explicit = false
-disallow_any_generics = false
-disallow_subclassing_any = false
+disallow_any_decorated = true
+disallow_any_explicit = true
+disallow_any_generics = true
+disallow_subclassing_any = true
 # None/Optional handling
 no_implicit_optional = true
 # show more context on failure
