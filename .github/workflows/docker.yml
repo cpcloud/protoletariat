@@ -22,7 +22,7 @@ jobs:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
-      - run: nix build -L '.#protoletariat-image'
+      - run: nix build -L '.#protoletariat-image' --no-link
       - run: docker load -i "$(nix path-info -L '.#protoletariat-image')"
       - run: echo "FROM protoletariat:$(nix eval --raw '.#protoletariat-image.imageTag')" > Dockerfile
       - uses: docker/metadata-action@v3
