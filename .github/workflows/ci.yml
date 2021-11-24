@@ -61,7 +61,7 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
-      - name: Build package and run tests
+      - name: Build docker image
         run: nix build --print-build-logs --keep-going '.#protoletariat-image'
   conda:
     strategy:
