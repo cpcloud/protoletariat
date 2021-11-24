@@ -107,6 +107,8 @@ jobs:
 
       - name: Setup buf
         uses: bufbuild/buf-setup-action@v0.7.0
+        with:
+          github_token: ${{ github.token }}
 
       - name: Setup Python
         uses: actions/setup-python@v2
