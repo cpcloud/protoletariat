@@ -45,7 +45,7 @@ $ protoc --python_out=out --proto_path=directory/containing/protos thing1.proto 
 3. Run `protol` on the generated code
 
 ```sh
-$ protol --create-init --overwrite -g out --proto-path=directory/containing/protos thing1.proto thing2.proto
+$ protol --create-init --overwrite -g out protoc --proto-path=directory/containing/protos thing1.proto thing2.proto
 ```
 
 The `out/thing1_pb2.py` file should show a diff containing at least these lines:
@@ -72,21 +72,23 @@ corresponding rewrite rule is fired.
 ## Help
 
 ```
-$ protol --help
-Usage: protol [OPTIONS] PROTO_FILES...
+$ protol
+Usage: protol [OPTIONS] COMMAND [ARGS]...
 
-  Rewrite protoc-generated imports for use by the proletariat.
+  Rewrite protoc or buf-generated imports for use by the protoletariat.
 
 Options:
   -g, --generated-python-dir DIRECTORY
                                   Directory containing generated Python code
                                   [required]
-  -p, --proto-path DIRECTORY      Protobuf file search path(s). Accepts
-                                  multiple values.  [required]
-  --overwrite / --no-overwrite    Overwrite all generated Python files with
-                                  modified imports
+  --overwrite / --no-overwrite    Overwrite all relevant files under
+                                  `generated_python_dir`  [default: no-overwrite]
   --create-init / --dont-create-init
-                                  Create an __init__.py file under the
-                                  `generated-python-dir` directory
+                                  Create an empty __init__.py file under
+                                  `generated_python_dir`  [default: dont-create-init]
   --help                          Show this message and exit.
+
+Commands:
+  buf     Use buf to generate the FileDescriptorSet blob
+  protoc  Use protoc to generate the FileDescriptorSet blob
 ```
