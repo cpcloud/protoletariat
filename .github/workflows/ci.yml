@@ -41,7 +41,7 @@ jobs:
 
       - name: Build package and run tests
         run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}'
-  docker-image-build:
+  docker-image:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -120,7 +120,7 @@ jobs:
     needs:
       - nix
       - conda
-      - docker-image-build
+      - docker-image
     runs-on: ubuntu-latest
     concurrency: release
     steps:
