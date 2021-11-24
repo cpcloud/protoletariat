@@ -477,3 +477,10 @@ def test_nested_buf(
         importlib.import_module("out_nested")
         importlib.import_module("out_nested.a.b.c.thing2_pb2")
         importlib.import_module("out_nested.d.thing1_pb2")
+
+    # check that we created packages in the correct locations
+    assert out.joinpath("__init__.py").exists()
+    assert out.joinpath("a", "__init__.py").exists()
+    assert out.joinpath("a", "b", "__init__.py").exists()
+    assert out.joinpath("a", "b", "c", "__init__.py").exists()
+    assert out.joinpath("d", "__init__.py").exists()
