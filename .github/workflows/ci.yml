@@ -136,6 +136,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yaml
 
+      - name: Install grpc-cpp for codegen plugins
+        run: mamba install grpc-cpp
+
       - name: Install the package locally
         run: pip3 install .
 
