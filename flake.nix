@@ -64,7 +64,7 @@
           }
         );
 
-        checkInputs = with pkgs; [ buf protobuf ];
+        checkInputs = with pkgs; [ buf grpc protobuf ];
 
         preCheck = ''
           export HOME
