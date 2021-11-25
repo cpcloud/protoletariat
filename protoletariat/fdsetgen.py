@@ -26,8 +26,8 @@ class FileDescriptorSetGenerator(abc.ABC):
 
     def fix_imports(
         self,
-        generated_python_dir: Path,
-        create_init: bool,
+        python_out: Path,
+        create_package: bool,
         overwrite_callback: Callable[[Path, str], None],
     ) -> None:
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
@@ -44,18 +44,18 @@ class FileDescriptorSetGenerator(abc.ABC):
         # only rewrite things with dependencies
         for fd_name in (fd.name for fd in fdset.file if fd.dependency):
             name = _PROTO_SUFFIX_PATTERN.sub(r"\1_pb2.py", fd_name)
-            python_file = generated_python_dir.joinpath(name)
+            python_file = python_out.joinpath(name)
             raw_code = python_file.read_text()
             module = ast.parse(raw_code)
             new_module = rewriter.visit(module)
             new_code = astor.to_source(new_module)
             overwrite_callback(python_file, new_code)
 
-        if create_init:
-            generated_python_dir.joinpath("__init__.py").touch(exist_ok=True)
+        if create_package:
+            python_out.joinpath("__init__.py").touch(exist_ok=True)
 
             # recursively create packages
-            for dir_entry in generated_python_dir.rglob("*"):
+            for dir_entry in python_out.rglob("*"):
                 if dir_entry.is_dir():
                     dir_entry.joinpath("__init__.py").touch(exist_ok=True)
 
