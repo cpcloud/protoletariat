@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.4.0 (2021-11-25)
+### Feature
+* Introduce module suffixes to allow adjustment of grpc generated code ([`b0b644a`](https://github.com/cpcloud/protoletariat/commit/b0b644a8daaa93850e4723e9bcaf47811294bb40))
+
+### Fix
+* Rewrite using per-file rewriters ([`baa883c`](https://github.com/cpcloud/protoletariat/commit/baa883cabb330fc289679d087f370a18e5ec5d15))
+
 ## v0.3.1 (2021-11-24)
 ### Fix
 * Generate packages in the output directory ([`a00cc06`](https://github.com/cpcloud/protoletariat/commit/a00cc0651ee4244500443aca9b561278783d0587))
