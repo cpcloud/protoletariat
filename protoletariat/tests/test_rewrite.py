@@ -158,6 +158,7 @@ def test_cli(
             str(other_proto),
             str(baz_bizz_buzz_other_proto),
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
 
@@ -186,6 +187,7 @@ def test_cli(
             str(other_proto),
             str(baz_bizz_buzz_other_proto),
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
 
@@ -319,6 +321,7 @@ def test_example_protoc(
             str(thing1),
             str(thing2),
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
 
@@ -388,6 +391,7 @@ def test_example_buf(
             "--create-init",
             "buf",
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
 
@@ -467,6 +471,7 @@ def test_nested_buf(
             "--create-init",
             "buf",
         ],
+        catch_exceptions=False,
     )
     assert result.exit_code == 0
 
