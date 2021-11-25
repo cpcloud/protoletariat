@@ -50,12 +50,22 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
     help="Recursively create __init__.py files under `--python-out`",
     show_default=True,
 )
+@click.option(
+    "-s",
+    "--module-suffixes",
+    type=str,
+    multiple=True,
+    default=["_pb2.py", "_pb2_grpc.py"],
+    help="Suffixes of Python modules to process",
+    show_default=True,
+)
 @click.pass_context
 def main(
     ctx: click.Context,
     python_out: Path,
     in_place: bool,
     create_package: bool,
+    module_suffixes: list[str],
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj.update(
@@ -63,6 +73,7 @@ def main(
             python_out=python_out,
             create_package=create_package,
             overwrite_callback=_make_callback(in_place),
+            module_suffixes=module_suffixes,
         )
     )
 
