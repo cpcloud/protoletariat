@@ -85,9 +85,6 @@ class Rewriter:
         return node
 
 
-rewrite = Rewriter()
-
-
 def build_import_rewrite(proto: str, dep: str) -> Replacement:
     """Construct a replacement import for `dep`.
 
@@ -125,22 +122,27 @@ def build_import_rewrite(proto: str, dep: str) -> Replacement:
     return Replacement(old=old, new=new)
 
 
-def register_import_rewrite(replacement: Replacement) -> None:
-    """Register a rewrite rule for turning `old` into `new`."""
-    (old_import,) = ast.parse(replacement.old).body
-    (new_import,) = ast.parse(replacement.new).body
-
-    def _rewrite(_: AST, new_import: AST = new_import) -> AST:
-        return new_import
-
-    rewrite.register(old_import)(_rewrite)
-
-
 class ImportRewriter(ast.NodeTransformer):
     """A NodeTransformer to apply rewrite rules."""
 
+    def __init__(self) -> None:
+        self.rewrite = Rewriter()
+
+    def register_import_rewrite(self, replacement: Replacement) -> None:
+        """Register a rewrite rule for turning `old` into `new`."""
+        (old_import,) = ast.parse(replacement.old).body
+        (new_import,) = ast.parse(replacement.new).body
+
+        def _rewrite(_: AST, new_import: AST = new_import) -> AST:
+            return new_import
+
+        if all(not matches(old_import, pat) for pat, _ in self.rewrite.funcs):
+            self.rewrite.register(old_import)(_rewrite)
+
+        assert sum(matches(old_import, pat) for pat, _ in self.rewrite.funcs) == 1
+
     def visit_Import(self, node: ast.Import) -> AST:
-        return rewrite(node)
+        return self.rewrite(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> AST:
-        return rewrite(node)
+        return self.rewrite(node)

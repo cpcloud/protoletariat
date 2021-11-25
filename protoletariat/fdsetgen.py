@@ -11,9 +11,14 @@ from typing import Callable, Iterable, Sequence
 import astor
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
-from .rewrite import ImportRewriter, build_import_rewrite, register_import_rewrite
+from .rewrite import ImportRewriter, build_import_rewrite
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
+
+
+def _remove_proto_suffix(name: str) -> str:
+    """Remove the `.proto` suffix from `name`."""
+    return _PROTO_SUFFIX_PATTERN.sub(r"\1", name)
 
 
 class FileDescriptorSetGenerator(abc.ABC):
@@ -31,26 +36,33 @@ class FileDescriptorSetGenerator(abc.ABC):
         overwrite_callback: Callable[[Path, str], None],
         module_suffixes: Sequence[str],
     ) -> None:
+        rewriters = {}
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
-            fd_name = _PROTO_SUFFIX_PATTERN.sub(r"\1", fd.name)
+            fd_name = _remove_proto_suffix(fd.name)
+            rewriters[fd_name] = rewriter = ImportRewriter()
+            # services live outside of the corresponding generated Python
+            # module, but they import it so we register a rewrite for the
+            # current proto as a dependency of itself to handle the case
+            # of services
+            rewriter.register_import_rewrite(build_import_rewrite(fd_name, fd_name))
             for dep in fd.dependency:
-                register_import_rewrite(
-                    build_import_rewrite(fd_name, _PROTO_SUFFIX_PATTERN.sub(r"\1", dep))
+                dep_name = _remove_proto_suffix(dep)
+                rewriter.register_import_rewrite(
+                    build_import_rewrite(fd_name, dep_name)
                 )
 
-        rewriter = ImportRewriter()
-
         # only rewrite things with dependencies
-        for fd_name in (fd.name for fd in fdset.file if fd.dependency):
+        for fd in fdset.file:
+            fd_name = _remove_proto_suffix(fd.name)
             for suffix in module_suffixes:
-                name = _PROTO_SUFFIX_PATTERN.sub(rf"\1{suffix}", fd_name)
-                python_file = python_out.joinpath(name)
+                py_name = f"{fd_name}{suffix}"
+                python_file = python_out.joinpath(py_name)
                 if python_file.exists():
                     raw_code = python_file.read_text()
                     module = ast.parse(raw_code)
-                    new_module = rewriter.visit(module)
+                    new_module = rewriters[fd_name].visit(module)
                     new_code = astor.to_source(new_module)
                     overwrite_callback(python_file, new_code)
 
