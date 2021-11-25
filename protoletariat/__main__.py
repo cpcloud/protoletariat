@@ -24,7 +24,7 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
 
 @click.group(
     help="Rewrite protoc or buf-generated imports for use by the protoletariat.",
-    context_settings=dict(max_content_width=88),
+    context_settings=dict(max_content_width=140),
 )
 @click.option(
     "-g",
