@@ -489,3 +489,125 @@ def test_nested_buf(
     assert out.joinpath("a", "b", "__init__.py").exists()
     assert out.joinpath("a", "b", "c", "__init__.py").exists()
     assert out.joinpath("d", "__init__.py").exists()
+
+
+@pytest.fixture
+def thing_service_text() -> str:
+    return """
+// thing_service.proto
+syntax = "proto3";
+
+import "thing1.proto";
+import "thing2.proto";
+
+package things;
+
+service ThingService {
+    rpc GetThing1(Thing1) returns (Thing1) {}
+    rpc GetThing2(Thing2) returns (Thing2) {}
+}
+"""
+
+
+@pytest.fixture
+def thing_service(thing_service_text: str, tmp_path: Path) -> Path:
+    p = tmp_path.joinpath("thing_service.proto")
+    p.write_text(thing_service_text)
+    return p
+
+
+@pytest.fixture
+def buf_yaml(tmp_path: Path) -> Path:
+    p = tmp_path.joinpath("buf.yaml")
+    p.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "lint": {"use": ["DEFAULT"]},
+                "breaking": {"use": ["FILE"]},
+            },
+        )
+    )
+    return p
+
+
+@pytest.fixture
+def out_grpc(tmp_path: Path) -> Path:
+    out = tmp_path / "out_grpc"
+    out.mkdir()
+    return out
+
+
+@pytest.fixture
+def buf_gen_yaml_grpc(tmp_path: Path, out_grpc: Path) -> Path:
+    p = tmp_path.joinpath("buf.gen.yaml")
+    p.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "python",
+                        "out": str(out_grpc),
+                    },
+                    {
+                        "name": "grpc_python",
+                        "out": str(out_grpc),
+                        "path": "grpc_python_plugin",
+                    },
+                ],
+            },
+        )
+    )
+    return p
+
+
+def test_grpc_buf(
+    cli: CliRunner,
+    tmp_path: Path,
+    thing1: Path,
+    thing2: Path,
+    buf_yaml: Path,
+    buf_gen_yaml_grpc: Path,
+    thing_service: Path,
+    out_grpc: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess.check_call(["buf", "generate"])
+
+    check_proto_out(out_grpc)
+
+    result = cli.invoke(
+        main,
+        [
+            "-o",
+            str(out_grpc),
+            "--in-place",
+            "--create-package",
+            "buf",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    service_module = out_grpc.joinpath("thing_service_pb2_grpc.py")
+    assert service_module.exists()
+
+    lines = service_module.read_text().splitlines()
+
+    assert "from . import thing1_pb2 as thing1__pb2" in lines
+    assert "import thing1_pb2 as thing1__pb2" not in lines
+
+    assert "from . import thing2_pb2 as thing2__pb2" in lines
+    assert "import thing2_pb2 as thing2__pb2" not in lines
+
+    assert out_grpc.joinpath("__init__.py").exists()
+
+    # check that we can import the thing
+    with monkeypatch.context() as m:
+        m.syspath_prepend(str(tmp_path))
+
+        importlib.import_module("out_grpc.thing1_pb2")
+        importlib.import_module("out_grpc.thing2_pb2")
+        importlib.import_module("out_grpc.thing_service_pb2_grpc")
