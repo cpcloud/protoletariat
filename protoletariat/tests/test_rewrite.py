@@ -348,3 +348,47 @@ def test_grpc_buf(
         importlib.import_module("out_grpc.thing1_pb2")
         importlib.import_module("out_grpc.thing2_pb2")
         importlib.import_module("out_grpc.thing_service_pb2_grpc")
+
+
+@pytest.mark.xfail(
+    condition=sys.version_info[:2] == (3, 10),
+    raises=subprocess.CalledProcessError,
+    reason="grpc-cpp cannot be installed with conda using Python 3.10",
+)
+def test_grpc_buf_no_imports(
+    cli: CliRunner,
+    tmp_path: Path,
+    buf_yaml: Path,
+    buf_gen_yaml_grpc_no_imports: Path,
+    no_imports_service: Path,
+    out_grpc_no_imports: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess.check_call(["buf", "generate"])
+
+    check_proto_out(out_grpc_no_imports)
+
+    result = cli.invoke(
+        main,
+        [
+            "-o",
+            str(out_grpc_no_imports),
+            "--in-place",
+            "--create-package",
+            "buf",
+        ],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+
+    service_module = out_grpc_no_imports.joinpath("no_imports_service_pb2_grpc.py")
+    assert service_module.exists()
+
+    assert out_grpc_no_imports.joinpath("__init__.py").exists()
+
+    # check that we can import the thing
+    with monkeypatch.context() as m:
+        m.syspath_prepend(str(tmp_path))
+
+        importlib.import_module("out_grpc_no_imports.no_imports_service_pb2_grpc")
