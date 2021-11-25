@@ -3,9 +3,10 @@ from __future__ import annotations
 import ast
 import collections
 import collections.abc
+from ast import AST
 from typing import Any, Callable, NamedTuple, Sequence, Union
 
-Node = Union[ast.AST, Sequence[ast.AST]]
+Node = Union[AST, Sequence[AST]]
 
 
 class Replacement(NamedTuple):
@@ -43,14 +44,12 @@ def matches(value: Node, pattern: Node) -> bool:
         return all(map(matches, value, pattern))
 
     # primitive value, such as None, True, False, etc.
-    if not isinstance(value, ast.AST) and not isinstance(pattern, ast.AST):
+    if not isinstance(value, AST) and not isinstance(pattern, AST):
         return value == pattern
 
+    assert isinstance(value, AST), f"value is not an AST node: {type(value).__name__}"
     assert isinstance(
-        value, ast.AST
-    ), f"value is not an AST node: {type(value).__name__}"
-    assert isinstance(
-        pattern, ast.AST
+        pattern, AST
     ), f"pattern is not an AST node: {type(pattern).__name__}"
 
     fields = [
@@ -68,18 +67,18 @@ class Rewriter:
     """AST pattern matching to enable rewrite rules."""
 
     def __init__(self) -> None:
-        self.funcs: list[tuple[ast.AST, Callable[[ast.AST], ast.AST]]] = []
+        self.funcs: list[tuple[AST, Callable[[AST], AST]]] = []
 
     def register(
-        self, pattern: ast.AST
-    ) -> Callable[[Callable[[ast.AST], ast.AST]], Callable[[ast.AST], ast.AST]]:
-        def wrapper(f: Callable[[ast.AST], ast.AST]) -> Callable[[ast.AST], ast.AST]:
+        self, pattern: AST
+    ) -> Callable[[Callable[[AST], AST]], Callable[[AST], AST]]:
+        def wrapper(f: Callable[[AST], AST]) -> Callable[[AST], AST]:
             self.funcs.append((pattern, f))
             return f
 
         return wrapper
 
-    def __call__(self, node: ast.AST) -> ast.AST:
+    def __call__(self, node: AST) -> AST:
         for pattern, func in self.funcs:
             if matches(node, pattern):
                 return func(node)
@@ -130,7 +129,7 @@ def register_import_rewrite(replacement: Replacement) -> None:
     (old_import,) = ast.parse(replacement.old).body
     (new_import,) = ast.parse(replacement.new).body
 
-    def _rewrite(_: ast.AST, new_import: ast.AST = new_import) -> ast.AST:
+    def _rewrite(_: AST, new_import: AST = new_import) -> AST:
         return new_import
 
     rewrite.register(old_import)(_rewrite)
@@ -139,8 +138,8 @@ def register_import_rewrite(replacement: Replacement) -> None:
 class ImportRewriter(ast.NodeTransformer):
     """A NodeTransformer to apply rewrite rules."""
 
-    def visit_Import(self, node: ast.Import) -> ast.AST:
+    def visit_Import(self, node: ast.Import) -> AST:
         return rewrite(node)
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> ast.AST:
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> AST:
         return rewrite(node)
