@@ -305,6 +305,11 @@ def test_nested_buf(
     assert out_nested.joinpath("d", "__init__.py").exists()
 
 
+@pytest.mark.xfail(
+    condition=sys.version_info[:2] == (3, 10),
+    raises=AssertionError,
+    reason="grpc-cpp cannot be installed with conda using Python 3.10",
+)
 def test_grpc_buf(
     cli: CliRunner,
     tmp_path: Path,
