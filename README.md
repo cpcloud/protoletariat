@@ -42,13 +42,19 @@ message Thing2 {
 
 ```sh
 $ mkdir out
-$ protoc --python_out=out --proto_path=directory/containing/protos thing1.proto thing2.proto
+$ protoc \
+  --python_out=out \
+  --proto_path=directory/containing/protos thing1.proto thing2.proto
 ```
 
 3. Run `protol` on the generated code
 
 ```sh
-$ protol --create-init --overwrite -g out protoc --proto-path=directory/containing/protos thing1.proto thing2.proto
+$ protol \
+  --create-package \
+  --in-place \
+  --python-out out \
+  protoc --proto-path=directory/containing/protos thing1.proto thing2.proto
 ```
 
 The `out/thing1_pb2.py` file should show a diff containing at least these lines:
@@ -81,14 +87,11 @@ Usage: protol [OPTIONS] COMMAND [ARGS]...
   Rewrite protoc or buf-generated imports for use by the protoletariat.
 
 Options:
-  -g, --generated-python-dir DIRECTORY
-                                  Directory containing generated Python code
-                                  [required]
-  --overwrite / --no-overwrite    Overwrite all relevant files under
-                                  `generated_python_dir`  [default: no-overwrite]
-  --create-init / --dont-create-init
-                                  Create an empty __init__.py file under
-                                  `generated_python_dir`  [default: dont-create-init]
+  -o, --python-out DIRECTORY      Directory containing protoc or buf-generated Python code  [required]
+  --in-place / --not-in-place     Overwrite all relevant files under `--python-out` with adjusted imports  [default: not-in-place]
+  --create-package / --dont-create-package
+                                  Recursively create __init__.py files under `--python-out`  [default: dont-create-package]
+  -s, --module-suffixes TEXT      Suffixes of Python modules to process  [default: _pb2.py, _pb2_grpc.py]
   --help                          Show this message and exit.
 
 Commands:
