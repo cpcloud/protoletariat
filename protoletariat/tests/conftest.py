@@ -265,3 +265,58 @@ def buf_gen_yaml_nested(tmp_path: Path, out_nested: Path) -> Path:
         )
     )
     return p
+
+
+@pytest.fixture
+def out_grpc_no_imports(tmp_path: Path) -> Path:
+    out = tmp_path / "out_grpc_no_imports"
+    out.mkdir()
+    return out
+
+
+@pytest.fixture
+def no_imports_service_text() -> str:
+    return """
+// no_imports_service.proto
+syntax = "proto3";
+
+package no_imports.a.b;
+
+message Request {}
+message Response {}
+
+service NoImportsService {
+    rpc Get(Request) returns (Response) {}
+}
+"""
+
+
+@pytest.fixture
+def no_imports_service(no_imports_service_text: str, tmp_path: Path) -> Path:
+    p = tmp_path.joinpath("no_imports_service.proto")
+    p.write_text(no_imports_service_text)
+    return p
+
+
+@pytest.fixture
+def buf_gen_yaml_grpc_no_imports(tmp_path: Path, out_grpc_no_imports: Path) -> Path:
+    p = tmp_path.joinpath("buf.gen.yaml")
+    p.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "python",
+                        "out": str(out_grpc_no_imports),
+                    },
+                    {
+                        "name": "grpc_python",
+                        "out": str(out_grpc_no_imports),
+                        "path": "grpc_python_plugin",
+                    },
+                ],
+            },
+        )
+    )
+    return p
