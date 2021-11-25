@@ -109,12 +109,13 @@ def build_import_rewrite(proto: str, dep: str) -> Replacement:
     # compute the number of dots needed to get to the package root
     num_leading_dots = proto.count("/") + 1
     leading_dots = "." * num_leading_dots
-    if not import_parts:
-        old = f"import {part}_pb2 as {part}__pb2"
-        new = f"from {leading_dots} import {part}_pb2 as {part}__pb2"
-    else:
-        last_part = "__".join(f"{part}_pb2".split("_"))
+    last_part = "__".join(f"{part}_pb2".split("_"))
 
+    if not import_parts:
+        # underscores are doubled by protoc/buf
+        old = f"import {part}_pb2 as {last_part}"
+        new = f"from {leading_dots} import {part}_pb2 as {last_part}"
+    else:
         from_ = ".".join(import_parts)
         as_ = f"{'_dot_'.join(import_parts)}_dot_{last_part}"
 
