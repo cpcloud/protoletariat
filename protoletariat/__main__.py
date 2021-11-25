@@ -39,30 +39,30 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
     help="Directory containing protoc or buf-generated Python code",
 )
 @click.option(
-    "--overwrite/--no-overwrite",
+    "--in-place/--not-in-place",
     default=False,
-    help="Overwrite all relevant files under `generated_python_dir`",
+    help="Overwrite all relevant files under `--python-out` with adjusted imports",
     show_default=True,
 )
 @click.option(
-    "--create-init/--dont-create-init",
+    "--create-package/--dont-create-package",
     default=False,
-    help="Create an empty __init__.py file under `generated_python_dir`",
+    help="Recursively create __init__.py files under `--python-out`",
     show_default=True,
 )
 @click.pass_context
 def main(
     ctx: click.Context,
     python_out: Path,
-    overwrite: bool,
-    create_init: bool,
+    in_place: bool,
+    create_package: bool,
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj.update(
         dict(
             python_out=python_out,
-            overwrite_callback=_make_callback(overwrite),
-            create_init=create_init,
+            create_package=create_package,
+            overwrite_callback=_make_callback(in_place),
         )
     )
 
