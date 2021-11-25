@@ -27,7 +27,7 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
     context_settings=dict(max_content_width=140),
 )
 @click.option(
-    "-g",
+    "-o",
     "--python-out",
     required=True,
     type=click.Path(
@@ -36,7 +36,7 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
         exists=True,
         path_type=Path,
     ),
-    help="Directory containing generated Python code",
+    help="Directory containing protoc or buf-generated Python code",
 )
 @click.option(
     "--overwrite/--no-overwrite",
