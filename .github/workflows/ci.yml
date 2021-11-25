@@ -144,7 +144,7 @@ jobs:
         run: pip3 install .
 
       - name: Run tests
-        run: pytest
+        run: pytest -ra
   release:
     needs:
       - nix
