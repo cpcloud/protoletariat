@@ -49,6 +49,7 @@
           }
         );
       };
+
       mkApp = python: pkgs.poetry2nix.mkPoetryApplication {
         inherit python;
 
