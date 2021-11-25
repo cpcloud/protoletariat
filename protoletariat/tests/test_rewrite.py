@@ -48,6 +48,7 @@ def check_proto_out(out: Path) -> None:
             "foo/bar/bizz_buzz",
             "from ..foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
         ),
+        ("a/b", "a/b", "from ..a import b_pb2 as a_dot_b__pb2"),
     ],
 )
 def test_build_import_rewrite(proto: str, dep: str, expected: str) -> None:
