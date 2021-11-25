@@ -144,9 +144,9 @@ def test_cli(
     result = cli.invoke(
         main,
         [
-            "-g",
+            "-o",
             str(out),
-            "--no-overwrite",
+            "--not-in-place",
             "protoc",
             "-p",
             str(this_proto.parent),
@@ -172,10 +172,10 @@ def test_cli(
     result = cli.invoke(
         main,
         [
-            "-g",
+            "-o",
             str(out),
-            "--overwrite",
-            "--create-init",
+            "--in-place",
+            "--create-package",
             "protoc",
             "-p",
             str(this_proto.parent),
@@ -303,16 +303,16 @@ def test_example_protoc(
             str(thing2.parent),
             "--python_out",
             str(out),
-        ]
+        ],
     )
 
     result = cli.invoke(
         main,
         [
-            "-g",
+            "-o",
             str(out),
-            "--no-overwrite",
-            "--create-init",
+            "--not-in-place",
+            "--create-package",
             "protoc",
             "-p",
             str(thing1.parent),
@@ -385,10 +385,10 @@ def test_example_buf(
     result = cli.invoke(
         main,
         [
-            "-g",
+            "-o",
             str(out),
-            "--no-overwrite",
-            "--create-init",
+            "--not-in-place",
+            "--create-package",
             "buf",
         ],
         catch_exceptions=False,
@@ -465,10 +465,10 @@ def test_nested_buf(
     result = cli.invoke(
         main,
         [
-            "-g",
+            "-o",
             str(out),
-            "--overwrite",
-            "--create-init",
+            "--in-place",
+            "--create-package",
             "buf",
         ],
         catch_exceptions=False,
