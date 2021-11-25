@@ -28,7 +28,7 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
 )
 @click.option(
     "-g",
-    "--generated-python-dir",
+    "--python-out",
     required=True,
     type=click.Path(
         file_okay=False,
@@ -53,14 +53,14 @@ def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
 @click.pass_context
 def main(
     ctx: click.Context,
-    generated_python_dir: Path,
+    python_out: Path,
     overwrite: bool,
     create_init: bool,
 ) -> None:
     ctx.ensure_object(dict)
     ctx.obj.update(
         dict(
-            generated_python_dir=generated_python_dir,
+            python_out=python_out,
             overwrite_callback=_make_callback(overwrite),
             create_init=create_init,
         )
