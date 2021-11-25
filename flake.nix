@@ -172,6 +172,7 @@
         nativeBuildInputs = (with pkgs; [
           buf
           commitizen
+          grpc
           poetry
           protobuf
         ]) ++ [
