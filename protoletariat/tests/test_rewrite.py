@@ -307,7 +307,7 @@ def test_nested_buf(
 
 @pytest.mark.xfail(
     condition=sys.version_info[:2] == (3, 10),
-    raises=AssertionError,
+    raises=subprocess.CalledProcessError,
     reason="grpc-cpp cannot be installed with conda using Python 3.10",
 )
 def test_grpc_buf(
