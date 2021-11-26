@@ -53,7 +53,6 @@ class FileDescriptorSetGenerator(abc.ABC):
                     build_import_rewrite(fd_name, dep_name)
                 )
 
-        # only rewrite things with dependencies
         for fd in fdset.file:
             fd_name = _remove_proto_suffix(fd.name)
             for suffix in module_suffixes:
