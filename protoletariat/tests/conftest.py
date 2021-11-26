@@ -315,6 +315,14 @@ def buf_gen_yaml_grpc_no_imports(tmp_path: Path, out_grpc_no_imports: Path) -> P
                         "out": str(out_grpc_no_imports),
                         "path": "grpc_python_plugin",
                     },
+                    {
+                        "name": "mypy",
+                        "out": str(out_grpc_no_imports),
+                    },
+                    {
+                        "name": "mypy_grpc",
+                        "out": str(out_grpc_no_imports),
+                    },
                 ],
             },
         )
