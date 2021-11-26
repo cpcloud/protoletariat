@@ -449,6 +449,11 @@ def test_grpc_buf_no_imports(
         importlib.import_module("out_grpc_no_imports.no_imports_service_pb2_grpc")
 
 
+@pytest.mark.xfail(
+    condition=sys.version_info[:2] == (3, 10),
+    raises=subprocess.CalledProcessError,
+    reason="grpc-cpp cannot be installed with conda using Python 3.10",
+)
 def test_pyi(
     cli: CliRunner,
     tmp_path: Path,
@@ -495,6 +500,11 @@ def test_pyi(
         importlib.import_module("out_grpc_no_imports.no_imports_service_pb2_grpc")
 
 
+@pytest.mark.xfail(
+    condition=sys.version_info[:2] == (3, 10),
+    raises=subprocess.CalledProcessError,
+    reason="grpc-cpp cannot be installed with conda using Python 3.10",
+)
 def test_pyi_with_imports(
     cli: CliRunner,
     tmp_path: Path,
