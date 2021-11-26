@@ -85,7 +85,7 @@ class Rewriter:
         return node
 
 
-def build_import_rewrite(proto: str, dep: str) -> Replacement:
+def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
     """Construct a replacement import for `dep`.
 
     Parameters
@@ -119,7 +119,7 @@ def build_import_rewrite(proto: str, dep: str) -> Replacement:
         old = f"from {from_} import {part}_pb2 as {as_}"
         new = f"from {leading_dots}{from_} import {part}_pb2 as {as_}"
 
-    return Replacement(old=old, new=new)
+    return [Replacement(old=old, new=new)]
 
 
 class ImportRewriter(ast.NodeTransformer):
@@ -128,7 +128,7 @@ class ImportRewriter(ast.NodeTransformer):
     def __init__(self) -> None:
         self.rewrite = Rewriter()
 
-    def register_import_rewrite(self, replacement: Replacement) -> None:
+    def register_rewrite(self, replacement: Replacement) -> None:
         """Register a rewrite rule for turning `old` into `new`."""
         (old_import,) = ast.parse(replacement.old).body
         (new_import,) = ast.parse(replacement.new).body

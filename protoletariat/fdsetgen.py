@@ -11,7 +11,7 @@ from typing import Callable, Iterable, Sequence
 import astor
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
-from .rewrite import ImportRewriter, build_import_rewrite
+from .rewrite import ImportRewriter, build_rewrites
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
 
@@ -46,12 +46,14 @@ class FileDescriptorSetGenerator(abc.ABC):
             # module, but they import it so we register a rewrite for the
             # current proto as a dependency of itself to handle the case
             # of services
-            rewriter.register_import_rewrite(build_import_rewrite(fd_name, fd_name))
+            for repl in build_rewrites(fd_name, fd_name):
+                rewriter.register_rewrite(repl)
+
+            # register _proto_ import rewrites
             for dep in fd.dependency:
                 dep_name = _remove_proto_suffix(dep)
-                rewriter.register_import_rewrite(
-                    build_import_rewrite(fd_name, dep_name)
-                )
+                for repl in build_rewrites(fd_name, dep_name):
+                    rewriter.register_rewrite(repl)
 
         for fd in fdset.file:
             fd_name = _remove_proto_suffix(fd.name)
