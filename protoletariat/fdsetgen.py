@@ -46,6 +46,10 @@ class FileDescriptorSetGenerator(abc.ABC):
             fd_name = _remove_proto_suffix(fd.name)
             rewriters[fd_name] = rewriter = ChainedImportRewriter(
                 ASTImportRewriter(),
+                # FIXME: mypy_protoc generates broken pyi files for long lines
+                # StringReplaceImportRewriter is an architectural workaround
+                # to allow replacement of strings so that the pyis might be able
+                # to work
                 StringReplaceImportRewriter(),
             )
             # services live outside of the corresponding generated Python
