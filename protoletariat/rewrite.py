@@ -4,6 +4,7 @@ import abc
 import ast
 import collections
 import collections.abc
+import re
 from ast import AST
 from typing import Any, Callable, ClassVar, MutableSequence, NamedTuple, Sequence, Union
 
@@ -197,16 +198,21 @@ class StringReplaceImportRewriter(BaseRewriter):
     replacement_type: ClassVar[type[Replacement]] = StringReplacement
 
     def __init__(self) -> None:
-        self.replacements: MutableSequence[Replacement] = []
+        self.replacements: MutableSequence[tuple[re.Pattern[str], str]] = []
 
     def do_register_rewrite(self, replacement: Replacement) -> None:
         """Register a rewrite rule for turning `old` into `new`."""
-        self.replacements.append(replacement)
+        self.replacements.append(
+            (
+                re.compile(f"^{re.escape(replacement.old)}$", flags=re.MULTILINE),
+                replacement.new,
+            )
+        )
 
     def rewrite(self, src: str) -> str:
-        for old, new in self.replacements:
-            if new not in src:
-                src = src.replace(old, new)
+        for pattern, new in self.replacements:
+            if pattern.search(src) is not None:
+                src = pattern.sub(new, src)
         return src
 
 
