@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2021-11-26)
+### Feature
+* Add mypy and mypy grpc suffixes ([`e5a4b9e`](https://github.com/cpcloud/protoletariat/commit/e5a4b9e773c01926ebbd36d7316edb81b13810da))
+
+### Fix
+* Address imports in pyi that share a prefix ([`87a3f61`](https://github.com/cpcloud/protoletariat/commit/87a3f6151754db71106badca323ef59df782606a))
+* Distinguish between single module imports versus froms in string replacements ([`8107d5a`](https://github.com/cpcloud/protoletariat/commit/8107d5abe16c5d0c8e1f68894935a33b81833737))
+
+### Documentation
+* Add comment about why the replacement strategies are necessary ([`f98e41c`](https://github.com/cpcloud/protoletariat/commit/f98e41c208f804627e81a7aba3a4b21708eaac5c))
+* Fix readme to reflect CLI ([`f5d264d`](https://github.com/cpcloud/protoletariat/commit/f5d264d1d99a68c5344d6d8561b58599b2dd9799))
+
 ## v0.4.0 (2021-11-25)
 ### Feature
 * Introduce module suffixes to allow adjustment of grpc generated code ([`b0b644a`](https://github.com/cpcloud/protoletariat/commit/b0b644a8daaa93850e4723e9bcaf47811294bb40))
