@@ -328,3 +328,114 @@ def buf_gen_yaml_grpc_no_imports(tmp_path: Path, out_grpc_no_imports: Path) -> P
         )
     )
     return p
+
+
+@pytest.fixture
+def out_grpc_imports(tmp_path: Path) -> Path:
+    out = tmp_path / "out_grpc_imports"
+    out.mkdir()
+    return out
+
+
+@pytest.fixture(scope="session")
+def imports_service_text() -> str:
+    return """
+// no_imports_service.proto
+syntax = "proto3";
+
+import "requests/get.proto";
+import "requests/post.proto";
+
+package imports_service;
+
+service ImportsService {
+    rpc Get(msg.GetRequest) returns (msg.GetResponse) {}
+    rpc Post(msg.PostRequest) returns (msg.PostResponse) {}
+}
+"""
+
+
+@pytest.fixture(scope="session")
+def requests_get_proto_text() -> str:
+    return """
+syntax = "proto3";
+
+package imports_service.msg;
+
+message GetRequest {}
+message GetResponse {}
+"""
+
+
+@pytest.fixture()
+def requests_get_proto(tmp_path: Path, requests_get_proto_text: str) -> Path:
+    requests_dir = tmp_path.joinpath("requests")
+    requests_dir.mkdir(exist_ok=True)
+    p = requests_dir.joinpath("get.proto")
+    p.write_text(requests_get_proto_text)
+    return p
+
+
+@pytest.fixture(scope="session")
+def requests_post_proto_text() -> str:
+    return """
+syntax = "proto3";
+
+package imports_service.msg;
+
+message PostRequest {}
+message PostResponse {}
+"""
+
+
+@pytest.fixture()
+def requests_post_proto(tmp_path: Path, requests_post_proto_text: str) -> Path:
+    requests_dir = tmp_path.joinpath("requests")
+    requests_dir.mkdir(exist_ok=True)
+    p = requests_dir.joinpath("post.proto")
+    p.write_text(requests_post_proto_text)
+    return p
+
+
+@pytest.fixture
+def imports_service(
+    imports_service_text: str,
+    tmp_path: Path,
+    requests_get_proto: Path,
+    requests_post_proto: Path,
+) -> Path:
+    p = tmp_path.joinpath("imports_service.proto")
+    p.write_text(imports_service_text)
+    return p
+
+
+@pytest.fixture
+def buf_gen_yaml_grpc_imports(tmp_path: Path, out_grpc_imports: Path) -> Path:
+    p = tmp_path.joinpath("buf.gen.yaml")
+    p.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "python",
+                        "out": str(out_grpc_imports),
+                    },
+                    {
+                        "name": "grpc_python",
+                        "out": str(out_grpc_imports),
+                        "path": "grpc_python_plugin",
+                    },
+                    {
+                        "name": "mypy",
+                        "out": str(out_grpc_imports),
+                    },
+                    {
+                        "name": "mypy_grpc",
+                        "out": str(out_grpc_imports),
+                    },
+                ],
+            },
+        )
+    )
+    return p
