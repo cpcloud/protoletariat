@@ -151,10 +151,8 @@ class BaseRewriter(abc.ABC):
 
     def register_rewrite(self, replacement: Replacement) -> None:
         """Register a rewrite rule for turning `old` into `new`."""
-        if not isinstance(replacement, self.__class__.replacement_type):
-            return
-
-        self.do_register_rewrite(replacement)
+        if isinstance(replacement, self.__class__.replacement_type):
+            self.do_register_rewrite(replacement)
 
 
 class ImportNodeTransformer(ast.NodeTransformer):
