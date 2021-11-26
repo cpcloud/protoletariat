@@ -52,15 +52,11 @@ def matches(value: Node, pattern: Node) -> bool:
         pattern, AST
     ), f"pattern is not an AST node: {type(pattern).__name__}"
 
-    fields = [
-        (field, getattr(pattern, field))
+    return all(
+        matches(getattr(value, field), getattr(pattern, field))
         for field in pattern._fields
         if hasattr(pattern, field)
-    ]
-    for field_name, field_value in fields:
-        if not matches(getattr(value, field_name), field_value):
-            return False
-    return True
+    )
 
 
 class Rewriter:
