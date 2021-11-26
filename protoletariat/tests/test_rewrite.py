@@ -493,3 +493,56 @@ def test_pyi(
         m.syspath_prepend(str(tmp_path))
 
         importlib.import_module("out_grpc_no_imports.no_imports_service_pb2_grpc")
+
+
+def test_pyi_with_imports(
+    cli: CliRunner,
+    tmp_path: Path,
+    buf_yaml: Path,
+    buf_gen_yaml_grpc_imports: Path,
+    imports_service: Path,
+    out_grpc_imports: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess.check_call(["buf", "generate"])
+
+    check_proto_out(out_grpc_imports)
+
+    result = cli.invoke(
+        main,
+        [
+            "-o",
+            str(out_grpc_imports),
+            "--in-place",
+            "--create-package",
+            "buf",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+
+    service_module = out_grpc_imports.joinpath("imports_service_pb2_grpc.py")
+    assert service_module.exists()
+
+    service_module_types = service_module.with_suffix(".pyi")
+    assert service_module_types.exists()
+
+    service_module_types_lines = service_module_types.read_text().splitlines()
+    assert "imports_service_pb2" not in service_module_types_lines
+    # this line should be in the code twice:
+    # once for get_pb2, once for post_pb2
+    assert service_module_types_lines.count("from . import requests") == 2
+
+    # neither of the following two lines should be in the result
+    assert "import requests.get_pb2" not in service_module_types_lines
+    assert "import requests.post_pb2" not in service_module_types_lines
+
+    assert out_grpc_imports.joinpath("__init__.py").exists()
+
+    # check that we can import the thing
+    with monkeypatch.context() as m:
+        m.syspath_prepend(str(tmp_path))
+
+        importlib.import_module("out_grpc_imports.imports_service_pb2_grpc")
