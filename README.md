@@ -91,7 +91,7 @@ Options:
   --in-place / --not-in-place     Overwrite all relevant files under `--python-out` with adjusted imports  [default: not-in-place]
   --create-package / --dont-create-package
                                   Recursively create __init__.py files under `--python-out`  [default: dont-create-package]
-  -s, --module-suffixes TEXT      Suffixes of Python modules to process  [default: _pb2.py, _pb2_grpc.py]
+  -s, --module-suffixes TEXT      Suffixes of Python/mypy modules to process  [default: _pb2.py, _pb2.pyi, _pb2_grpc.py, _pb2_grpc.pyi]
   --help                          Show this message and exit.
 
 Commands:
