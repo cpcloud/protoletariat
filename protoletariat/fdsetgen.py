@@ -1,17 +1,20 @@
 from __future__ import annotations
 
 import abc
-import ast
 import re
 import subprocess
 import tempfile
 from pathlib import Path
 from typing import Callable, Iterable, Sequence
 
-import astor
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
-from .rewrite import ImportRewriter, build_rewrites
+from .rewrite import (
+    ASTImportRewriter,
+    ChainedImportRewriter,
+    StringReplaceImportRewriter,
+    build_rewrites,
+)
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
 
@@ -41,7 +44,10 @@ class FileDescriptorSetGenerator(abc.ABC):
 
         for fd in fdset.file:
             fd_name = _remove_proto_suffix(fd.name)
-            rewriters[fd_name] = rewriter = ImportRewriter()
+            rewriters[fd_name] = rewriter = ChainedImportRewriter(
+                ASTImportRewriter(),
+                StringReplaceImportRewriter(),
+            )
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
             # current proto as a dependency of itself to handle the case
@@ -62,9 +68,8 @@ class FileDescriptorSetGenerator(abc.ABC):
                 python_file = python_out.joinpath(py_name)
                 if python_file.exists():
                     raw_code = python_file.read_text()
-                    module = ast.parse(raw_code)
-                    new_module = rewriters[fd_name].visit(module)
-                    new_code = astor.to_source(new_module)
+                    rewriter = rewriters[fd_name]
+                    new_code = rewriter.rewrite(raw_code)
                     overwrite_callback(python_file, new_code)
 
         if create_package:

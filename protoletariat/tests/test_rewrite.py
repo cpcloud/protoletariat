@@ -1,4 +1,5 @@
 import importlib
+import itertools
 import subprocess
 import sys
 from pathlib import Path
@@ -8,7 +9,7 @@ import pytest
 from click.testing import CliRunner, Result
 
 from protoletariat.__main__ import main
-from protoletariat.rewrite import build_import_rewrite
+from protoletariat.rewrite import build_rewrites
 
 
 def check_import_lines(result: Result, expected_lines: Iterable[str]) -> None:
@@ -22,38 +23,89 @@ def check_proto_out(out: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    ("proto", "dep", "expected"),
+    ("proto", "dep", "expecteds"),
     [
-        ("a", "foo", "from . import foo_pb2 as foo__pb2"),
-        ("a/b", "foo", "from .. import foo_pb2 as foo__pb2"),
-        ("a", "foo/bar", "from .foo import bar_pb2 as foo_dot_bar__pb2"),
-        ("a/b", "foo/bar", "from ..foo import bar_pb2 as foo_dot_bar__pb2"),
-        (
+        pytest.param(
+            "a",
+            "foo",
+            ["from . import foo_pb2 as foo__pb2", "from . import foo_pb2"],
+            id="no_nesting",
+        ),
+        pytest.param(
+            "a/b",
+            "foo",
+            ["from .. import foo_pb2 as foo__pb2", "from .. import foo_pb2"],
+            id="proto_one_level",
+        ),
+        pytest.param(
+            "a",
+            "foo/bar",
+            [
+                "from .foo import bar_pb2 as foo_dot_bar__pb2",
+                "from .foo import bar_pb2",
+            ],
+            id="dep_one_level",
+        ),
+        pytest.param(
+            "a/b",
+            "foo/bar",
+            [
+                "from ..foo import bar_pb2 as foo_dot_bar__pb2",
+                "from ..foo import bar_pb2",
+            ],
+            id="both_one_level",
+        ),
+        pytest.param(
             "a",
             "foo/bar/baz",
-            "from .foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+            [
+                "from .foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+                "from .foo.bar import baz_pb2",
+            ],
+            id="dep_two_levels",
         ),
-        (
+        pytest.param(
             "a/b",
             "foo/bar/baz",
-            "from ..foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+            [
+                "from ..foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
+                "from ..foo.bar import baz_pb2",
+            ],
+            id="proto_one_level_dep_two_levels",
         ),
-        (
+        pytest.param(
             "a",
             "foo/bar/bizz_buzz",
-            "from .foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
+            [
+                "from .foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
+                "from .foo.bar import bizz_buzz_pb2",
+            ],
+            id="dep_three_levels",
         ),
-        (
+        pytest.param(
             "a/b",
             "foo/bar/bizz_buzz",
-            "from ..foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
+            [
+                (
+                    "from ..foo.bar import bizz_buzz_pb2 as "
+                    "foo_dot_bar_dot_bizz__buzz__pb2"
+                ),
+                "from ..foo.bar import bizz_buzz_pb2",
+            ],
+            id="proto_one_level_dep_three_levels",
         ),
-        ("a/b", "a/b", "from ..a import b_pb2 as a_dot_b__pb2"),
+        pytest.param(
+            "a/b",
+            "a/b",
+            ["from ..a import b_pb2 as a_dot_b__pb2", "from ..a import b_pb2"],
+            id="self_dep",
+        ),
     ],
 )
-def test_build_import_rewrite(proto: str, dep: str, expected: str) -> None:
-    old, new = build_import_rewrite(proto, dep)
-    assert new == expected
+def test_build_import_rewrites(proto: str, dep: str, expecteds: Iterable[str]) -> None:
+    rewrites = build_rewrites(proto, dep)
+    for (_, new), expected in itertools.zip_longest(rewrites, expecteds):
+        assert new == expected
 
 
 def test_cli(
