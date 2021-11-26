@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Callable
 
 import click
 
@@ -16,10 +15,6 @@ def _overwrite(python_file: Path, code: str) -> None:
 
 def _echo(_: Path, code: str) -> None:
     click.echo(code)
-
-
-def _make_callback(overwrite: bool) -> Callable[[Path, str], None]:
-    return _overwrite if overwrite else _echo
 
 
 @click.group(
@@ -72,7 +67,7 @@ def main(
         dict(
             python_out=python_out,
             create_package=create_package,
-            overwrite_callback=_make_callback(in_place),
+            overwrite_callback=_overwrite if in_place else _echo,
             module_suffixes=module_suffixes,
         )
     )
