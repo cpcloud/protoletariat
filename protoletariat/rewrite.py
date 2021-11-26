@@ -130,7 +130,10 @@ def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
         ASTReplacement(old=old, new=new),
         StringReplacement(
             old=f"import {'.'.join(parts)}_pb2",
-            new=f"from {leading_dots or '.'}{'.'.join(import_parts)} import {part}_pb2",
+            new=(
+                f"from {leading_dots or '.'} import {parts[0]}"
+                + "_pb2" * (not import_parts)
+            ),
         ),
     ]
 
