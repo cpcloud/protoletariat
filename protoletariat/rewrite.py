@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import abc
-import ast
 import collections
 import collections.abc
-import re
-from ast import AST
-from typing import Any, Callable, ClassVar, MutableSequence, NamedTuple, Sequence, Union
+import typing
+from typing import Any, Callable, NamedTuple, Sequence, Union
 
-import astor
+import typed_astunparse as astunparse
+from typed_ast import ast3 as ast
+from typed_ast.ast3 import AST
 
 Node = Union[AST, Sequence[AST]]
 
@@ -129,7 +128,7 @@ def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
 
     return [
         ASTReplacement(old=old, new=new),
-        StringReplacement(
+        ASTReplacement(
             old=f"import {'.'.join(parts)}_pb2",
             new=(
                 f"from {leading_dots or '.'} import {parts[0]}"
@@ -137,23 +136,6 @@ def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
             ),
         ),
     ]
-
-
-class BaseRewriter(abc.ABC):
-    replacement_type: ClassVar[type[Replacement]]
-
-    @abc.abstractmethod
-    def rewrite(self, src: str) -> str:
-        ...
-
-    @abc.abstractmethod
-    def do_register_rewrite(self, replacement: Replacement) -> None:
-        ...
-
-    def register_rewrite(self, replacement: Replacement) -> None:
-        """Register a rewrite rule for turning `old` into `new`."""
-        if isinstance(replacement, self.__class__.replacement_type):
-            self.do_register_rewrite(replacement)
 
 
 class ImportNodeTransformer(ast.NodeTransformer):
@@ -169,16 +151,14 @@ class ImportNodeTransformer(ast.NodeTransformer):
         return self.ast_rewriter(node)
 
 
-class ASTImportRewriter(BaseRewriter):
-    replacement_type: ClassVar[type[Replacement]] = ASTReplacement
-
+class ASTImportRewriter:
     def __init__(self) -> None:
         self.node_transformer = ImportNodeTransformer(ASTRewriter())
 
-    def do_register_rewrite(self, replacement: Replacement) -> None:
+    def register_rewrite(self, replacement: Replacement) -> None:
         """Register a rewrite rule for turning `old` into `new`."""
-        (old_node,) = ast.parse(replacement.old).body
-        (new_node,) = ast.parse(replacement.new).body
+        (old_node,) = typing.cast(ast.Module, ast.parse(replacement.old)).body
+        (new_node,) = typing.cast(ast.Module, ast.parse(replacement.new)).body
 
         def _rewrite(_: AST, repl: AST = new_node) -> AST:
             return repl
@@ -191,42 +171,4 @@ class ASTImportRewriter(BaseRewriter):
         ), f"more than one rewrite rule found for pattern `{replacement.old}`"
 
     def rewrite(self, src: str) -> str:
-        return astor.to_source(self.node_transformer.visit(ast.parse(src)))
-
-
-class StringReplaceImportRewriter(BaseRewriter):
-    replacement_type: ClassVar[type[Replacement]] = StringReplacement
-
-    def __init__(self) -> None:
-        self.replacements: MutableSequence[tuple[re.Pattern[str], str]] = []
-
-    def do_register_rewrite(self, replacement: Replacement) -> None:
-        """Register a rewrite rule for turning `old` into `new`."""
-        self.replacements.append(
-            (
-                re.compile(f"^{re.escape(replacement.old)}$", flags=re.MULTILINE),
-                replacement.new,
-            )
-        )
-
-    def rewrite(self, src: str) -> str:
-        for pattern, new in self.replacements:
-            if pattern.search(src) is not None:
-                src = pattern.sub(new, src)
-        return src
-
-
-class ChainedImportRewriter(BaseRewriter):
-    replacement_type: ClassVar[type[Replacement]] = Replacement
-
-    def __init__(self, *rewriters: BaseRewriter) -> None:
-        self.rewriters = rewriters
-
-    def do_register_rewrite(self, replacement: Replacement) -> None:
-        for rewriter in self.rewriters:
-            rewriter.register_rewrite(replacement)
-
-    def rewrite(self, src: str) -> str:
-        for rewriter in self.rewriters:
-            src = rewriter.rewrite(src)
-        return src
+        return astunparse.unparse(self.node_transformer.visit(ast.parse(src)))
