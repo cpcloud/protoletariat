@@ -64,8 +64,6 @@
           }
         );
 
-        nativeBuildInputs = [ pkgs.git ];
-
         checkInputs = with pkgs; [ buf grpc protobuf ];
 
         preCheck = ''

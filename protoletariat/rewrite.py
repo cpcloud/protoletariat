@@ -5,7 +5,7 @@ import collections.abc
 import typing
 from typing import Any, Callable, NamedTuple, Sequence, Union
 
-import typed_astunparse as astunparse
+import astunparse
 from typed_ast import ast3 as ast
 from typed_ast.ast3 import AST
 

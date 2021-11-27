@@ -20,7 +20,7 @@ python = ">=3.7,<3.11"
 click = "^8.0.1"
 protobuf = "^3.19.1"
 typed-ast = "^1.4.0"
-typed-astunparse = "^2.1.4"
+astunparse = "^1.6.3"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
