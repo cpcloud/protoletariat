@@ -35,6 +35,7 @@ pytest = "^6.2.5"
 pytest-randomly = "^3.10.1"
 pyupgrade = "^2.26.0"
 types-protobuf = "^3.18.1"
+types-typed-ast = "^1.5.0"
 
 [tool.poetry.scripts]
 protol = "protoletariat.__main__:main"
