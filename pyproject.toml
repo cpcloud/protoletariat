@@ -17,9 +17,10 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
-astor = "^0.8.1"
 click = "^8.0.1"
 protobuf = "^3.19.1"
+typed-ast = "^1.4.0"
+typed-astunparse = "^2.1.4"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
