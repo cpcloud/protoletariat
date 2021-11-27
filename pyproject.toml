@@ -76,7 +76,7 @@ skip_glob = [".direnv/*", "result/*", "result-*"]
 [tool.pydocstyle]
 inherit = false
 convention = "numpy"
-match_dir = "ibis"
+match_dir = "protoletariat"
 add_ignore = ["D100", "D101", "D102", "D103", "D104", "D105"]
 
 [tool.mypy]
