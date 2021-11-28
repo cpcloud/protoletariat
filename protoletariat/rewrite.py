@@ -17,14 +17,6 @@ class Replacement(NamedTuple):
     new: str
 
 
-class ASTReplacement(Replacement):
-    pass
-
-
-class StringReplacement(Replacement):
-    pass
-
-
 def _is_iterable(value: Any) -> bool:  # type: ignore[misc]
     """Return whether `value` is a non-string iterable."""
     return not isinstance(value, str) and isinstance(value, collections.abc.Iterable)
@@ -127,8 +119,8 @@ def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
         new = f"from {leading_dots}{from_} import {part}_pb2 as {as_}"
 
     return [
-        ASTReplacement(old=old, new=new),
-        ASTReplacement(
+        Replacement(old=old, new=new),
+        Replacement(
             old=f"import {'.'.join(parts)}_pb2",
             new=(
                 f"from {leading_dots or '.'} import {parts[0]}"
