@@ -62,7 +62,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: Build package and run tests
-        run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}'
+        run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}' --no-link
   docker-image:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +84,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: Build docker image
-        run: nix build --print-build-logs --keep-going '.#protoletariat-image'
+        run: nix build --print-build-logs --keep-going '.#protoletariat-image' --no-link
   conda:
     strategy:
       fail-fast: false
