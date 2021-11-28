@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.1 (2021-11-28)
+### Fix
+* Use ast replacement everywhere because typed_ast/typed_astunparse performs correct roundtrip ([`627bffb`](https://github.com/cpcloud/protoletariat/commit/627bffb3512adae63bcd59dab6fce5cc2683f9a6))
+
+### Documentation
+* Add installation section to README.md ([`edd9dfc`](https://github.com/cpcloud/protoletariat/commit/edd9dfce36f9936fe46593713c12c0c258cb808a))
+* Update README to include .pyi suffixes in help message ([`3e1ba1e`](https://github.com/cpcloud/protoletariat/commit/3e1ba1e6f1686e541ff211770b3f6a2aff28cbab))
+
 ## v0.5.0 (2021-11-26)
 ### Feature
 * Add mypy and mypy grpc suffixes ([`e5a4b9e`](https://github.com/cpcloud/protoletariat/commit/e5a4b9e773c01926ebbd36d7316edb81b13810da))
