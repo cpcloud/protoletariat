@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.2 (2021-11-28)
+### Performance
+* Use cpp implementation for python protobuf ([`ebc5614`](https://github.com/cpcloud/protoletariat/commit/ebc561447af11e2dfcef655695a7c4b5316cc92b))
+
 ## v0.5.1 (2021-11-28)
 ### Fix
 * Use ast replacement everywhere because typed_ast/typed_astunparse performs correct roundtrip ([`627bffb`](https://github.com/cpcloud/protoletariat/commit/627bffb3512adae63bcd59dab6fce5cc2683f9a6))
