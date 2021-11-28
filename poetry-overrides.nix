@@ -2,7 +2,7 @@
 self: super:
 {
   typing-extensions = super.typing-extensions.overridePythonAttrs (attrs: {
-    buildInputs = (attrs.buildInputs or [ ]) ++ [ super.flit-core ];
+    buildInputs = (attrs.buildInputs or [ ]) ++ [ self.flit-core ];
   });
 
   protobuf = super.protobuf.overridePythonAttrs (attrs: {
