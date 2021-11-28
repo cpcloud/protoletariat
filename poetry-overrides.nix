@@ -1,11 +1,11 @@
 { pkgs, ... }:
-self: super:
+self: pysuper:
 {
-  typing-extensions = super.typing-extensions.overridePythonAttrs (attrs: {
+  typing-extensions = pysuper.typing-extensions.overridePythonAttrs (attrs: {
     buildInputs = (attrs.buildInputs or [ ]) ++ [ self.flit-core ];
   });
 
-  protobuf = super.protobuf.overridePythonAttrs (attrs: {
+  protobuf = pysuper.protobuf.overridePythonAttrs (attrs: {
     nativeBuildInputs = (attrs.nativeBuildInputs or [ ]) ++ [ self.pyext ];
     propagatedNativeBuildInputs = (attrs.propagatedNativeBuildInputs or [ ]) ++ [
       pkgs.buildPackages.protobuf
