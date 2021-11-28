@@ -439,3 +439,58 @@ def buf_gen_yaml_grpc_imports(tmp_path: Path, out_grpc_imports: Path) -> Path:
         )
     )
     return p
+
+
+@pytest.fixture(scope="session")
+def long_names_text() -> str:
+    # taken from https://github.com/substrait-io/substrait
+    return """
+syntax = "proto3";
+
+package io.substrait;
+
+message FunctionSignature {
+    message FinalArgVariadic {
+        int64 min_args = 1;
+        int64 max_args = 2;
+        ParameterConsistency consistency = 3;
+        enum ParameterConsistency {
+            UNKNOWN = 0;
+            CONSISTENT = 1;
+            INCONSISTENT = 2;
+        }
+    }
+}"""
+
+
+@pytest.fixture
+def out_long_names(tmp_path: Path) -> Path:
+    out = tmp_path / "out_long_names"
+    out.mkdir()
+    return out
+
+
+@pytest.fixture
+def long_names_proto(tmp_path: Path, long_names_text: str) -> Path:
+    p = tmp_path / "function.proto"
+    p.write_text(long_names_text)
+    return p
+
+
+@pytest.fixture
+def buf_gen_yaml_long_names(tmp_path: Path, out_long_names: Path) -> Path:
+    p = tmp_path / "buf.gen.yaml"
+    p.write_text(
+        json.dumps(
+            {
+                "version": "v1",
+                "plugins": [
+                    {
+                        "name": "mypy",
+                        "out": str(out_long_names),
+                    },
+                ],
+            },
+        )
+    )
+    return p
