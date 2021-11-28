@@ -85,6 +85,18 @@ jobs:
 
       - name: Build docker image
         run: nix build --print-build-logs --keep-going '.#protoletariat-image' --no-link
+
+      - name: Load the docker image
+        run: |
+          set -euo pipefail
+
+          docker load < "$(nix path-info --print-build-logs --keep-going '.#protoletariat-image')"
+
+      - name: Smoke test the image
+        run: |
+          set -euo pipefail
+
+          docker run --rm -it protoletariat:"$(nix eval --raw '.#protoletariat-image.imageTag')"
   conda:
     strategy:
       fail-fast: false
