@@ -96,7 +96,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          docker run --rm -it protoletariat:"$(nix eval --raw '.#protoletariat-image.imageTag')"
+          docker run --rm protoletariat:"$(nix eval --raw '.#protoletariat-image.imageTag')"
   conda:
     strategy:
       fail-fast: false
