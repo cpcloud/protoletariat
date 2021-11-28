@@ -556,3 +556,34 @@ def test_pyi_with_imports(
         m.syspath_prepend(str(tmp_path))
 
         importlib.import_module("out_grpc_imports.imports_service_pb2_grpc")
+
+
+def test_pyi_with_long_names(
+    cli: CliRunner,
+    tmp_path: Path,
+    buf_yaml: Path,
+    buf_gen_yaml_long_names: Path,
+    out_long_names: Path,
+    long_names_proto: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess.check_call(["buf", "generate"])
+
+    assert list(out_long_names.rglob("*.pyi"))
+    assert all(path.read_text() for path in out_long_names.rglob("*.pyi"))
+
+    for _ in range(2):
+        result = cli.invoke(
+            main,
+            [
+                "-o",
+                str(out_long_names),
+                "--in-place",
+                "--create-package",
+                "buf",
+            ],
+            catch_exceptions=False,
+        )
+
+        assert result.exit_code == 0
