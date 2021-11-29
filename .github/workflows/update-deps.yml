@@ -70,6 +70,7 @@ jobs:
           title: "chore(flake/${{ matrix.input }}): `${{ steps.get_current_commit.outputs.short-rev }}` -> `${{ steps.get_new_commit.outputs.short-rev }}`"
           token: ${{ secrets.PROTOLETARIAT_CI }}
           body: ${{ steps.compare_commits.outputs.differences }}
+          labels: dependencies
 
       - name: Set the PR to automerge
         if: ${{ steps.create_pr.outputs.pull-request-operation == 'created' }}
