@@ -384,3 +384,38 @@ def test_pyi_with_long_names(
         )
 
         assert result.exit_code == 0
+
+
+def test_google_imports(
+    cli: CliRunner,
+    tmp_path: Path,
+    buf_yaml: Path,
+    buf_gen_yaml_google_import: Path,
+    out_google_import: Path,
+    google_import_proto: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess.check_call(["buf", "generate"])
+
+    check_proto_out(out_google_import)
+
+    result = cli.invoke(
+        main,
+        [
+            "-o",
+            str(out_google_import),
+            "--in-place",
+            "--create-package",
+            "buf",
+        ],
+        catch_exceptions=False,
+    )
+
+    assert result.exit_code == 0
+
+    mod = out_google_import.joinpath("google_import_pb2.py")
+    assert mod.exists()
+    text = mod.read_text()
+
+    assert "from .google" not in text.splitlines()
