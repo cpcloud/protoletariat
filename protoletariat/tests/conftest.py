@@ -498,32 +498,34 @@ def buf_gen_yaml_long_names(tmp_path: Path, out_long_names: Path) -> Path:
 
 
 @pytest.fixture(scope="session")
-def google_import_text() -> str:
+def ignored_import_text() -> str:
     return """
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "ignored.proto";
 
 message Foo {}
 """
 
 
 @pytest.fixture
-def out_google_import(tmp_path: Path) -> Path:
-    out = tmp_path / "out_google_import"
+def out_ignored_import(tmp_path: Path) -> Path:
+    out = tmp_path / "out_ignored_import"
     out.mkdir()
     return out
 
 
 @pytest.fixture
-def google_import_proto(tmp_path: Path, google_import_text: str) -> Path:
-    p = tmp_path / "google_import.proto"
-    p.write_text(google_import_text)
+def ignored_import_proto(tmp_path: Path, ignored_import_text: str) -> Path:
+    p = tmp_path / "ignored_import.proto"
+    p.write_text(ignored_import_text)
+    tmp_path.joinpath("ignored.proto").touch()
     return p
 
 
 @pytest.fixture
-def buf_gen_yaml_google_import(tmp_path: Path, out_google_import: Path) -> Path:
+def buf_gen_yaml_ignored_import(tmp_path: Path, out_ignored_import: Path) -> Path:
     p = tmp_path / "buf.gen.yaml"
     p.write_text(
         json.dumps(
@@ -532,7 +534,7 @@ def buf_gen_yaml_google_import(tmp_path: Path, out_google_import: Path) -> Path:
                 "plugins": [
                     {
                         "name": "python",
-                        "out": str(out_google_import),
+                        "out": str(out_ignored_import),
                     },
                 ],
             },

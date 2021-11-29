@@ -386,25 +386,27 @@ def test_pyi_with_long_names(
         assert result.exit_code == 0
 
 
-def test_google_imports(
+def test_ignored_imports(
     cli: CliRunner,
     tmp_path: Path,
     buf_yaml: Path,
-    buf_gen_yaml_google_import: Path,
-    out_google_import: Path,
-    google_import_proto: Path,
+    buf_gen_yaml_ignored_import: Path,
+    out_ignored_import: Path,
+    ignored_import_proto: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.chdir(tmp_path)
     subprocess.check_call(["buf", "generate"])
 
-    check_proto_out(out_google_import)
+    check_proto_out(out_ignored_import)
 
     result = cli.invoke(
         main,
         [
+            "-i",
+            "igno*",
             "-o",
-            str(out_google_import),
+            str(out_ignored_import),
             "--in-place",
             "--create-package",
             "buf",
@@ -414,11 +416,15 @@ def test_google_imports(
 
     assert result.exit_code == 0
 
-    mod = out_google_import.joinpath("google_import_pb2.py")
-    assert mod.exists()
+    mod = out_ignored_import.joinpath("ignored_import_pb2.py")
     text = mod.read_text()
+    lines = text.splitlines()
 
-    invalid_line = (
+    ignored_google_line = (
         "from .google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2"
     )
-    assert invalid_line not in text.splitlines()
+    ignored_custom_line = "from . import ignored_pb2 as ignored__pb2"
+    lines = text.splitlines()
+
+    assert ignored_google_line not in lines
+    assert ignored_custom_line not in lines
