@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import fnmatch
 import re
 import subprocess
 import tempfile
@@ -19,6 +20,10 @@ def _remove_proto_suffix(name: str) -> str:
     return _PROTO_SUFFIX_PATTERN.sub(r"\1", name)
 
 
+def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
+    return any(fnmatch.fnmatchcase(fd_name, pattern) for pattern in patterns)
+
+
 class FileDescriptorSetGenerator(abc.ABC):
     def __init__(self, fdset_generator_binary: str) -> None:
         self.fdset_generator_binary = fdset_generator_binary
@@ -33,12 +38,15 @@ class FileDescriptorSetGenerator(abc.ABC):
         create_package: bool,
         overwrite_callback: Callable[[Path, str], None],
         module_suffixes: Sequence[str],
+        ignore_imports_glob: Sequence[str],
     ) -> None:
         rewriters = {}
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
             fd_name = _remove_proto_suffix(fd.name)
+            if _should_ignore(fd_name, ignore_imports_glob):
+                continue
             rewriters[fd_name] = rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
@@ -50,6 +58,8 @@ class FileDescriptorSetGenerator(abc.ABC):
             # register _proto_ import rewrites
             for dep in fd.dependency:
                 dep_name = _remove_proto_suffix(dep)
+                if _should_ignore(dep_name, ignore_imports_glob):
+                    continue
                 for repl in build_rewrites(fd_name, dep_name):
                     rewriter.register_rewrite(repl)
 
@@ -60,9 +70,14 @@ class FileDescriptorSetGenerator(abc.ABC):
                 python_file = python_out.joinpath(py_name)
                 if python_file.exists():
                     raw_code = python_file.read_text()
-                    rewriter = rewriters[fd_name]
-                    new_code = rewriter.rewrite(raw_code)
-                    overwrite_callback(python_file, new_code)
+                    try:
+                        rewriter = rewriters[fd_name]
+                    except KeyError:
+                        # rewriters don't exist for glob-ignored names
+                        pass
+                    else:
+                        new_code = rewriter.rewrite(raw_code)
+                        overwrite_callback(python_file, new_code)
 
         if create_package:
             python_out.joinpath("__init__.py").touch(exist_ok=True)
