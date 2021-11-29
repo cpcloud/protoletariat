@@ -428,3 +428,10 @@ def test_ignored_imports(
 
     assert ignored_google_line not in lines
     assert ignored_custom_line not in lines
+
+    google_line = (
+        "from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2"
+    )
+    custom_line = "import ignored_pb2 as ignored__pb2"
+    assert google_line in lines
+    assert custom_line in lines
