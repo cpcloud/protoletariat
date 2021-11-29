@@ -30,7 +30,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: Lint commits
-        run: nix develop -c commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }} --verbose
+        run: nix shell -L -f '<nixpkgs>' commitlint -c commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }} --verbose
   pre-commit:
     runs-on: ubuntu-latest
     steps:
