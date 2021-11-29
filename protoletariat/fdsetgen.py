@@ -21,6 +21,7 @@ def _remove_proto_suffix(name: str) -> str:
 
 
 def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
+    """Return whether `fd_name` should be ignored according to `patterns`."""
     return any(fnmatch.fnmatchcase(fd_name, pattern) for pattern in patterns)
 
 
