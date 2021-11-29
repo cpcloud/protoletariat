@@ -60,7 +60,7 @@ def _echo(_: Path, code: str) -> None:
     help="Exclude rewriting imports prefixed with google/protobuf",
 )
 @click.option(
-    "-i",
+    "-e",
     "--exclude-imports-glob",
     type=str,
     multiple=True,
