@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.4 (2021-11-29)
+### Fix
+* Add the ability to exclude google and optionally additional glob patterns from import rewrites ([`beadb73`](https://github.com/cpcloud/protoletariat/commit/beadb73227c03fc592f37f4bb7bd30b63188397c))
+
+### Documentation
+* Add docstring to _should_ignore ([`52225ad`](https://github.com/cpcloud/protoletariat/commit/52225ad2bcac4f7634cc86fe9e525da900a2d6b9))
+
 ## v0.5.3 (2021-11-29)
 ### Fix
 * Don't require commitlint for release ([`1e1a7fe`](https://github.com/cpcloud/protoletariat/commit/1e1a7fe5fe36ffe2666c3d2b22490a2b46a68501))
