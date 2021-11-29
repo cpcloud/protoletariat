@@ -403,7 +403,7 @@ def test_ignored_imports(
     result = cli.invoke(
         main,
         [
-            "-i",
+            "-e",
             "igno*",
             "-o",
             str(out_ignored_import),
