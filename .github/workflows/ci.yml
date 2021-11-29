@@ -8,6 +8,10 @@ on:
 
 name: CI
 
+concurrency:
+  group: ${{ github.repository }}-${{ github.head_ref || github.sha }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   commitlint:
     if: ${{ github.event_name == 'pull_request' }}
