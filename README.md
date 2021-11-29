@@ -106,6 +106,10 @@ Options:
   --create-package / --dont-create-package
                                   Recursively create __init__.py files under `--python-out`  [default: dont-create-package]
   -s, --module-suffixes TEXT      Suffixes of Python/mypy modules to process  [default: _pb2.py, _pb2.pyi, _pb2_grpc.py, _pb2_grpc.pyi]
+  --exclude-google-imports / --dont-exclude-google-imports
+                                  Exclude rewriting imports prefixed with google/protobuf
+  -e, --exclude-imports-glob TEXT
+                                  Exclude imports matching a glob pattern from being rewritten. Multiple values are allowed
   --help                          Show this message and exit.
 
 Commands:
