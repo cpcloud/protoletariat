@@ -418,4 +418,7 @@ def test_google_imports(
     assert mod.exists()
     text = mod.read_text()
 
-    assert "from .google" not in text.splitlines()
+    invalid_line = (
+        "from .google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2"
+    )
+    assert invalid_line not in text.splitlines()
