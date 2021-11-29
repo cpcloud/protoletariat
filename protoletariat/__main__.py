@@ -54,6 +54,20 @@ def _echo(_: Path, code: str) -> None:
     help="Suffixes of Python/mypy modules to process",
     show_default=True,
 )
+@click.option(
+    "--ignore-google-imports/--dont-ignore-google-imports",
+    default=True,
+    help="Ignore rewriting imports prefixed with google/protobuf",
+)
+@click.option(
+    "-i",
+    "--ignore-imports-glob",
+    type=str,
+    multiple=True,
+    default=[],
+    help="Ignore rewrites matching a glob pattern",
+    show_default=True,
+)
 @click.pass_context
 def main(
     ctx: click.Context,
@@ -61,14 +75,21 @@ def main(
     in_place: bool,
     create_package: bool,
     module_suffixes: list[str],
+    ignore_google_imports: bool,
+    ignore_imports_glob: list[str],
 ) -> None:
     ctx.ensure_object(dict)
+
+    if ignore_google_imports:
+        ignore_imports_glob += ("google/protobuf/*",)
+
     ctx.obj.update(
         dict(
             python_out=python_out,
             create_package=create_package,
             overwrite_callback=_overwrite if in_place else _echo,
             module_suffixes=module_suffixes,
+            ignore_imports_glob=ignore_imports_glob,
         )
     )
 
