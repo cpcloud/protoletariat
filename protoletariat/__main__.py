@@ -91,7 +91,7 @@ def main(
             create_package=create_package,
             overwrite_callback=_overwrite if in_place else _echo,
             module_suffixes=module_suffixes,
-            ignore_imports_glob=exclude_imports_glob,
+            exclude_imports_glob=exclude_imports_glob,
         )
     )
 
