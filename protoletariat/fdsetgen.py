@@ -38,14 +38,14 @@ class FileDescriptorSetGenerator(abc.ABC):
         create_package: bool,
         overwrite_callback: Callable[[Path, str], None],
         module_suffixes: Sequence[str],
-        ignore_imports_glob: Sequence[str],
+        exclude_imports_glob: Sequence[str],
     ) -> None:
         rewriters = {}
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
             fd_name = _remove_proto_suffix(fd.name)
-            if _should_ignore(fd_name, ignore_imports_glob):
+            if _should_ignore(fd_name, exclude_imports_glob):
                 continue
             rewriters[fd_name] = rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
@@ -58,7 +58,7 @@ class FileDescriptorSetGenerator(abc.ABC):
             # register _proto_ import rewrites
             for dep in fd.dependency:
                 dep_name = _remove_proto_suffix(dep)
-                if _should_ignore(dep_name, ignore_imports_glob):
+                if _should_ignore(dep_name, exclude_imports_glob):
                     continue
                 for repl in build_rewrites(fd_name, dep_name):
                     rewriter.register_rewrite(repl)
