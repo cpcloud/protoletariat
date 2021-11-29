@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.3 (2021-11-29)
+### Fix
+* Don't require commitlint for release ([`1e1a7fe`](https://github.com/cpcloud/protoletariat/commit/1e1a7fe5fe36ffe2666c3d2b22490a2b46a68501))
+* Split out buf tests to allow for skipping without a marker ([`b7dabca`](https://github.com/cpcloud/protoletariat/commit/b7dabca00d491b0f5bbac0bea830d5b50b38223c))
+* Add buf marker to allow running tests if buf is known not be installable ([`50847d9`](https://github.com/cpcloud/protoletariat/commit/50847d93aba4e9bedb427265c8a18fb5556840c2))
+
 ## v0.5.2 (2021-11-28)
 ### Performance
 * Use cpp implementation for python protobuf ([`ebc5614`](https://github.com/cpcloud/protoletariat/commit/ebc561447af11e2dfcef655695a7c4b5316cc92b))
