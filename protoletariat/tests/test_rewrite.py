@@ -237,6 +237,7 @@ def test_example_protoc(
     assert out.joinpath("__init__.py").exists()
 
 
+@pytest.mark.buf
 def test_example_buf(
     cli: CliRunner,
     tmp_path: Path,
@@ -282,6 +283,7 @@ def test_example_buf(
     assert out.joinpath("__init__.py").exists()
 
 
+@pytest.mark.buf
 def test_nested_buf(
     cli: CliRunner,
     tmp_path: Path,
@@ -354,6 +356,7 @@ def test_nested_buf(
     raises=subprocess.CalledProcessError,
     reason="grpc-cpp cannot be installed with conda using Python 3.10",
 )
+@pytest.mark.buf
 def test_grpc_buf(
     cli: CliRunner,
     tmp_path: Path,
@@ -410,6 +413,7 @@ def test_grpc_buf(
     raises=subprocess.CalledProcessError,
     reason="grpc-cpp cannot be installed with conda using Python 3.10",
 )
+@pytest.mark.buf
 def test_grpc_buf_no_imports(
     cli: CliRunner,
     tmp_path: Path,
@@ -454,6 +458,7 @@ def test_grpc_buf_no_imports(
     raises=subprocess.CalledProcessError,
     reason="grpc-cpp cannot be installed with conda using Python 3.10",
 )
+@pytest.mark.buf
 def test_pyi(
     cli: CliRunner,
     tmp_path: Path,
@@ -505,6 +510,7 @@ def test_pyi(
     raises=subprocess.CalledProcessError,
     reason="grpc-cpp cannot be installed with conda using Python 3.10",
 )
+@pytest.mark.buf
 def test_pyi_with_imports(
     cli: CliRunner,
     tmp_path: Path,
@@ -558,6 +564,7 @@ def test_pyi_with_imports(
         importlib.import_module("out_grpc_imports.imports_service_pb2_grpc")
 
 
+@pytest.mark.buf
 def test_pyi_with_long_names(
     cli: CliRunner,
     tmp_path: Path,

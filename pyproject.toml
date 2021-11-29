@@ -59,6 +59,7 @@ addopts = [
   "--ignore=.direnv",
   "--strict-markers"
 ]
+markers = ["buf"]
 norecursedirs = ["site-packages", "dist-packages", ".direnv"]
 
 [tool.poetry2conda]
