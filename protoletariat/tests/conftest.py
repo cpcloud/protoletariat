@@ -1,8 +1,9 @@
 import json
 from pathlib import Path
+from typing import Iterable
 
 import pytest
-from click.testing import CliRunner
+from click.testing import CliRunner, Result
 
 
 @pytest.fixture
@@ -494,3 +495,13 @@ def buf_gen_yaml_long_names(tmp_path: Path, out_long_names: Path) -> Path:
         )
     )
     return p
+
+
+def check_import_lines(result: Result, expected_lines: Iterable[str]) -> None:
+    lines = result.stdout.splitlines()
+    assert set(expected_lines) <= set(lines)
+
+
+def check_proto_out(out: Path) -> None:
+    assert list(out.rglob("*.py"))
+    assert all(path.read_text() for path in out.rglob("*.py"))
