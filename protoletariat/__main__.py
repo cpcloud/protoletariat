@@ -163,7 +163,6 @@ def buf(ctx: click.Context, buf_path: str) -> None:
     type=click.File("rb"),
     default=sys.stdin,
     show_default=True,
-    show_envvar=True,
     help="Path to the `buf` executable",
 )
 @click.pass_context
