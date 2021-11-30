@@ -1,9 +1,199 @@
+from __future__ import annotations
+
+import abc
+import contextlib
 import json
+import os
+import shutil
+import subprocess
+from functools import partial
 from pathlib import Path
-from typing import Iterable
+from typing import Generator, Iterable, NamedTuple, Sequence
 
 import pytest
+from _pytest.fixtures import SubRequest
 from click.testing import CliRunner, Result
+
+from protoletariat.__main__ import main
+
+
+class Plugin(NamedTuple):
+    name: str
+    path: str | None = None
+
+
+class ProtoFile(NamedTuple):
+    basename: str
+    code: str
+
+
+class ProtoletariatFixture(abc.ABC):
+    def __init__(
+        self,
+        *,
+        base_dir: Path,
+        package: str,
+        proto_texts: Iterable[ProtoFile],
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        assert base_dir.is_dir(), f"`{base_dir}` is not a directory"
+        self.base_dir = base_dir
+        self.package_dir = base_dir / package
+        self.package_dir.mkdir(exist_ok=True, parents=True)
+        self.proto_texts = [
+            (base_dir / basename, code) for basename, code in proto_texts
+        ]
+        self.monkeypatch = monkeypatch
+
+    @property
+    def package_name(self) -> str:
+        return self.package_dir.name
+
+    def write_protos(self) -> None:
+        for filename, code in self.proto_texts:
+            filename.parent.mkdir(exist_ok=True, parents=True)
+            filename.write_text(code)
+
+    def generate(
+        self,
+        cli: CliRunner,
+        *,
+        args: Iterable[str] = (),
+    ) -> Result:
+        self.write_protos()
+        cwd = os.getcwd()
+        self.monkeypatch.chdir(self.base_dir)
+        result = self.do_generate(cli, args=args)
+        self.monkeypatch.chdir(cwd)
+        return result
+
+    @abc.abstractmethod
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str]) -> Result:
+        ...
+
+    @property  # type: ignore[misc]
+    @contextlib.contextmanager
+    def patched_syspath(self) -> Generator[None, None, None]:
+        with self.monkeypatch.context() as m:
+            m.syspath_prepend(str(self.base_dir))
+            yield
+
+    def check_proto_out(self) -> None:
+        py_files = list(self.package_dir.rglob("*.py"))
+        assert py_files
+        assert all(path.read_text() for path in py_files)
+
+
+class BufFixture(ProtoletariatFixture):
+    def __init__(
+        self,
+        *,
+        base_dir: Path,
+        package: str,
+        proto_texts: Iterable[ProtoFile],
+        plugins: Sequence[Plugin] = (Plugin(name="python"),),
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        super().__init__(
+            base_dir=base_dir,
+            package=package,
+            proto_texts=proto_texts,
+            monkeypatch=monkeypatch,
+        )
+
+        self.base_dir.joinpath("buf.yaml").write_text(
+            json.dumps(
+                {
+                    "version": "v1",
+                    "lint": {"use": ["DEFAULT"]},
+                    "breaking": {"use": ["FILE"]},
+                },
+            )
+        )
+
+        plugin_specs = []
+        for plugin in plugins:
+            plugin_spec = {"name": plugin.name, "out": str(self.package_dir)}
+            if plugin.path is not None:
+                plugin_spec["path"] = str(plugin.path)
+            plugin_specs.append(plugin_spec)
+
+        self.base_dir.joinpath("buf.gen.yaml").write_text(
+            json.dumps({"version": "v1", "plugins": plugin_specs})
+        )
+
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
+        try:
+            subprocess.check_call(["buf", "generate"], cwd=str(self.base_dir))
+        except FileNotFoundError:
+            pytest.skip("buf executable not found")
+        else:
+            return cli.invoke(
+                main,
+                ["--python-out", str(self.package_dir), *args, "buf"],
+                catch_exceptions=False,
+            )
+
+
+class ProtocFixture(ProtoletariatFixture):
+    def __init__(
+        self,
+        *,
+        base_dir: Path,
+        package: str,
+        proto_texts: Iterable[ProtoFile],
+        monkeypatch: pytest.MonkeyPatch,
+        grpc: bool = False,
+        mypy: bool = False,
+        mypy_grpc: bool = False,
+    ) -> None:
+        super().__init__(
+            base_dir=base_dir,
+            package=package,
+            proto_texts=proto_texts,
+            monkeypatch=monkeypatch,
+        )
+        self.grpc = grpc
+        self.mypy = mypy
+        self.mypy_grpc = mypy_grpc
+
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
+        protoc_args = [
+            "protoc",
+            "--proto_path",
+            str(self.base_dir),
+            "--python_out",
+            str(self.package_dir),
+            *(str(filename) for filename, _ in self.proto_texts),
+        ]
+        if self.grpc:
+            # XXX: why isn't this found? PATH is set properly
+            grpc_python_plugin = shutil.which("grpc_python_plugin")
+            protoc_args.extend(
+                (
+                    f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
+                    "--grpc_python_out",
+                    str(self.package_dir),
+                )
+            )
+        if self.mypy:
+            protoc_args.extend(("--mypy_out", str(self.package_dir)))
+        if self.mypy_grpc:
+            protoc_args.extend(("--mypy_grpc_out", str(self.package_dir)))
+        subprocess.check_call(protoc_args)
+        return cli.invoke(
+            main,
+            [
+                "--python-out",
+                str(self.package_dir),
+                *args,
+                "protoc",
+                "--proto-path",
+                str(self.base_dir),
+                *(str(filename) for filename, _ in self.proto_texts),
+            ],
+            catch_exceptions=False,
+        )
 
 
 @pytest.fixture
@@ -12,8 +202,8 @@ def cli() -> CliRunner:
 
 
 @pytest.fixture
-def this_proto(tmp_path: Path) -> Path:
-    code = """
+def basic_cli_texts() -> list[ProtoFile]:
+    this_code = """
 syntax = "proto3";
 
 import "other.proto";
@@ -24,131 +214,60 @@ package protoletariat.test;
 message Test {
     Other test = 1;
     protoletariat.test.baz.BuzzBuzz baz = 2;
-}
-"""
-    p = tmp_path.joinpath("this.proto")
-    p.write_text(code)
-    return p
-
-
-@pytest.fixture
-def other_proto(tmp_path: Path) -> Path:
-    code = """
+}"""
+    other_code = """
 syntax = "proto3";
 
 package protoletariat.test;
 
 message Other {}
 """
-    p = tmp_path.joinpath("other.proto")
-    p.write_text(code)
-    return p
-
-
-@pytest.fixture
-def baz_bizz_buzz_other_proto(tmp_path: Path) -> Path:
-    code = """
+    baz_bizz_buzz_code = """
 syntax = "proto3";
 
 package protoletariat.test.baz;
 
 message BuzzBuzz {}
 """
-    baz = tmp_path.joinpath("baz")
-    baz.mkdir()
-    p = baz.joinpath("bizz_buzz.proto")
-    p.write_text(code)
-    return p
+    return [
+        ProtoFile(basename="this.proto", code=this_code),
+        ProtoFile(basename="other.proto", code=other_code),
+        ProtoFile(basename="baz/bizz_buzz.proto", code=baz_bizz_buzz_code),
+    ]
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(
+                BufFixture,
+                plugins=[Plugin(name="python")],
+                package="basic_cli",
+            ),
+            id="basic_cli_buf",
+        ),
+        pytest.param(
+            partial(ProtocFixture, package="basic_cli"),
+            id="basic_cli_protoc",
+        ),
+    ]
+)
+def basic_cli(
+    request: SubRequest,
+    tmp_path: Path,
+    basic_cli_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=basic_cli_texts,
+        monkeypatch=monkeypatch,
+    )
 
 
 @pytest.fixture
-def thing1_text() -> str:
-    return """
-// thing1.proto
-syntax = "proto3";
-
-import "thing2.proto";
-
-package things;
-
-message Thing1 {
-  Thing2 thing2 = 1;
-}
-"""
-
-
-@pytest.fixture
-def thing1(thing1_text: str, tmp_path: Path) -> Path:
-    p = tmp_path.joinpath("thing1.proto")
-    p.write_text(thing1_text)
-    return p
-
-
-@pytest.fixture
-def thing2_text() -> str:
-    return """
-// thing2.proto
-syntax = "proto3";
-
-package things;
-
-message Thing2 {
-  string data = 1;
-}
-"""
-
-
-@pytest.fixture
-def thing2(thing2_text: str, tmp_path: Path) -> Path:
-    code = """
-// thing2.proto
-syntax = "proto3";
-
-package things;
-
-message Thing2 {
-  string data = 1;
-}
-"""
-    p = tmp_path.joinpath("thing2.proto")
-    p.write_text(code)
-    return p
-
-
-@pytest.fixture
-def thing1_nested_text() -> str:
-    return """
-// thing1.proto
-syntax = "proto3";
-
-import "a/b/c/thing2.proto";
-
-package thing1.a;
-
-message Thing1 {
-  thing2.a.b.c.Thing2 thing2 = 1;
-}
-"""
-
-
-@pytest.fixture
-def thing2_nested_text() -> str:
-    return """
-// thing2.proto
-syntax = "proto3";
-
-package thing2.a.b.c;
-
-message Thing2 {
-  string data = 1;
-}
-"""
-
-
-@pytest.fixture
-def thing_service_text() -> str:
-    return """
-// thing_service.proto
+def thing_service_texts() -> list[ProtoFile]:
+    thing_service_code = """
 syntax = "proto3";
 
 import "thing1.proto";
@@ -161,124 +280,119 @@ service ThingService {
     rpc GetThing2(Thing2) returns (Thing2) {}
 }
 """
+    thing1_code = """
+syntax = "proto3";
+
+import "thing2.proto";
+
+package things;
+
+message Thing1 {
+  Thing2 thing2 = 1;
+}
+"""
+    thing2_code = """
+syntax = "proto3";
+
+package things;
+
+message Thing2 {
+  string data = 1;
+}
+"""
+    return [
+        ProtoFile(basename="thing_service.proto", code=thing_service_code),
+        ProtoFile(basename="thing1.proto", code=thing1_code),
+        ProtoFile(basename="thing2.proto", code=thing2_code),
+    ]
 
 
-@pytest.fixture
-def thing_service(thing_service_text: str, tmp_path: Path) -> Path:
-    p = tmp_path.joinpath("thing_service.proto")
-    p.write_text(thing_service_text)
-    return p
-
-
-@pytest.fixture
-def buf_yaml(tmp_path: Path) -> Path:
-    p = tmp_path.joinpath("buf.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "lint": {"use": ["DEFAULT"]},
-                "breaking": {"use": ["FILE"]},
-            },
-        )
-    )
-    return p
-
-
-@pytest.fixture
-def out_grpc(tmp_path: Path) -> Path:
-    out = tmp_path / "out_grpc"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def out(tmp_path: Path) -> Path:
-    out = tmp_path / "out"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def out_nested(tmp_path: Path) -> Path:
-    out = tmp_path / "out_nested"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def buf_gen_yaml_grpc(tmp_path: Path, out_grpc: Path) -> Path:
-    p = tmp_path.joinpath("buf.gen.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out_grpc),
-                    },
-                    {
-                        "name": "grpc_python",
-                        "out": str(out_grpc),
-                        "path": "grpc_python_plugin",
-                    },
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(
+                BufFixture,
+                plugins=[
+                    Plugin(name="python"),
+                    Plugin(name="grpc_python", path="grpc_python_plugin"),
                 ],
-            },
-        )
+                package="thing_service",
+            ),
+            id="thing_service_buf",
+        ),
+        pytest.param(
+            partial(ProtocFixture, package="thing_service", grpc=True),
+            id="thing_service_protoc",
+        ),
+    ]
+)
+def thing_service(
+    request: SubRequest,
+    tmp_path: Path,
+    thing_service_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=thing_service_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
 @pytest.fixture
-def buf_gen_yaml(tmp_path: Path, out: Path) -> Path:
-    p = tmp_path.joinpath("buf.gen.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out),
-                    }
-                ],
-            },
-        )
+def nested_texts() -> list[ProtoFile]:
+    thing1_code = """
+syntax = "proto3";
+
+import "a/b/c/thing2.proto";
+
+package thing1.a;
+
+message Thing1 {
+  thing2.a.b.c.Thing2 thing2 = 1;
+}
+"""
+
+    thing2_code = """
+syntax = "proto3";
+
+package thing2.a.b.c;
+
+message Thing2 {
+  string data = 1;
+}
+"""
+    return [
+        ProtoFile(basename="d/thing1.proto", code=thing1_code),
+        ProtoFile(basename="a/b/c/thing2.proto", code=thing2_code),
+    ]
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(BufFixture, plugins=[Plugin(name="python")], package="nested"),
+            id="nested_buf",
+        ),
+        pytest.param(partial(ProtocFixture, package="nested"), id="nested_protoc"),
+    ]
+)
+def nested(
+    request: SubRequest,
+    tmp_path: Path,
+    nested_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=nested_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
 @pytest.fixture
-def buf_gen_yaml_nested(tmp_path: Path, out_nested: Path) -> Path:
-    p = tmp_path.joinpath("buf.gen.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out_nested),
-                    }
-                ],
-            },
-        )
-    )
-    return p
-
-
-@pytest.fixture
-def out_grpc_no_imports(tmp_path: Path) -> Path:
-    out = tmp_path / "out_grpc_no_imports"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def no_imports_service_text() -> str:
-    return """
-// no_imports_service.proto
+def no_imports_service_texts() -> list[ProtoFile]:
+    code = """
 syntax = "proto3";
 
 package no_imports.a.b;
@@ -290,58 +404,52 @@ service NoImportsService {
     rpc Get(Request) returns (Response) {}
 }
 """
+    return [ProtoFile(basename="no_imports_service.proto", code=code)]
 
 
-@pytest.fixture
-def no_imports_service(no_imports_service_text: str, tmp_path: Path) -> Path:
-    p = tmp_path.joinpath("no_imports_service.proto")
-    p.write_text(no_imports_service_text)
-    return p
-
-
-@pytest.fixture
-def buf_gen_yaml_grpc_no_imports(tmp_path: Path, out_grpc_no_imports: Path) -> Path:
-    p = tmp_path.joinpath("buf.gen.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out_grpc_no_imports),
-                    },
-                    {
-                        "name": "grpc_python",
-                        "out": str(out_grpc_no_imports),
-                        "path": "grpc_python_plugin",
-                    },
-                    {
-                        "name": "mypy",
-                        "out": str(out_grpc_no_imports),
-                    },
-                    {
-                        "name": "mypy_grpc",
-                        "out": str(out_grpc_no_imports),
-                    },
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(
+                BufFixture,
+                plugins=[
+                    Plugin(name="python"),
+                    Plugin(name="grpc_python", path="grpc_python_plugin"),
+                    Plugin(name="mypy"),
+                    Plugin(name="mypy_grpc"),
                 ],
-            },
-        )
+                package="no_imports_service",
+            ),
+            id="no_imports_service_buf",
+        ),
+        pytest.param(
+            partial(
+                ProtocFixture,
+                package="no_imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="no_imports_service_protoc",
+        ),
+    ]
+)
+def no_imports_service(
+    request: SubRequest,
+    tmp_path: Path,
+    no_imports_service_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=no_imports_service_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
 @pytest.fixture
-def out_grpc_imports(tmp_path: Path) -> Path:
-    out = tmp_path / "out_grpc_imports"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture(scope="session")
-def imports_service_text() -> str:
-    return """
-// no_imports_service.proto
+def imports_service_texts() -> list[ProtoFile]:
+    imports_code = """
 syntax = "proto3";
 
 import "requests/get.proto";
@@ -354,11 +462,7 @@ service ImportsService {
     rpc Post(msg.PostRequest) returns (msg.PostResponse) {}
 }
 """
-
-
-@pytest.fixture(scope="session")
-def requests_get_proto_text() -> str:
-    return """
+    requests_get_code = """
 syntax = "proto3";
 
 package imports_service.msg;
@@ -366,20 +470,7 @@ package imports_service.msg;
 message GetRequest {}
 message GetResponse {}
 """
-
-
-@pytest.fixture()
-def requests_get_proto(tmp_path: Path, requests_get_proto_text: str) -> Path:
-    requests_dir = tmp_path.joinpath("requests")
-    requests_dir.mkdir(exist_ok=True)
-    p = requests_dir.joinpath("get.proto")
-    p.write_text(requests_get_proto_text)
-    return p
-
-
-@pytest.fixture(scope="session")
-def requests_post_proto_text() -> str:
-    return """
+    requests_post_code = """
 syntax = "proto3";
 
 package imports_service.msg;
@@ -387,65 +478,57 @@ package imports_service.msg;
 message PostRequest {}
 message PostResponse {}
 """
+    return [
+        ProtoFile(basename="imports_service.proto", code=imports_code),
+        ProtoFile(basename="requests/get.proto", code=requests_get_code),
+        ProtoFile(basename="requests/post.proto", code=requests_post_code),
+    ]
 
 
-@pytest.fixture()
-def requests_post_proto(tmp_path: Path, requests_post_proto_text: str) -> Path:
-    requests_dir = tmp_path.joinpath("requests")
-    requests_dir.mkdir(exist_ok=True)
-    p = requests_dir.joinpath("post.proto")
-    p.write_text(requests_post_proto_text)
-    return p
-
-
-@pytest.fixture
-def imports_service(
-    imports_service_text: str,
-    tmp_path: Path,
-    requests_get_proto: Path,
-    requests_post_proto: Path,
-) -> Path:
-    p = tmp_path.joinpath("imports_service.proto")
-    p.write_text(imports_service_text)
-    return p
-
-
-@pytest.fixture
-def buf_gen_yaml_grpc_imports(tmp_path: Path, out_grpc_imports: Path) -> Path:
-    p = tmp_path.joinpath("buf.gen.yaml")
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out_grpc_imports),
-                    },
-                    {
-                        "name": "grpc_python",
-                        "out": str(out_grpc_imports),
-                        "path": "grpc_python_plugin",
-                    },
-                    {
-                        "name": "mypy",
-                        "out": str(out_grpc_imports),
-                    },
-                    {
-                        "name": "mypy_grpc",
-                        "out": str(out_grpc_imports),
-                    },
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(
+                BufFixture,
+                plugins=[
+                    Plugin(name="python"),
+                    Plugin(name="grpc_python", path="grpc_python_plugin"),
+                    Plugin(name="mypy"),
+                    Plugin(name="mypy_grpc"),
                 ],
-            },
-        )
+                package="imports_service",
+            ),
+            id="imports_service_buf",
+        ),
+        pytest.param(
+            partial(
+                ProtocFixture,
+                package="imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="imports_service_protoc",
+        ),
+    ]
+)
+def grpc_imports(
+    request: SubRequest,
+    tmp_path: Path,
+    imports_service_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=imports_service_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
-@pytest.fixture(scope="session")
-def long_names_text() -> str:
+@pytest.fixture
+def long_names_texts() -> list[ProtoFile]:
     # taken from https://github.com/substrait-io/substrait
-    return """
+    code = """
 syntax = "proto3";
 
 package io.substrait;
@@ -462,44 +545,37 @@ message FunctionSignature {
         }
     }
 }"""
+    return [ProtoFile(basename="function.proto", code=code)]
 
 
-@pytest.fixture
-def out_long_names(tmp_path: Path) -> Path:
-    out = tmp_path / "out_long_names"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def long_names_proto(tmp_path: Path, long_names_text: str) -> Path:
-    p = tmp_path / "function.proto"
-    p.write_text(long_names_text)
-    return p
-
-
-@pytest.fixture
-def buf_gen_yaml_long_names(tmp_path: Path, out_long_names: Path) -> Path:
-    p = tmp_path / "buf.gen.yaml"
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "mypy",
-                        "out": str(out_long_names),
-                    },
-                ],
-            },
-        )
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(BufFixture, plugins=[Plugin(name="mypy")], package="long_names"),
+            id="long_names_buf",
+        ),
+        pytest.param(
+            partial(ProtocFixture, package="long_names", mypy=True),
+            id="long_names_protoc",
+        ),
+    ]
+)
+def long_names(
+    request: SubRequest,
+    tmp_path: Path,
+    long_names_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=long_names_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
-@pytest.fixture(scope="session")
-def ignored_import_text() -> str:
-    return """
+@pytest.fixture
+def ignored_import_texts() -> list[ProtoFile]:
+    ignored_import_code = """
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
@@ -507,47 +583,42 @@ import "ignored.proto";
 
 message Foo {}
 """
+    ignored_code = ""
+    return [
+        ProtoFile(basename="ignored_import.proto", code=ignored_import_code),
+        ProtoFile(basename="ignored.proto", code=ignored_code),
+    ]
 
 
-@pytest.fixture
-def out_ignored_import(tmp_path: Path) -> Path:
-    out = tmp_path / "out_ignored_import"
-    out.mkdir()
-    return out
-
-
-@pytest.fixture
-def ignored_import_proto(tmp_path: Path, ignored_import_text: str) -> Path:
-    p = tmp_path / "ignored_import.proto"
-    p.write_text(ignored_import_text)
-    tmp_path.joinpath("ignored.proto").touch()
-    return p
-
-
-@pytest.fixture
-def buf_gen_yaml_ignored_import(tmp_path: Path, out_ignored_import: Path) -> Path:
-    p = tmp_path / "buf.gen.yaml"
-    p.write_text(
-        json.dumps(
-            {
-                "version": "v1",
-                "plugins": [
-                    {
-                        "name": "python",
-                        "out": str(out_ignored_import),
-                    },
-                ],
-            },
-        )
+@pytest.fixture(
+    params=[
+        pytest.param(
+            partial(
+                BufFixture,
+                plugins=[Plugin(name="python")],
+                package="ignored_imports",
+            ),
+            id="ignored_imports_buf",
+        ),
+        pytest.param(
+            partial(ProtocFixture, package="ignored_imports"),
+            id="ignored_imports_protoc",
+        ),
+    ]
+)
+def ignored_imports(
+    request: SubRequest,
+    tmp_path: Path,
+    ignored_import_texts: list[ProtoFile],
+    monkeypatch: pytest.MonkeyPatch,
+) -> ProtoletariatFixture:
+    return request.param(
+        base_dir=tmp_path,
+        proto_texts=ignored_import_texts,
+        monkeypatch=monkeypatch,
     )
-    return p
 
 
 def check_import_lines(result: Result, expected_lines: Iterable[str]) -> None:
     lines = result.stdout.splitlines()
     assert set(expected_lines) <= set(lines)
-
-
-def check_proto_out(out: Path) -> None:
-    assert list(out.rglob("*.py"))
-    assert all(path.read_text() for path in out.rglob("*.py"))
