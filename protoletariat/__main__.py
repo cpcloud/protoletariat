@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+from typing import IO
 
 import click
 
-from .fdsetgen import Buf, Protoc
+from .fdsetgen import Buf, Protoc, Raw
 
 
 def _overwrite(python_file: Path, code: str) -> None:
@@ -153,6 +155,20 @@ def protoc(
 @click.pass_context
 def buf(ctx: click.Context, buf_path: str) -> None:
     Buf(buf_path).fix_imports(**ctx.obj)
+
+
+@main.command(help="Rewrite imports using FileDescriptorSet bytes from a file or stdin")
+@click.option(
+    "--descriptor-set",
+    type=click.File("rb"),
+    default=sys.stdin,
+    show_default=True,
+    show_envvar=True,
+    help="Path to the `buf` executable",
+)
+@click.pass_context
+def raw(ctx: click.Context, descriptor_set: IO[bytes]) -> None:
+    Raw(descriptor_set.read()).fix_imports(**ctx.obj)
 
 
 if __name__ == "__main__":

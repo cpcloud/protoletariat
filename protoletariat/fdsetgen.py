@@ -28,9 +28,6 @@ def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
 class FileDescriptorSetGenerator(abc.ABC):
     """Base class that implements fixing imports."""
 
-    def __init__(self, fdset_generator_binary: str) -> None:
-        self.fdset_generator_binary = fdset_generator_binary
-
     @abc.abstractmethod
     def generate_file_descriptor_set_bytes(self) -> bytes:
         """Generate the bytes of a `FileDescriptorSet`"""
@@ -90,13 +87,15 @@ class FileDescriptorSetGenerator(abc.ABC):
 
 
 class Protoc(FileDescriptorSetGenerator):
+    """Generate the FileDescriptorSet using `protoc`."""
+
     def __init__(
         self,
         protoc_path: str,
         proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
     ) -> None:
-        super().__init__(protoc_path)
+        self.fdset_generator_binary = protoc_path
         self.proto_files = list(proto_files)
         self.proto_paths = list(proto_paths)
 
@@ -120,6 +119,11 @@ class Protoc(FileDescriptorSetGenerator):
 
 
 class Buf(FileDescriptorSetGenerator):
+    """Generate the FileDescriptorSet using `buf`."""
+
+    def __init__(self, fdset_generator_binary: str) -> None:
+        self.fdset_generator_binary = fdset_generator_binary
+
     def generate_file_descriptor_set_bytes(self) -> bytes:
         return subprocess.check_output(
             [
@@ -131,3 +135,13 @@ class Buf(FileDescriptorSetGenerator):
                 "-",
             ]
         )
+
+
+class Raw(FileDescriptorSetGenerator):
+    """Generate the FileDescriptorSet using user-provided bytes."""
+
+    def __init__(self, fdset_bytes: bytes) -> None:
+        self.fdset_bytes = fdset_bytes
+
+    def generate_file_descriptor_set_bytes(self) -> bytes:
+        return self.fdset_bytes
