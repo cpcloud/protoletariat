@@ -163,7 +163,10 @@ def buf(ctx: click.Context, buf_path: str) -> None:
     type=click.File("rb"),
     default=sys.stdin,
     show_default=True,
-    help="Path to the `buf` executable",
+    help=(
+        "Path to a binary Protobuf message of type google.protobuf.FileDescriptorSet. "
+        "Can also be read from stdin"
+    ),
 )
 @click.pass_context
 def raw(ctx: click.Context, descriptor_set: IO[bytes]) -> None:
