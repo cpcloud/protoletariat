@@ -110,4 +110,5 @@ Options:
 Commands:
   buf     Use buf to generate the FileDescriptorSet blob
   protoc  Use protoc to generate the FileDescriptorSet blob
+  raw     Rewrite imports using FileDescriptorSet bytes from a file or stdin
 ```
