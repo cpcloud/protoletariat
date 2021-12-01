@@ -139,17 +139,17 @@ jobs:
           - "3.9"
           - "3.10"
         buf:
-          - true
+          - buf
         include:
           - os: ubuntu-latest
             python-version: "3.9"
-            buf: false
+            buf: no-buf
           - os: macos-11
             python-version: "3.9"
-            buf: false
+            buf: no-buf
           - os: windows-latest
             python-version: "3.9"
-            buf: false
+            buf: no-buf
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -160,7 +160,7 @@ jobs:
 
       - name: Setup buf
         uses: bufbuild/buf-setup-action@v0.7.0
-        if: ${{ matrix.buf }}
+        if: ${{ matrix.buf == 'buf' }}
         with:
           github_token: ${{ github.token }}
 
