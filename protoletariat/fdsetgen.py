@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import fnmatch
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -11,10 +12,12 @@ from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
 from .rewrite import ASTImportRewriter, build_rewrites
 
+_PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
+
 
 def _remove_proto_suffix(name: str) -> str:
     """Remove the `.proto` suffix from `name`."""
-    return str(Path(name).with_suffix("")) if name.endswith(".proto") else name
+    return _PROTO_SUFFIX_PATTERN.sub(r"\1", name)
 
 
 def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
