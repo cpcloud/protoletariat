@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.0 (2021-12-01)
+### Feature
+* Add the ability to bring your own (FileDescriptorSet) bytes ([`36589a6`](https://github.com/cpcloud/protoletariat/commit/36589a605585afde46ceec89bea790bff13c02fb))
+
+### Documentation
+* Update documentation ([`3a670a0`](https://github.com/cpcloud/protoletariat/commit/3a670a0624a92d41ec9a5c8039cba10c6eb10d09))
+
 ## v0.5.5 (2021-12-01)
 ### Documentation
 * **README.md:** Remove redundant pypi badge ([`eca23d3`](https://github.com/cpcloud/protoletariat/commit/eca23d3b3ff8400cd73ed7951b88974c11a4e75a))
