@@ -1,18 +1,20 @@
 from __future__ import annotations
 
+import ast
 import collections
 import collections.abc
 import typing
+from ast import AST
 from typing import Any, Callable, NamedTuple, Sequence, Union
 
 import astunparse
-from typed_ast import ast3 as ast
-from typed_ast.ast3 import AST
 
 Node = Union[AST, Sequence[AST]]
 
 
 class Replacement(NamedTuple):
+    """A mapping from an old import to a new import."""
+
     old: str
     new: str
 
