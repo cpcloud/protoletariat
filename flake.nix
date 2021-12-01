@@ -130,7 +130,7 @@
             prettier = {
               enable = true;
               entry = lib.mkForce "${prettierTOML}/bin/prettier --check";
-              types_or = [ "json" "toml" "yaml" ];
+              types_or = [ "json" "toml" "yaml" "markdown" ];
             };
 
             black = {
