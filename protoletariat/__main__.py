@@ -158,10 +158,10 @@ def buf(ctx: click.Context, buf_path: str) -> None:
 
 
 @main.command(help="Rewrite imports using FileDescriptorSet bytes from a file or stdin")
-@click.argument("descriptor_set", type=click.File("rb"), default=sys.stdin.buffer)
+@click.argument("descriptor_set_bytes", type=click.File("rb"), default=sys.stdin.buffer)
 @click.pass_context
-def raw(ctx: click.Context, descriptor_set: IO[bytes]) -> None:
-    Raw(descriptor_set.read()).fix_imports(**ctx.obj)
+def raw(ctx: click.Context, descriptor_set_bytes: IO[bytes]) -> None:
+    Raw(descriptor_set_bytes.read()).fix_imports(**ctx.obj)
 
 
 if __name__ == "__main__":
