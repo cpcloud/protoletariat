@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.5 (2021-12-01)
+### Documentation
+* **README.md:** Remove redundant pypi badge ([`eca23d3`](https://github.com/cpcloud/protoletariat/commit/eca23d3b3ff8400cd73ed7951b88974c11a4e75a))
+* Fix message about conda-forge artifacts ([`6b77fb2`](https://github.com/cpcloud/protoletariat/commit/6b77fb2676fded336a008314f7a3daea6713a155))
+* Replace installation lines with table ([`8a1a702`](https://github.com/cpcloud/protoletariat/commit/8a1a7021fb2c5ab246319dad2a79451b06ba3426))
+* Update README.md to include new options ([`ae2e8ea`](https://github.com/cpcloud/protoletariat/commit/ae2e8ea917475446f4f1ae6e52371b87ab387263))
+
+### Performance
+* Only iterate through files and dependencies once ([`561a616`](https://github.com/cpcloud/protoletariat/commit/561a616524cd9cd1f0107646635be60ef059b507))
+
 ## v0.5.4 (2021-11-29)
 ### Fix
 * Add the ability to exclude google and optionally additional glob patterns from import rewrites ([`beadb73`](https://github.com/cpcloud/protoletariat/commit/beadb73227c03fc592f37f4bb7bd30b63188397c))
