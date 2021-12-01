@@ -93,11 +93,11 @@ class Protoc(FileDescriptorSetGenerator):
     def __init__(
         self,
         protoc_path: str,
-        paths: Iterable[Path],
+        proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
     ) -> None:
         super().__init__(protoc_path)
-        self.paths = list(paths)
+        self.proto_files = list(proto_files)
         self.proto_paths = list(proto_paths)
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
@@ -109,7 +109,7 @@ class Protoc(FileDescriptorSetGenerator):
                     "--include_imports",
                     f"--descriptor_set_out={filename}",
                     *map("--proto_path={}".format, self.proto_paths),
-                    *map(str, self.paths),
+                    *map(str, self.proto_files),
                 ]
             )
 
