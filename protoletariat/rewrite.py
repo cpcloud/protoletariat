@@ -33,12 +33,17 @@ def matches(value: Node, pattern: Node) -> bool:
         Instance to match
     pattern
         Pattern to match against
+
+    Returns
+    -------
+    bool
+        Whether `value` matches `pattern`
     """
     # types must match exactly
     if type(value) != type(pattern):
         return False
 
-    # recur into lists
+    # recur into non-str sequences
     if _is_iterable(value) and _is_iterable(pattern):
         assert isinstance(
             value, collections.abc.Iterable
@@ -64,53 +69,62 @@ def matches(value: Node, pattern: Node) -> bool:
     )
 
 
+ASTTransform = Callable[[AST], AST]
+
+
 class ASTRewriter:
     """AST pattern matching to enable rewrite rules."""
 
     def __init__(self) -> None:
-        self.funcs: list[tuple[AST, Callable[[AST], AST]]] = []
+        self.funcs: list[tuple[AST, ASTTransform]] = []
 
-    def register(
-        self, pattern: AST
-    ) -> Callable[[Callable[[AST], AST]], Callable[[AST], AST]]:
-        def wrapper(f: Callable[[AST], AST]) -> Callable[[AST], AST]:
+    def register(self, pattern: AST) -> Callable[[ASTTransform], ASTTransform]:
+        """Register a callable to rewrite `pattern`."""
+
+        def wrapper(f: ASTTransform) -> ASTTransform:
             self.funcs.append((pattern, f))
             return f
 
         return wrapper
 
-    def __call__(self, node: AST) -> AST:
-        for pattern, func in self.funcs:
-            if matches(node, pattern):
-                return func(node)
-        return node
+    def rewrite(self, node: AST) -> AST:
+        """Rewrite `node` if it matches a registered pattern."""
+        try:
+            return next(
+                func(node) for pattern, func in self.funcs if matches(node, pattern)
+            )
+        except StopIteration:
+            return node
 
 
-def build_rewrites(proto: str, dep: str) -> Sequence[Replacement]:
+def build_rewrites(proto: str, dep: str) -> list[Replacement]:
     """Construct a replacement import for `dep`.
 
     Parameters
     ----------
+    proto
+        The dependent protobuf path.
     dep
         The `name` field of a `FileDescriptorProto` message, stripped
         of its ``.proto`` suffix.
 
     Returns
     -------
-    Replacement
-        A named tuple of the old import and its replacement
+    list[Replacement]
+        A list of mapping from old code to new code
     """
     parts = dep.split("/")
 
     *import_parts, part = parts
 
-    # compute the number of dots needed to get to the package root
+    # compute the number of dots needed to get to the package root relative to
+    # the dependent proto file
     num_leading_dots = proto.count("/") + 1
     leading_dots = "." * num_leading_dots
     last_part = "__".join(f"{part}_pb2".split("_"))
 
     if not import_parts:
-        # underscores are doubled by protoc/buf
+        # underscores are doubled by codegen
         old = f"import {part}_pb2 as {last_part}"
         new = f"from {leading_dots} import {part}_pb2 as {last_part}"
     else:
@@ -139,10 +153,10 @@ class ImportNodeTransformer(ast.NodeTransformer):
         self.ast_rewriter = ast_rewriter
 
     def visit_Import(self, node: ast.Import) -> AST:
-        return self.ast_rewriter(node)
+        return self.ast_rewriter.rewrite(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> AST:
-        return self.ast_rewriter(node)
+        return self.ast_rewriter.rewrite(node)
 
 
 class ASTImportRewriter:

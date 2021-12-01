@@ -23,6 +23,8 @@ def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
 
 
 class FileDescriptorSetGenerator(abc.ABC):
+    """Base class that implements fixing imports."""
+
     def __init__(self, fdset_generator_binary: str) -> None:
         self.fdset_generator_binary = fdset_generator_binary
 
@@ -38,6 +40,7 @@ class FileDescriptorSetGenerator(abc.ABC):
         module_suffixes: Sequence[str],
         exclude_imports_glob: Sequence[str],
     ) -> None:
+        """Fix imports from protoc/buf generated code."""
         rewriters = {}
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
