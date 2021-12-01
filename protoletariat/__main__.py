@@ -158,16 +158,7 @@ def buf(ctx: click.Context, buf_path: str) -> None:
 
 
 @main.command(help="Rewrite imports using FileDescriptorSet bytes from a file or stdin")
-@click.option(
-    "--descriptor-set",
-    type=click.File("rb"),
-    default=sys.stdin,
-    show_default=True,
-    help=(
-        "Path to a binary Protobuf message of type google.protobuf.FileDescriptorSet. "
-        "Can also be read from stdin"
-    ),
-)
+@click.argument("descriptor_set", type=click.File("rb"), default=sys.stdin.buffer)
 @click.pass_context
 def raw(ctx: click.Context, descriptor_set: IO[bytes]) -> None:
     Raw(descriptor_set.read()).fix_imports(**ctx.obj)

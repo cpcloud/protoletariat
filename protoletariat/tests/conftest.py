@@ -252,13 +252,8 @@ class RawFixture(ProtoletariatFixture):
 
             subprocess.check_call(protoc_args)
 
-        protol_args = [
-            "--python-out",
-            str(self.package_dir),
-            *args,
-            "raw",
-            f"--descriptor-set={filename}",
-        ]
+        protol_args = ["--python-out", str(self.package_dir), *args, "raw", filename]
+
         try:
             return cli.invoke(main, protol_args, catch_exceptions=False)
         finally:
