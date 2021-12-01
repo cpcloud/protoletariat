@@ -48,9 +48,11 @@ class FileDescriptorSetGenerator(abc.ABC):
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
-            fd_name = _remove_proto_suffix(fd.name)
-            if _should_ignore(fd_name, exclude_imports_glob):
+            name = fd.name
+            if _should_ignore(name, exclude_imports_glob):
                 continue
+
+            fd_name = _remove_proto_suffix(name)
             rewriters[fd_name] = rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
@@ -59,29 +61,24 @@ class FileDescriptorSetGenerator(abc.ABC):
             for repl in build_rewrites(fd_name, fd_name):
                 rewriter.register_rewrite(repl)
 
-            # register _proto_ import rewrites
-            for dep in fd.dependency:
-                dep_name = _remove_proto_suffix(dep)
-                if _should_ignore(dep_name, exclude_imports_glob):
+            # register proto import rewrites
+            for dep in map(_remove_proto_suffix, fd.dependency):
+                if _should_ignore(dep, exclude_imports_glob):
                     continue
+
+                dep_name = _remove_proto_suffix(dep)
                 for repl in build_rewrites(fd_name, dep_name):
                     rewriter.register_rewrite(repl)
 
-        for fd in fdset.file:
-            fd_name = _remove_proto_suffix(fd.name)
             for suffix in module_suffixes:
-                py_name = f"{fd_name}{suffix}"
-                python_file = python_out.joinpath(py_name)
-                if python_file.exists():
+                python_file = python_out.joinpath(f"{fd_name}{suffix}")
+                try:
                     raw_code = python_file.read_text()
-                    try:
-                        rewriter = rewriters[fd_name]
-                    except KeyError:
-                        # rewriters don't exist for glob-ignored names
-                        pass
-                    else:
-                        new_code = rewriter.rewrite(raw_code)
-                        overwrite_callback(python_file, new_code)
+                except FileNotFoundError:
+                    pass
+                else:
+                    new_code = rewriters[fd_name].rewrite(raw_code)
+                    overwrite_callback(python_file, new_code)
 
         if create_package:
             python_out.joinpath("__init__.py").touch(exist_ok=True)
