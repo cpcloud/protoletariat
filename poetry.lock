@@ -428,14 +428,6 @@ python-versions = "*"
 types-futures = "*"
 
 [[package]]
-name = "types-typed-ast"
-version = "1.5.0"
-description = "Typing stubs for typed-ast"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "typing-extensions"
 version = "4.0.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -458,7 +450,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7,<3.11"
-content-hash = "4c6303edb945edc82b8a79328e6b5e0410c13326765671eed2b0bd08c9f2c0d1"
+content-hash = "700eb4f96399592a7471888e3b86a17de8f9c238c9a9b9aa102791fcd51631db"
 
 [metadata.files]
 astunparse = [
@@ -797,10 +789,6 @@ types-futures = [
 types-protobuf = [
     {file = "types-protobuf-3.18.2.tar.gz", hash = "sha256:ca21dedfe7759acbeb0cd8f5c72a74ff3c409ae0c07bc1d94eff5123ac0fa23c"},
     {file = "types_protobuf-3.18.2-py3-none-any.whl", hash = "sha256:bcf3176ca59b42145fd60530f918b74fba01903a6cd96b94fa488791e3af0586"},
-]
-types-typed-ast = [
-    {file = "types-typed-ast-1.5.0.tar.gz", hash = "sha256:d8ea79cbfbc520be8d9bc8de4872f44b342dbdbc091667e2f21b03bbd7969150"},
-    {file = "types_typed_ast-1.5.0-py3-none-any.whl", hash = "sha256:4a261b6af545af41fd08957993292742959ca5c480ee8d49804dcc68d78773a3"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.1-py3-none-any.whl", hash = "sha256:7f001e5ac290a0c0401508864c7ec868be4e701886d5b573a9528ed3973d9d3b"},
