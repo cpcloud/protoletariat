@@ -94,7 +94,7 @@ class Protoc(FileDescriptorSetGenerator):
         proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
     ) -> None:
-        self.fdset_generator_binary = protoc_path
+        self.protoc_path = protoc_path
         self.proto_files = list(proto_files)
         self.proto_paths = list(proto_paths)
 
@@ -103,7 +103,7 @@ class Protoc(FileDescriptorSetGenerator):
             filename = Path(f.name)
             subprocess.check_output(
                 [
-                    self.fdset_generator_binary,
+                    self.protoc_path,
                     "--include_imports",
                     f"--descriptor_set_out={filename}",
                     *map("--proto_path={}".format, self.proto_paths),
@@ -120,13 +120,13 @@ class Protoc(FileDescriptorSetGenerator):
 class Buf(FileDescriptorSetGenerator):
     """Generate the FileDescriptorSet using `buf`."""
 
-    def __init__(self, fdset_generator_binary: str) -> None:
-        self.fdset_generator_binary = fdset_generator_binary
+    def __init__(self, buf_path: str) -> None:
+        self.buf_path = buf_path
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
         return subprocess.check_output(
             [
-                self.fdset_generator_binary,
+                self.buf_path,
                 "build",
                 "--as-file-descriptor-set",
                 "--exclude-source-info",
