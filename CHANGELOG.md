@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.1 (2021-12-02)
+### Documentation
+* Add some more information to the README.md ([`1d93380`](https://github.com/cpcloud/protoletariat/commit/1d93380ee9efc8159da96dd7600f95b5b6b83ec9))
+
+### Performance
+* Remove the use of a dict to store rewriters ([`72a8fd3`](https://github.com/cpcloud/protoletariat/commit/72a8fd367c11d951f1132f5b7e69ca4e7218807c))
+
 ## v0.6.0 (2021-12-01)
 ### Feature
 * Add the ability to bring your own (FileDescriptorSet) bytes ([`36589a6`](https://github.com/cpcloud/protoletariat/commit/36589a605585afde46ceec89bea790bff13c02fb))
