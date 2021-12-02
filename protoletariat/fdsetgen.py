@@ -41,7 +41,6 @@ class FileDescriptorSetGenerator(abc.ABC):
         exclude_imports_glob: Sequence[str],
     ) -> None:
         """Fix imports from protoc/buf generated code."""
-        rewriters = {}
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
@@ -50,7 +49,7 @@ class FileDescriptorSetGenerator(abc.ABC):
                 continue
 
             fd_name = _remove_proto_suffix(name)
-            rewriters[fd_name] = rewriter = ASTImportRewriter()
+            rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
             # current proto as a dependency of itself to handle the case
@@ -74,7 +73,7 @@ class FileDescriptorSetGenerator(abc.ABC):
                 except FileNotFoundError:
                     pass
                 else:
-                    new_code = rewriters[fd_name].rewrite(raw_code)
+                    new_code = rewriter.rewrite(raw_code)
                     overwrite_callback(python_file, new_code)
 
         if create_package:
