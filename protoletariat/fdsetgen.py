@@ -5,6 +5,7 @@ import fnmatch
 import re
 import subprocess
 import tempfile
+import os
 from pathlib import Path
 from typing import Callable, Iterable, Sequence
 
@@ -13,7 +14,6 @@ from google.protobuf.descriptor_pb2 import FileDescriptorSet
 from .rewrite import ASTImportRewriter, build_rewrites
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
-
 
 def _remove_proto_suffix(name: str) -> str:
     """Remove the `.proto` suffix from `name`."""
@@ -41,10 +41,11 @@ class FileDescriptorSetGenerator(abc.ABC):
         exclude_imports_glob: Sequence[str],
     ) -> None:
         """Fix imports from protoc/buf generated code."""
+        python_out = Path(os.fsdecode(python_out))
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
-            name = fd.name
+            name = os.fsdecode(fd.name)
             if _should_ignore(name, exclude_imports_glob):
                 continue
 
@@ -94,9 +95,9 @@ class Protoc(FileDescriptorSetGenerator):
         proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
     ) -> None:
-        self.protoc_path = protoc_path
-        self.proto_files = list(proto_files)
-        self.proto_paths = list(proto_paths)
+        self.protoc_path = os.fsdecode(protoc_path)
+        self.proto_files = [os.fsdecode(file) for file in proto_files]
+        self.proto_paths = [os.fsdecode(path) for path in proto_paths]
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -105,9 +106,9 @@ class Protoc(FileDescriptorSetGenerator):
                 [
                     self.protoc_path,
                     "--include_imports",
-                    f"--descriptor_set_out={filename}",
-                    *map("--proto_path={}".format, self.proto_paths),
-                    *map(str, self.proto_files),
+                    "--descriptor_set_out=" + os.fsdecode(filename),
+                    *["--proto_path=" + path for path in self.proto_paths],
+                    *self.proto_files,
                 ]
             )
 
