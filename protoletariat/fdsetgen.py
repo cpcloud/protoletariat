@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import abc
 import fnmatch
+import os
 import re
 import subprocess
 import tempfile
-import os
 from pathlib import Path
 from typing import Callable, Iterable, Sequence
 
@@ -14,6 +14,7 @@ from google.protobuf.descriptor_pb2 import FileDescriptorSet
 from .rewrite import ASTImportRewriter, build_rewrites
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
+
 
 def _remove_proto_suffix(name: str) -> str:
     """Remove the `.proto` suffix from `name`."""
