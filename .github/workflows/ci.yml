@@ -246,7 +246,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          nix run -L '.#protoletariat' -- --python-out "$PYTHON_OUT" \
+          nix develop -c protol --in-place --create-package --python-out "$PYTHON_OUT" \
             protoc \
             --proto-path $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") \
             $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
