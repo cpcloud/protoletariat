@@ -250,6 +250,10 @@ jobs:
             protoc \
             --proto-path $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") \
             $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
+
+          # check that there are no relative imports
+      - name: Check for absolute imports
+        run: grep -v -R "$PYTHON_OUT" '^import tensorflow'
   release:
     needs:
       - nix
