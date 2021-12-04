@@ -224,7 +224,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: tensorflow/tensorflow
-          path: tensorflow
+          path: ../tensorflow
 
       - name: Make generated code directory
         run: mkdir "$PYTHON_OUT"
@@ -236,15 +236,15 @@ jobs:
           nix shell -L -f . -c \
             protoc \
             --python_out "$PYTHON_OUT" \
-            --proto_path "$GITHUB_WORKSPACE/tensorflow" \
-            $GITHUB_WORKSPACE/tensorflow/**/*.proto
+            --proto_path "$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" \
+            $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
 
       - name: Test tensorflow rewriting
         run: |
           set -euo pipefail
 
           nix run -L '.#protoletariat' --python-out "$PYTHON_OUT" \
-            protoc $GITHUB_WORKSPACE/tensorflow/**/*.proto
+            protoc $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
   release:
     needs:
       - nix
