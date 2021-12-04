@@ -240,7 +240,7 @@ jobs:
             protoc \
             --python_out "$PYTHON_OUT" \
             --proto_path "$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" \
-            $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
+            $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
 
       - name: Test tensorflow rewriting
         run: |
@@ -249,7 +249,7 @@ jobs:
           nix run -L '.#protoletariat' --python-out "$PYTHON_OUT" \
             protoc \
             --proto-path $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") \
-            $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
+            $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
   release:
     needs:
       - nix
