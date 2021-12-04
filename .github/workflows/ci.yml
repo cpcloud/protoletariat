@@ -236,7 +236,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          nix shell -L -f . -c \
+          nix develop -c \
             protoc \
             --python_out "$PYTHON_OUT" \
             --proto_path "$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" \
