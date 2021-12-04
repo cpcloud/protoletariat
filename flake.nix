@@ -64,7 +64,6 @@
           }
         );
 
-        propgatedBuildInputs = with pkgs; [ buf grpc protobuf ];
         checkInputs = with pkgs; [ buf grpc protobuf ];
 
         preCheck = ''
