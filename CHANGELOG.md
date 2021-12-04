@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.6.2 (2021-12-04)
+### Fix
+* Ensure every path is decoded as utf-8 ([`a936f08`](https://github.com/cpcloud/protoletariat/commit/a936f088884b94d91af88d2554f5dce1b5e37408))
+
 ## v0.6.1 (2021-12-02)
 ### Documentation
 * Add some more information to the README.md ([`1d93380`](https://github.com/cpcloud/protoletariat/commit/1d93380ee9efc8159da96dd7600f95b5b6b83ec9))
