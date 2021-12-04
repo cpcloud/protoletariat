@@ -252,7 +252,7 @@ jobs:
             $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
 
       - name: Check for absolute imports
-        run: grep -v -R "$PYTHON_OUT" '^import tensorflow'
+        run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
   release:
     needs:
       - nix
