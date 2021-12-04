@@ -244,7 +244,9 @@ jobs:
           set -euo pipefail
 
           nix run -L '.#protoletariat' --python-out "$PYTHON_OUT" \
-            protoc $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
+            protoc \
+            --proto-path $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") \
+            $(readlink -f "$GITHUB_WORKSPACE/../tensorflow")/**/*.proto
   release:
     needs:
       - nix
