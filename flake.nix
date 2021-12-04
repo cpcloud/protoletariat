@@ -90,6 +90,7 @@
 
       apps.protoletariat = flake-utils.lib.mkApp {
         drv = packages.protoletariat;
+        exePath = "/bin/protol";
       };
       defaultApp = apps.protoletariat;
 
