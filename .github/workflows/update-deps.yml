@@ -58,6 +58,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           include-merge-commits: false
 
+      - name: Generate a GitHub token
+        uses: tibdex/github-app-token@v1
+        if: ${{ steps.get_current_commit.outputs.rev != steps.get_new_commit.outputs.rev }}
+        id: generate_token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Create a pull request to update ${{ matrix.input }}
         if: ${{ steps.get_current_commit.outputs.rev != steps.get_new_commit.outputs.rev }}
         id: create_pr
@@ -68,7 +76,7 @@ jobs:
           delete-branch: true
           author: "Phillip Ground <cpcloudbot@gmail.com>"
           title: "chore(flake/${{ matrix.input }}): `${{ steps.get_current_commit.outputs.short-rev }}` -> `${{ steps.get_new_commit.outputs.short-rev }}`"
-          token: ${{ secrets.PROTOLETARIAT_CI }}
+          token: ${{ steps.generate_token.outputs.token }}
           body: ${{ steps.compare_commits.outputs.differences }}
           labels: dependencies
 
@@ -76,6 +84,6 @@ jobs:
         if: ${{ steps.create_pr.outputs.pull-request-operation == 'created' }}
         uses: peter-evans/enable-pull-request-automerge@v1
         with:
-          token: ${{ secrets.PROTOLETARIAT_CI }}
+          token: ${{ steps.generate_token.outputs.token }}
           pull-request-number: ${{ steps.create_pr.outputs.pull-request-number }}
           merge-method: rebase
