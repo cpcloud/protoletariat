@@ -17,12 +17,29 @@ _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
 
 
 def _remove_proto_suffix(name: str) -> str:
-    """Remove the `.proto` suffix from `name`."""
+    """Remove the `.proto` suffix from `name`.
+
+    Examples
+    --------
+    >>> _remove_proto_suffix("a/b.proto")
+    'a/b'
+    """
     return _PROTO_SUFFIX_PATTERN.sub(r"\1", name)
 
 
 def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
-    """Return whether `fd_name` should be ignored according to `patterns`."""
+    """Return whether `fd_name` should be ignored according to `patterns`.
+
+    Examples
+    --------
+    >>> fd_name = "google/protobuf/empty.proto"
+    >>> pattern = "google/protobuf/*"
+    >>> _should_ignore(fd_name, [pattern])
+    True
+    >>> fd_name = "foo/bar"
+    >>> _should_ignore(fd_name, [pattern])
+    False
+    """
     return any(fnmatch.fnmatchcase(fd_name, pattern) for pattern in patterns)
 
 
