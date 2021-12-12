@@ -7,7 +7,10 @@ import typing
 from ast import AST
 from typing import Any, Callable, NamedTuple, Sequence, Union
 
-import astunparse
+try:
+    from ast import unparse as astunparse
+except ImportError:
+    from astunparse import unparse as astunparse  # type: ignore[no-redef]
 
 Node = Union[AST, Sequence[AST]]
 
@@ -122,10 +125,10 @@ class ASTRewriter:
         ...     return ast.parse("x = 2")
         ...
         >>> node = ast.parse("x = 1")
-        >>> print(ast.unparse(node))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(astunparse(node))  # doctest: +NORMALIZE_WHITESPACE
         x = 1
         >>> rewritten = rewriter.rewrite(node)
-        >>> print(astunparse.unparse(rewritten))  # doctest: +NORMALIZE_WHITESPACE
+        >>> print(astunparse(rewritten))  # doctest: +NORMALIZE_WHITESPACE
         x = 2
         """  # noqa: E501
         try:
@@ -227,4 +230,4 @@ class ASTImportRewriter:
         ), f"more than one rewrite rule found for pattern `{replacement.old}`"
 
     def rewrite(self, src: str) -> str:
-        return astunparse.unparse(self.node_transformer.visit(ast.parse(src)))
+        return astunparse(self.node_transformer.visit(ast.parse(src)))
