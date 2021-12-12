@@ -148,15 +148,15 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: "click@<9"
+            click-version: "click"
           - os: macos-11
             python-version: "3.9"
             buf: no-buf
-            click-version: "click@<9"
+            click-version: "click"
           - os: windows-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: "click@<9"
+            click-version: "click"
     runs-on: ${{ matrix.os }}
     defaults:
       run:
