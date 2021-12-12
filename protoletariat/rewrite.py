@@ -121,15 +121,9 @@ class ASTRewriter:
         ...     return ast.parse("x = 2")
         ...
         >>> rewritten = rewriter.rewrite(ast.parse("x = 1"))
-        >>> print(ast.dump(rewritten, indent=2))
-        Module(
-          body=[
-            Assign(
-              targets=[
-                Name(id='x', ctx=Store())],
-              value=Constant(value=2))],
-          type_ignores=[])
-        """
+        >>> print(ast.dump(rewritten))
+        Module(body=[Assign(targets=[Name(id='x', ctx=Store())], value=Constant(value=2))], type_ignores=[])
+        """  # noqa: E501
         try:
             return next(
                 func(node) for pattern, func in self.funcs if matches(node, pattern)
