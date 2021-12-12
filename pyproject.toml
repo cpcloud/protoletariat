@@ -17,9 +17,9 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
+astunparse = "^1.6.3"
 click = "^8.0.1"
 protobuf = "^3.19.1"
-astunparse = "^1.6.3"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
@@ -55,7 +55,8 @@ addopts = [
   "--ignore=site-packages",
   "--ignore=dist-packages",
   "--ignore=.direnv",
-  "--strict-markers"
+  "--strict-markers",
+  "--doctest-modules",
 ]
 norecursedirs = ["site-packages", "dist-packages", ".direnv"]
 

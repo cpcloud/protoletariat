@@ -24,69 +24,89 @@
     , nixpkgs
     , flake-utils
     , pre-commit-hooks
-    , ...
+    , poetry2nix
     }:
-    flake-utils.lib.eachDefaultSystem (system:
+    {
+      overlay = nixpkgs.lib.composeManyExtensions [
+        poetry2nix.overlay
+        (pkgs: super: {
+          prettierTOML = pkgs.writeShellScriptBin "prettier" ''
+            ${pkgs.nodePackages.prettier}/bin/prettier \
+            --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
+            "$@"
+          '';
+        } // (super.lib.listToAttrs (
+          super.lib.concatMap
+            (py:
+              let
+                noDotPy = super.lib.replaceStrings [ "." ] [ "" ] py;
+                overrides = pkgs.poetry2nix.overrides.withDefaults (
+                  import ./poetry-overrides.nix {
+                    inherit pkgs;
+                    inherit (pkgs) lib stdenv;
+                  }
+                );
+              in
+              [
+                {
+                  name = "protoletariat${noDotPy}";
+                  value = pkgs.poetry2nix.mkPoetryApplication {
+                    python = pkgs."python${noDotPy}";
+
+                    pyproject = ./pyproject.toml;
+                    poetrylock = ./poetry.lock;
+                    src = pkgs.lib.cleanSource ./.;
+
+                    buildInputs = [ pkgs.sqlite ];
+
+                    inherit overrides;
+
+                    checkInputs = with pkgs; [ buf grpc protobuf ];
+
+                    preCheck = ''
+                      export HOME
+                      HOME="$(mktemp -d)"
+                    '';
+
+                    checkPhase = ''
+                      runHook preCheck
+                      pytest
+                      runHook postCheck
+                    '';
+
+                    pythonImportsCheck = [ "protoletariat" ];
+                  };
+                }
+                {
+                  name = "protoletariatDevEnv${noDotPy}";
+                  value = pkgs.poetry2nix.mkPoetryEnv {
+                    python = pkgs."python${noDotPy}";
+                    projectDir = ./.;
+                    inherit overrides;
+                    editablePackageSources = {
+                      protoletariat = ./protoletariat;
+                    };
+                  };
+                }
+              ])
+            [ "3.7" "3.8" "3.9" ]
+        )))
+      ];
+    } // (flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [ self.overlay ];
+      };
       inherit (pkgs) lib;
-      prettierTOML = pkgs.writeShellScriptBin "prettier" ''
-        ${pkgs.nodePackages.prettier}/bin/prettier \
-        --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
-        "$@"
-      '';
-
-      mkPoetryEnv = python: pkgs.poetry2nix.mkPoetryEnv {
-        inherit python;
-        projectDir = ./.;
-        editablePackageSources = {
-          protoletariat = ./protoletariat;
-        };
-        overrides = pkgs.poetry2nix.overrides.withDefaults (
-          import ./poetry-overrides.nix {
-            inherit pkgs;
-            inherit (pkgs) lib stdenv;
-          }
-        );
-      };
-
-      mkApp = python: pkgs.poetry2nix.mkPoetryApplication {
-        inherit python;
-
-        pyproject = ./pyproject.toml;
-        poetrylock = ./poetry.lock;
-        src = lib.cleanSource ./.;
-
-        overrides = pkgs.poetry2nix.overrides.withDefaults (
-          import ./poetry-overrides.nix {
-            inherit pkgs;
-            inherit (pkgs) lib stdenv;
-          }
-        );
-
-        checkInputs = with pkgs; [ buf grpc protobuf ];
-
-        preCheck = ''
-          export HOME
-          HOME="$(mktemp -d)"
-        '';
-
-        checkPhase = ''
-          runHook preCheck
-          pytest
-          runHook postCheck
-        '';
-
-        pythonImportsCheck = [ "protoletariat" ];
-      };
     in
     rec {
-      packages.protoletariat37 = mkApp pkgs.python37;
-      packages.protoletariat38 = mkApp pkgs.python38;
-      packages.protoletariat39 = mkApp pkgs.python39;
-      packages.protoletariat = mkApp pkgs.python3;
+      packages.protoletariat37 = pkgs.protoletariat37;
+      packages.protoletariat38 = pkgs.protoletariat38;
+      packages.protoletariat39 = pkgs.protoletariat39;
+      packages.protoletariat = pkgs.protoletariat39;
 
-      defaultPackage = packages.protoletariat;
+      defaultPackage = pkgs.protoletariat39;
 
       apps.protoletariat = flake-utils.lib.mkApp {
         drv = packages.protoletariat;
@@ -97,8 +117,8 @@
       packages.protoletariat-image = pkgs.dockerTools.buildLayeredImage {
         name = "protoletariat";
         config = {
-          Entrypoint = [ "${packages.protoletariat}/bin/protol" ];
-          Command = [ "${packages.protoletariat}/bin/protol" ];
+          Entrypoint = [ "${defaultPackage}/bin/protol" ];
+          Command = [ "${defaultPackage}/bin/protol" ];
         };
       };
 
@@ -116,22 +136,10 @@
               entry = lib.mkForce "${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt --check";
             };
 
-            shellcheck = {
-              enable = true;
-              entry = "${pkgs.shellcheck}/bin/shellcheck";
-              files = "\\.sh$";
-            };
-
-            shfmt = {
-              enable = true;
-              entry = "${pkgs.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
-              files = "\\.sh$";
-            };
-
             prettier = {
               enable = true;
-              entry = lib.mkForce "${prettierTOML}/bin/prettier --check";
-              types_or = [ "json" "toml" "yaml" "markdown" ];
+              entry = lib.mkForce "${pkgs.prettierTOML}/bin/prettier --check";
+              types_or = [ "json" "markdown" "toml" "yaml" ];
             };
 
             black = {
@@ -170,17 +178,17 @@
       };
 
       devShell = pkgs.mkShell {
-        nativeBuildInputs = (with pkgs; [
+        nativeBuildInputs = with pkgs; [
           buf
           commitizen
           grpc
           poetry
-          protobuf
-        ]) ++ [
           prettierTOML
-          (mkPoetryEnv pkgs.python3)
+          protobuf
+          protoletariatDevEnv39
         ];
-        shellHook = self.checks.${system}.pre-commit-check.shellHook;
+
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
       };
-    });
+    }));
 }
