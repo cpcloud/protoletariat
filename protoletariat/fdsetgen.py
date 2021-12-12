@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import fnmatch
-import os
 import re
 import subprocess
 import tempfile
@@ -52,6 +51,7 @@ class FileDescriptorSetGenerator(abc.ABC):
 
     def fix_imports(
         self,
+        *,
         python_out: Path,
         create_package: bool,
         overwrite_callback: Callable[[Path, str], None],
@@ -59,15 +59,13 @@ class FileDescriptorSetGenerator(abc.ABC):
         exclude_imports_glob: Sequence[str],
     ) -> None:
         """Fix imports from protoc/buf generated code."""
-        python_out = Path(os.fsdecode(python_out))
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
         for fd in fdset.file:
-            name = os.fsdecode(fd.name)
-            if _should_ignore(name, exclude_imports_glob):
+            if _should_ignore(fd.name, exclude_imports_glob):
                 continue
 
-            fd_name = _remove_proto_suffix(name)
+            fd_name = _remove_proto_suffix(fd.name)
             rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
@@ -109,13 +107,14 @@ class Protoc(FileDescriptorSetGenerator):
 
     def __init__(
         self,
+        *,
         protoc_path: str,
         proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
     ) -> None:
-        self.protoc_path = os.fsdecode(protoc_path)
-        self.proto_files = [os.fsdecode(file) for file in proto_files]
-        self.proto_paths = [os.fsdecode(path) for path in proto_paths]
+        self.protoc_path = protoc_path
+        self.proto_files = proto_files
+        self.proto_paths = proto_paths
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -124,9 +123,9 @@ class Protoc(FileDescriptorSetGenerator):
                 [
                     self.protoc_path,
                     "--include_imports",
-                    "--descriptor_set_out=" + os.fsdecode(filename),
-                    *["--proto_path=" + path for path in self.proto_paths],
-                    *self.proto_files,
+                    f"--descriptor_set_out={filename}",
+                    *map("--proto_path={}".format, self.proto_paths),
+                    *map(str, self.proto_files),
                 ]
             )
 
@@ -139,7 +138,14 @@ class Protoc(FileDescriptorSetGenerator):
 class Buf(FileDescriptorSetGenerator):
     """Generate the FileDescriptorSet using `buf`."""
 
-    def __init__(self, buf_path: str) -> None:
+    def __init__(self, *, buf_path: str) -> None:
+        """Construct a `buf`-based `FileDescriptorSetGenerator`.
+
+        Parameters
+        ----------
+        buf_path
+            Path to buf executable
+        """
         self.buf_path = buf_path
 
     def generate_file_descriptor_set_bytes(self) -> bytes:

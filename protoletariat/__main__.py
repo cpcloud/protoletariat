@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import IO
@@ -89,7 +90,7 @@ def main(
 
     ctx.obj.update(
         dict(
-            python_out=python_out,
+            python_out=Path(os.fsdecode(python_out)),
             create_package=create_package,
             overwrite_callback=_overwrite if in_place else _echo,
             module_suffixes=module_suffixes,
@@ -100,8 +101,18 @@ def main(
 
 @main.command(help="Use protoc to generate the FileDescriptorSet blob")
 @click.option(
+    "--protoc-path",
+    envvar="PROTOC_PATH",
+    type=str,
+    default="protoc",
+    show_default=True,
+    show_envvar=True,
+    help="Path to the `protoc` executable",
+)
+@click.option(
     "-p",
     "--proto-path",
+    "proto_paths",
     multiple=True,
     required=True,
     type=click.Path(
@@ -123,23 +134,18 @@ def main(
         path_type=Path,
     ),
 )
-@click.option(
-    "--protoc-path",
-    envvar="PROTOC_PATH",
-    type=str,
-    default="protoc",
-    show_default=True,
-    show_envvar=True,
-    help="Path to the `protoc` executable",
-)
 @click.pass_context
 def protoc(
     ctx: click.Context,
-    proto_path: list[Path],
-    proto_files: list[Path],
     protoc_path: str,
+    proto_paths: list[Path],
+    proto_files: list[Path],
 ) -> None:
-    Protoc(protoc_path, proto_files, proto_path).fix_imports(**ctx.obj)
+    Protoc(
+        protoc_path=os.fsdecode(protoc_path),
+        proto_files=[Path(os.fsdecode(proto_file)) for proto_file in proto_files],
+        proto_paths=[Path(os.fsdecode(proto_path)) for proto_path in proto_paths],
+    ).fix_imports(**ctx.obj)
 
 
 @main.command(help="Use buf to generate the FileDescriptorSet blob")
@@ -154,7 +160,7 @@ def protoc(
 )
 @click.pass_context
 def buf(ctx: click.Context, buf_path: str) -> None:
-    Buf(buf_path).fix_imports(**ctx.obj)
+    Buf(buf_path=os.fsdecode(buf_path)).fix_imports(**ctx.obj)
 
 
 @main.command(help="Rewrite imports using FileDescriptorSet bytes from a file or stdin")
