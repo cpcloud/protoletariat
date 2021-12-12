@@ -116,13 +116,17 @@ class ASTRewriter:
         Examples
         --------
         >>> rewriter = ASTRewriter()
-        >>> @rewriter.register(ast.parse("x = 1"))
+        >>> pattern = ast.parse("x = 1")
+        >>> @rewriter.register(pattern)
         ... def make_it_two(node):
         ...     return ast.parse("x = 2")
         ...
-        >>> rewritten = rewriter.rewrite(ast.parse("x = 1"))
-        >>> print(ast.dump(rewritten))
-        Module(body=[Assign(targets=[Name(id='x', ctx=Store())], value=Constant(value=2))], type_ignores=[])
+        >>> node = ast.parse("x = 1")
+        >>> print(ast.unparse(node))  # doctest: +NORMALIZE_WHITESPACE
+        x = 1
+        >>> rewritten = rewriter.rewrite(node)
+        >>> print(astunparse.unparse(rewritten))  # doctest: +NORMALIZE_WHITESPACE
+        x = 2
         """  # noqa: E501
         try:
             return next(
