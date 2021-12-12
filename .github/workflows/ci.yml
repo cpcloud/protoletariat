@@ -140,6 +140,9 @@ jobs:
           - "3.10"
         buf:
           - buf
+        click-version:
+          - "7.1.2"
+          - "latest"
         include:
           - os: ubuntu-latest
             python-version: "3.9"
@@ -169,8 +172,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install poetry2conda
-        run: pip3 install poetry2conda
+      - name: Install poetry and poetry2conda
+        run: pip3 install poetry2conda poetry
+
+      - name: Set click version
+        run: poetry add 'click@{{ matrix.click-version }}'
 
       - name: Generate conda environment file
         run: |
