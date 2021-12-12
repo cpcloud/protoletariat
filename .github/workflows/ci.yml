@@ -263,12 +263,19 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: release
     steps:
+      - name: Generate a GitHub token
+        uses: tibdex/github-app-token@v1
+        id: generate_token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           fetch-depth: 0
-          token: ${{ secrets.PROTOLETARIAT_CI }}
+          token: ${{ steps.generate_token.outputs.token }}
 
       - name: Checkout PR
         uses: actions/checkout@v2
@@ -293,7 +300,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: semantic-release publish --verbosity=DEBUG
         env:
-          GH_TOKEN: ${{ secrets.PROTOLETARIAT_CI }}
+          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
       - name: Semantic release
