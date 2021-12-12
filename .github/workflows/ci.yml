@@ -142,7 +142,7 @@ jobs:
           - buf
         click-version:
           - "click@<8"
-          - "click@<9"
+          - "click"
         include:
           - os: ubuntu-latest
             python-version: "3.9"
