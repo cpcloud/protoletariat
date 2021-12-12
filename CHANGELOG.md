@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.0 (2021-12-12)
+### Feature
+* Support click 7 ([`b994dad`](https://github.com/cpcloud/protoletariat/commit/b994dad32f0e4a66f20793f1526638a296004186))
+
+### Documentation
+* Link to protobuf issue ([`2b60855`](https://github.com/cpcloud/protoletariat/commit/2b608550bd85e9152189f4bf63806e543f383d45))
+
 ## v0.6.2 (2021-12-04)
 ### Fix
 * Ensure every path is decoded as utf-8 ([`a936f08`](https://github.com/cpcloud/protoletariat/commit/a936f088884b94d91af88d2554f5dce1b5e37408))
