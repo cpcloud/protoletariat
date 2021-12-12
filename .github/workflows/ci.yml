@@ -176,7 +176,7 @@ jobs:
         run: pip3 install poetry2conda poetry
 
       - name: Set click version
-        run: poetry add 'click@{{ matrix.click-version }}'
+        run: poetry add 'click@${{ matrix.click-version }}'
 
       - name: Generate conda environment file
         run: |
