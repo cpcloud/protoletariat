@@ -20,7 +20,19 @@ class Replacement(NamedTuple):
 
 
 def _is_iterable(value: Any) -> bool:  # type: ignore[misc]
-    """Return whether `value` is a non-string iterable."""
+    """Return whether `value` is a non-string iterable.
+
+    Examples
+    --------
+    >>> _is_iterable(1)
+    False
+    >>> _is_iterable([1])
+    True
+    >>> _is_iterable("a")
+    False
+    >>> _is_iterable(["a"])
+    True
+    """
     return not isinstance(value, str) and isinstance(value, collections.abc.Iterable)
 
 
@@ -38,6 +50,17 @@ def matches(value: Node, pattern: Node) -> bool:
     -------
     bool
         Whether `value` matches `pattern`
+
+    Examples
+    --------
+    >>> import ast
+    >>> node = ast.parse("x = 1")
+    >>> pattern = node
+    >>> matches(node, pattern)
+    True
+    >>> node = ast.parse("x = 2")
+    >>> matches(node, pattern)
+    False
     """
     # types must match exactly
     if type(value) != type(pattern):
@@ -88,7 +111,25 @@ class ASTRewriter:
         return wrapper
 
     def rewrite(self, node: AST) -> AST:
-        """Rewrite `node` if it matches a registered pattern."""
+        """Rewrite `node` if it matches a registered pattern.
+
+        Examples
+        --------
+        >>> rewriter = ASTRewriter()
+        >>> @rewriter.register(ast.parse("x = 1"))
+        ... def make_it_two(node):
+        ...     return ast.parse("x = 2")
+        ...
+        >>> rewritten = rewriter.rewrite(ast.parse("x = 1"))
+        >>> print(ast.dump(rewritten, indent=2))
+        Module(
+          body=[
+            Assign(
+              targets=[
+                Name(id='x', ctx=Store())],
+              value=Constant(value=2))],
+          type_ignores=[])
+        """
         try:
             return next(
                 func(node) for pattern, func in self.funcs if matches(node, pattern)
@@ -112,7 +153,16 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
     -------
     list[Replacement]
         A list of mapping from old code to new code
-    """
+
+    Examples
+    --------
+    >>> from pprint import pprint
+    >>> proto = "a/b/c"
+    >>> dep = "foo/bar"
+    >>> pprint(build_rewrites(proto, dep))
+    [Replacement(old='from foo import bar_pb2 as foo_dot_bar__pb2', new='from ...foo import bar_pb2 as foo_dot_bar__pb2'),
+     Replacement(old='import foo.bar_pb2', new='from ... import foo')]
+    """  # noqa: E501
     parts = dep.split("/")
 
     *import_parts, part = parts
