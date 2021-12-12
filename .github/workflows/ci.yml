@@ -141,8 +141,8 @@ jobs:
         buf:
           - buf
         click-version:
-          - "7.1.2"
-          - "latest"
+          - "<8"
+          - "<9"
         include:
           - os: ubuntu-latest
             python-version: "3.9"
