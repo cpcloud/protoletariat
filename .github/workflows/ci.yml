@@ -141,8 +141,8 @@ jobs:
         buf:
           - buf
         click-version:
-          - "<8"
-          - "<9"
+          - "click@<8"
+          - "click@<9"
         include:
           - os: ubuntu-latest
             python-version: "3.9"
@@ -176,7 +176,7 @@ jobs:
         run: pip3 install poetry2conda poetry
 
       - name: Set click version
-        run: poetry add 'click@${{ matrix.click-version }}'
+        run: poetry add '${{ matrix.click-version }}'
 
       - name: Generate conda environment file
         run: |
