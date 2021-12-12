@@ -237,7 +237,11 @@ jobs:
           path: tensorflow
 
       - name: Move tensorflow repo up
-        run: mv tensorflow ..
+        run: |
+          set -euo pipefail
+
+          mv tensorflow ..
+          echo "TENSORFLOW_HOME=$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" >> "$GITHUB_ENV"
 
       - name: Make generated code directory
         run: mkdir "$PYTHON_OUT"
@@ -249,8 +253,8 @@ jobs:
           nix develop -c \
             protoc \
             --python_out "$PYTHON_OUT" \
-            --proto_path "$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" \
-            $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
+            --proto_path "$TENSORFLOW_HOME" \
+            $(find "$TENSORFLOW_HOME" -name '*.proto')
 
       - name: Test tensorflow rewriting
         run: |
@@ -258,8 +262,8 @@ jobs:
 
           nix develop -c protol --in-place --create-package --python-out "$PYTHON_OUT" \
             protoc \
-            --proto-path $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") \
-            $(find $(readlink -f "$GITHUB_WORKSPACE/../tensorflow") -name '*.proto')
+            --proto-path "$TENSORFLOW_HOME" \
+            $(find "$TENSORFLOW_HOME" -name '*.proto')
 
       - name: Check for absolute imports
         run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
