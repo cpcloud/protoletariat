@@ -17,7 +17,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.11"
-astunparse = "^1.6.3"
+astunparse = { version = "^1.6.3", python = "<3.9" }
 click = "^8.0.1"
 protobuf = "^3.19.1"
 
