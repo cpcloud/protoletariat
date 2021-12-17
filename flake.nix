@@ -89,7 +89,7 @@
                   };
                 }
               ])
-            [ "3.7" "3.8" "3.9" ]
+            [ "3.7" "3.8" "3.9" "3.10" ]
         )))
       ];
     } // (flake-utils.lib.eachDefaultSystem (system:
@@ -104,9 +104,10 @@
       packages.protoletariat37 = pkgs.protoletariat37;
       packages.protoletariat38 = pkgs.protoletariat38;
       packages.protoletariat39 = pkgs.protoletariat39;
-      packages.protoletariat = pkgs.protoletariat39;
+      packages.protoletariat310 = pkgs.protoletariat310;
+      packages.protoletariat = pkgs.protoletariat310;
 
-      defaultPackage = pkgs.protoletariat39;
+      defaultPackage = pkgs.protoletariat310;
 
       apps.protoletariat = flake-utils.lib.mkApp {
         drv = packages.protoletariat;
@@ -185,7 +186,7 @@
           poetry
           prettierTOML
           protobuf
-          protoletariatDevEnv39
+          protoletariatDevEnv310
         ];
 
         inherit (self.checks.${system}.pre-commit-check) shellHook;
