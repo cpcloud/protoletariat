@@ -213,7 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_OUT: /tmp/tensorflow-gen
-      TENSORFLOW_HOME: $GITHUB_WORKSPACE/tensorflow
+      TENSORFLOW_HOME: ${{ github.workspace }}/tensorflow
     steps:
       - name: Checkout
         uses: actions/checkout@v2
