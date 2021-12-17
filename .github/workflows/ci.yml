@@ -71,6 +71,7 @@ jobs:
           - "37"
           - "38"
           - "39"
+          - "310"
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout

@@ -1,4 +1,5 @@
 import importlib
+import os
 import subprocess
 import sys
 
@@ -6,6 +7,15 @@ import pytest
 from click.testing import CliRunner
 
 from .conftest import ProtoletariatFixture, check_import_lines
+
+xfail_if_conda_and_py310 = pytest.mark.xfail(
+    condition=(
+        bool(os.environ.get("CONDA_DEFAULT_ENV", False))
+        and sys.version_info[:2] == (3, 10)
+    ),
+    raises=subprocess.CalledProcessError,
+    reason="grpc-cpp cannot be installed for Python 3.10 using conda",
+)
 
 
 def test_basic_cli(cli: CliRunner, basic_cli: ProtoletariatFixture) -> None:
@@ -50,12 +60,11 @@ def test_nested(cli: CliRunner, nested: ProtoletariatFixture) -> None:
         importlib.import_module(f"{nested.package_name}.a.b.c.thing2_pb2")
 
 
-@pytest.mark.xfail(
-    condition=sys.version_info[:2] == (3, 10),
-    raises=subprocess.CalledProcessError,
-    reason="grpc-cpp cannot be installed with conda using Python 3.10",
-)
-def test_thing_service(cli: CliRunner, thing_service: ProtoletariatFixture) -> None:
+@xfail_if_conda_and_py310  # type: ignore[misc]
+def test_thing_service(  # type: ignore[misc]
+    cli: CliRunner,
+    thing_service: ProtoletariatFixture,
+) -> None:
     result = thing_service.generate(cli)
     assert result.exit_code == 0
 
@@ -82,12 +91,11 @@ def test_thing_service(cli: CliRunner, thing_service: ProtoletariatFixture) -> N
         importlib.import_module(f"{thing_service.package_name}.thing_service_pb2_grpc")
 
 
-@pytest.mark.xfail(
-    condition=sys.version_info[:2] == (3, 10),
-    raises=subprocess.CalledProcessError,
-    reason="grpc-cpp cannot be installed with conda using Python 3.10",
-)
-def test_grpc(cli: CliRunner, grpc_imports: ProtoletariatFixture) -> None:
+@xfail_if_conda_and_py310  # type: ignore[misc]
+def test_grpc(  # type: ignore[misc]
+    cli: CliRunner,
+    grpc_imports: ProtoletariatFixture,
+) -> None:
     result = grpc_imports.generate(cli)
     assert result.exit_code == 0
 
@@ -116,12 +124,8 @@ def test_grpc(cli: CliRunner, grpc_imports: ProtoletariatFixture) -> None:
         importlib.import_module(f"{grpc_imports.package_name}.imports_service_pb2_grpc")
 
 
-@pytest.mark.xfail(
-    condition=sys.version_info[:2] == (3, 10),
-    raises=subprocess.CalledProcessError,
-    reason="grpc-cpp cannot be installed with conda using Python 3.10",
-)
-def test_grpc_no_imports(
+@xfail_if_conda_and_py310  # type: ignore[misc]
+def test_grpc_no_imports(  # type: ignore[misc]
     cli: CliRunner,
     no_imports_service: ProtoletariatFixture,
 ) -> None:
