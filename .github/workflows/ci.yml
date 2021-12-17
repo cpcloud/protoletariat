@@ -213,6 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PYTHON_OUT: /tmp/tensorflow-gen
+      TENSORFLOW_HOME: $GITHUB_WORKSPACE/tensorflow
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -238,9 +239,6 @@ jobs:
         with:
           repository: tensorflow/tensorflow
           path: tensorflow
-
-      - name: Set TENSORFLOW_HOME
-        run: echo "TENSORFLOW_HOME=$GITHUB_WORKSPACE/tensorflow" >> "$GITHUB_ENV"
 
       - name: Make generated code directory
         run: mkdir "$PYTHON_OUT"
