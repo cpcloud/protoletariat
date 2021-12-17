@@ -49,12 +49,21 @@ def _echo(_: Path, code: str) -> None:
     show_default=True,
 )
 @click.option(
-    "-s",
-    "--module-suffixes",
+    "-p",
+    "--protobuf-suffixes",
     type=str,
     multiple=True,
-    default=["_pb2.py", "_pb2.pyi", "_pb2_grpc.py", "_pb2_grpc.pyi"],
-    help="Suffixes of Python/mypy modules to process",
+    default=["_pb2.py", "_pb2.pyi"],
+    help="Suffixes of Python/mypy Protobuf modules to process",
+    show_default=True,
+)
+@click.option(
+    "-g",
+    "--grpc-suffixes",
+    type=str,
+    multiple=True,
+    default=["_pb2_grpc.py", "_pb2_grpc.pyi"],
+    help="Suffixes of Python/mypy gPRC Protobuf modules to process",
     show_default=True,
 )
 @click.option(
@@ -79,7 +88,8 @@ def main(
     python_out: Path,
     in_place: bool,
     create_package: bool,
-    module_suffixes: list[str],
+    protobuf_suffixes: list[str],
+    grpc_suffixes: list[str],
     exclude_google_imports: bool,
     exclude_imports_glob: list[str],
 ) -> None:
@@ -93,7 +103,8 @@ def main(
             python_out=Path(os.fsdecode(python_out)),
             create_package=create_package,
             overwrite_callback=_overwrite if in_place else _echo,
-            module_suffixes=module_suffixes,
+            protobuf_suffixes=protobuf_suffixes,
+            grpc_suffixes=grpc_suffixes,
             exclude_imports_glob=exclude_imports_glob,
         )
     )

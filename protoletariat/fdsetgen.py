@@ -55,7 +55,8 @@ class FileDescriptorSetGenerator(abc.ABC):
         python_out: Path,
         create_package: bool,
         overwrite_callback: Callable[[Path, str], None],
-        module_suffixes: Sequence[str],
+        protobuf_suffixes: Iterable[str],
+        grpc_suffixes: Iterable[str],
         exclude_imports_glob: Sequence[str],
     ) -> None:
         """Fix imports from protoc/buf generated code."""
@@ -74,8 +75,10 @@ class FileDescriptorSetGenerator(abc.ABC):
             for repl in build_rewrites(fd_name, fd_name):
                 rewriter.register_rewrite(repl)
 
+            dependencies = fd.dependency
+
             # register proto import rewrites
-            for dep in map(_remove_proto_suffix, fd.dependency):
+            for dep in map(_remove_proto_suffix, dependencies):
                 if _should_ignore(dep, exclude_imports_glob):
                     continue
 
@@ -83,7 +86,13 @@ class FileDescriptorSetGenerator(abc.ABC):
                 for repl in build_rewrites(fd_name, dep_name):
                     rewriter.register_rewrite(repl)
 
-            for suffix in module_suffixes:
+            # only rewrite things that have dependencies or are gRPC services
+            suffixes = list(grpc_suffixes)
+
+            if dependencies:
+                suffixes.extend(protobuf_suffixes)
+
+            for suffix in suffixes:
                 python_file = python_out.joinpath(f"{fd_name}{suffix}")
                 try:
                     raw_code = python_file.read_text()
