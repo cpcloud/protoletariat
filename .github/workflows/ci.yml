@@ -216,6 +216,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          path: protoletariat
 
       - name: Install Nix
         uses: cachix/install-nix-action@v16
@@ -237,17 +239,14 @@ jobs:
           repository: tensorflow/tensorflow
           path: tensorflow
 
-      - name: Move tensorflow repo up
-        run: |
-          set -euo pipefail
-
-          mv tensorflow ..
-          echo "TENSORFLOW_HOME=$(readlink -f $GITHUB_WORKSPACE/../tensorflow)" >> "$GITHUB_ENV"
+      - name: Set TENSORFLOW_HOME
+        run: echo "TENSORFLOW_HOME=$GITHUB_WORKSPACE/tensorflow" >> "$GITHUB_ENV"
 
       - name: Make generated code directory
         run: mkdir "$PYTHON_OUT"
 
       - name: Generate tensorflow Python proto code
+        working-directory: protoletariat
         run: |
           set -euo pipefail
 
@@ -258,6 +257,7 @@ jobs:
             $(find "$TENSORFLOW_HOME" -name '*.proto')
 
       - name: Test tensorflow rewriting
+        working-directory: protoletariat
         run: |
           set -euo pipefail
 
