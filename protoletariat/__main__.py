@@ -17,6 +17,7 @@ def _overwrite(python_file: Path, code: str) -> None:
 
 
 def _echo(_: Path, code: str) -> None:
+    """Write the :py:`str` `code` to stdout."""
     click.echo(code)
 
 
