@@ -229,7 +229,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          nix develop -c protol --in-place --create-package --python-out "$PYTHON_OUT" \
+          nix run '.#protoletariat' \
+            -- \
+            --in-place \
+            --create-package \
+            --python-out "$PYTHON_OUT" \
             protoc \
             --proto-path "$TENSORFLOW_HOME" \
             $(find "$TENSORFLOW_HOME" -name '*.proto')
