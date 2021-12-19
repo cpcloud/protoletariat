@@ -15,13 +15,13 @@ See https://github.com/protocolbuffers/protobuf/issues/1491 for the discussion t
 
 ## Installation
 
-**Note: the `conda-forge` package version may lag behind the other artifacts.**
-
 |   Artifact    |                                                              Status                                                               |                Installation Command                |
 | :-----------: | :-------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------: |
 | PyPI Package  |                  [![PyPI](https://img.shields.io/pypi/v/protoletariat)](https://pypi.org/project/protoletariat)                   |            `pip install protoletariat`             |
 | Conda Package | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/protoletariat.svg)](https://anaconda.org/conda-forge/protoletariat) |    `conda install protoletariat -c conda-forge`    |
 | Docker Image  |                                                                 ∅                                                                 | `docker pull ghcr.io/cpcloud/protoletariat:latest` |
+
+**Note: the `conda-forge` package version may lag behind the other artifacts by a few hours.**
 
 ## Usage
 
