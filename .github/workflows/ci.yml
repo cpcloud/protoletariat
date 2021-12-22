@@ -201,7 +201,6 @@ jobs:
           environment-file: environment.yaml
 
       - name: Install grpc-cpp for codegen plugins
-        if: ${{ matrix.python-version != '3.10' }}
         run: mamba install grpc-cpp
 
       - name: Install the package locally
