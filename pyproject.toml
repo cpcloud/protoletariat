@@ -23,6 +23,7 @@ protobuf = "^3.19.1"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
+commitizen = "^2.20.3"
 flake8 = "^4.0.0"
 grpc-stubs = "^1.24.7"
 grpcio = "^1.42.0"
@@ -100,6 +101,11 @@ no_implicit_optional = true
 show_error_context = true
 # show codes in case we end up needing to ignore
 show_error_codes = true
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.7.0"
+tag_format = "v$version"
 
 [build-system]
 requires = ["poetry-core"]
