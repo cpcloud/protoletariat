@@ -181,7 +181,6 @@
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           buf
-          commitizen
           grpc
           poetry
           prettierTOML
