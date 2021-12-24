@@ -4,6 +4,11 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
 
+    gitignore = {
+      url = "github:hercules-ci/gitignore.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable-small";
 
     pre-commit-hooks = {
@@ -25,9 +30,61 @@
     , flake-utils
     , pre-commit-hooks
     , poetry2nix
+    , gitignore
     }:
+    let
+      mkApp = { py, pkgs }:
+        {
+          name = "protoletariat${py}";
+          value = pkgs.poetry2nix.mkPoetryApplication {
+            python = pkgs."python${py}Optimized";
+
+            projectDir = ./.;
+            src = pkgs.gitignoreSource ./.;
+
+            buildInputs = [ pkgs.sqlite ];
+
+            overrides = getOverrides pkgs;
+
+            checkInputs = with pkgs; [ buf grpc protobuf ];
+
+            preCheck = ''
+              export HOME
+              HOME="$(mktemp -d)"
+            '';
+
+            checkPhase = ''
+              runHook preCheck
+              pytest
+              runHook postCheck
+            '';
+
+            pythonImportsCheck = [ "protoletariat" ];
+          };
+
+        };
+      mkEnv = { py, pkgs }:
+        {
+          name = "protoletariatDevEnv${py}";
+          value = pkgs.poetry2nix.mkPoetryEnv {
+            python = pkgs."python${py}";
+            projectDir = ./.;
+            overrides = getOverrides pkgs;
+            editablePackageSources = {
+              protoletariat = ./protoletariat;
+            };
+          };
+        };
+      getOverrides = pkgs: pkgs.poetry2nix.overrides.withDefaults (
+        import ./poetry-overrides.nix {
+          inherit pkgs;
+          inherit (pkgs) lib stdenv;
+        }
+      );
+    in
     {
       overlay = nixpkgs.lib.composeManyExtensions [
+        gitignore.overlay
         poetry2nix.overlay
         (pkgs: super: {
           prettierTOML = pkgs.writeShellScriptBin "prettier" ''
@@ -37,59 +94,64 @@
           '';
         } // (super.lib.listToAttrs (
           super.lib.concatMap
-            (py:
-              let
-                noDotPy = super.lib.replaceStrings [ "." ] [ "" ] py;
-                overrides = pkgs.poetry2nix.overrides.withDefaults (
-                  import ./poetry-overrides.nix {
-                    inherit pkgs;
-                    inherit (pkgs) lib stdenv;
-                  }
-                );
-              in
-              [
-                {
-                  name = "protoletariat${noDotPy}";
-                  value = pkgs.poetry2nix.mkPoetryApplication {
-                    python = pkgs."python${noDotPy}";
+            (py: [
+              (mkApp { inherit py pkgs; })
+              (mkEnv {
+                inherit py;
+                pkgs = pkgs.pkgsBuildBuild;
+              })
+              {
+                name = "python${py}Optimized";
+                value = (super."python${py}".override {
+                  # remove python-config, this contributes around 30MB to the closure
+                  stripConfig = true;
+                  # remove the IDLE GUI
+                  stripIdlelib = true;
+                  # remove tests
+                  stripTests = true;
+                  # remove tkinter things
+                  stripTkinter = true;
+                  # remove a bunch of unused modules
+                  ncurses = null;
+                  readline = null;
+                  openssl = null;
+                  gdbm = null;
+                  sqlite = null;
+                  configd = null;
+                  tzdata = null;
+                  # we could reduce the size even futher (< 40MB for the
+                  # entire closure) but there's a performance penality:
+                  # stripBytecode == true + rebuildBytecode == false means
+                  # *no* bytecode on disk until import. Probably not a big
+                  # issue for a long running service, but horrible for a CLI
+                  # tool
+                  stripBytecode = true;
+                  rebuildBytecode = true;
 
-                    pyproject = ./pyproject.toml;
-                    poetrylock = ./poetry.lock;
-                    src = pkgs.lib.cleanSource ./.;
+                  # no need for site customize in the application
+                  includeSiteCustomize = false;
+                  # unused in protoletariat
+                  mimetypesSupport = false;
+                }).overrideAttrs (attrs: {
+                  # compile the python interpreter without -Os because we care
+                  # about startup time; protoletariat is a CLI tool after all
+                  preConfigure = ''
+                    ${attrs.preConfigure or ""}
+                    export NIX_LDFLAGS+=" --strip-all"
+                  '';
 
-                    buildInputs = [ pkgs.sqlite ];
-
-                    inherit overrides;
-
-                    checkInputs = with pkgs; [ buf grpc protobuf ];
-
-                    preCheck = ''
-                      export HOME
-                      HOME="$(mktemp -d)"
-                    '';
-
-                    checkPhase = ''
-                      runHook preCheck
-                      pytest
-                      runHook postCheck
-                    '';
-
-                    pythonImportsCheck = [ "protoletariat" ];
-                  };
-                }
-                {
-                  name = "protoletariatDevEnv${noDotPy}";
-                  value = pkgs.poetry2nix.mkPoetryEnv {
-                    python = pkgs."python${noDotPy}";
-                    projectDir = ./.;
-                    inherit overrides;
-                    editablePackageSources = {
-                      protoletariat = ./protoletariat;
-                    };
-                  };
-                }
-              ])
-            [ "3.7" "3.8" "3.9" "3.10" ]
+                  # remove optimized bytecode; shaves about 15MB
+                  #
+                  # the application will never be run with any optimization
+                  # level so we don't need it
+                  postInstall = ''
+                    ${attrs.postInstall or ""}
+                    find $out -name '*.opt-?.pyc' -exec rm '{}' +
+                  '';
+                });
+              }
+            ])
+            [ "37" "38" "39" "310" ]
         )))
       ];
     } // (flake-utils.lib.eachDefaultSystem (system:
@@ -107,7 +169,7 @@
       packages.protoletariat310 = pkgs.protoletariat310;
       packages.protoletariat = pkgs.protoletariat310;
 
-      defaultPackage = pkgs.protoletariat310;
+      defaultPackage = pkgs.protoletariat;
 
       apps.protoletariat = flake-utils.lib.mkApp {
         drv = packages.protoletariat;
@@ -118,8 +180,8 @@
       packages.protoletariat-image = pkgs.dockerTools.buildLayeredImage {
         name = "protoletariat";
         config = {
-          Entrypoint = [ "${defaultPackage}/bin/protol" ];
-          Command = [ "${defaultPackage}/bin/protol" ];
+          Entrypoint = [ defaultApp.program ];
+          Command = [ defaultApp.program ];
         };
       };
 
