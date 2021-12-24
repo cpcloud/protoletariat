@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.7.1 (2021-12-24)
+### Documentation
+* Add some info ([`b4c9663`](https://github.com/cpcloud/protoletariat/commit/b4c96636efc65e2b21de7c3d2c4a68535afcdef9))
+* Move the conda bit down ([`0cf67c4`](https://github.com/cpcloud/protoletariat/commit/0cf67c4321e52bbe0cc05bdf87c3c8d0b5fa074c))
+
+### Performance
+* Reduce everything up to but not including musl ([`c21a2a9`](https://github.com/cpcloud/protoletariat/commit/c21a2a9dd6de4be9353e2e704d643e2ac978d4de))
+
 ## v0.7.0 (2021-12-12)
 ### Feature
 * Support click 7 ([`b994dad`](https://github.com/cpcloud/protoletariat/commit/b994dad32f0e4a66f20793f1526638a296004186))
