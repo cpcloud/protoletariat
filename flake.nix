@@ -137,8 +137,9 @@
                   # about startup time; protoletariat is a CLI tool after all
                   preConfigure = ''
                     ${attrs.preConfigure or ""}
+                  '' + (super.lib.optionalString (!super.stdenv.isDarwin) ''
                     export NIX_LDFLAGS+=" --strip-all"
-                  '';
+                  '');
 
                   # remove optimized bytecode; shaves about 15MB
                   #
