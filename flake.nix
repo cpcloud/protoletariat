@@ -47,7 +47,7 @@
 
             buildInputs = [ pkgs.sqlite ];
 
-            overrides = getOverrides pkgs;
+            overrides = pkgs.poetry2nix.defaultPoetryOverrides;
 
             checkInputs = with pkgs; [ buf grpc protobuf ];
 
@@ -72,18 +72,12 @@
           value = pkgs.poetry2nix.mkPoetryEnv {
             python = pkgs."python${py}";
             projectDir = ./.;
-            overrides = getOverrides pkgs;
+            overrides = pkgs.poetry2nix.defaultPoetryOverrides;
             editablePackageSources = {
               protoletariat = ./protoletariat;
             };
           };
         };
-      getOverrides = pkgs: pkgs.poetry2nix.overrides.withDefaults (
-        import ./poetry-overrides.nix {
-          inherit pkgs;
-          inherit (pkgs) lib stdenv;
-        }
-      );
     in
     {
       overlay = nixpkgs.lib.composeManyExtensions [
