@@ -1,3 +1,4 @@
+name: CI
 on:
   push:
     branches:
@@ -5,8 +6,6 @@ on:
   pull_request:
     branches:
       - main
-
-name: CI
 
 concurrency:
   group: ${{ github.repository }}-${{ github.head_ref || github.sha }}-${{ github.workflow }}
@@ -17,48 +16,37 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v16
+      - uses: cachix/install-nix-action@v16
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
-          extra_nix_config: |
-            experimental-features = nix-command flakes
 
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v10
         with:
           name: protoletariat
           extraPullNames: nix-community,poetry2nix
 
-      - name: Lint commits
+      - name: commitlint
         run: nix shell -L -f '<nixpkgs>' commitlint -c commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }} --verbose
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v16
+      - uses: cachix/install-nix-action@v16
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
-          extra_nix_config: |
-            experimental-features = nix-command flakes
 
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v10
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
-      - name: Run pre-commit checks
-        run: nix develop -c pre-commit run --all-files
+      - run: nix develop -c pre-commit run --all-files
   nix:
     strategy:
       fail-fast: false
@@ -74,55 +62,48 @@ jobs:
           - "310"
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v16
+      - uses: cachix/install-nix-action@v16
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
-          extra_nix_config: |
-            experimental-features = nix-command flakes
 
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v10
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
-      - name: Build package and run tests
+      - name: build package and run tests
         run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}' --no-link
+
+      - name: show closure info
+        run: nix path-info --closure-size --human-readable --recursive '.#protoletariat${{ matrix.python-version }}'
   docker-image:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v16
+      - uses: cachix/install-nix-action@v16
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
-          extra_nix_config: |
-            experimental-features = nix-command flakes
 
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v10
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
-      - name: Build docker image
+      - name: build docker image
         run: nix build --print-build-logs --keep-going '.#protoletariat-image' --no-link
 
-      - name: Load the docker image
+      - name: load docker image
         run: |
           set -euo pipefail
 
-          docker load < "$(nix path-info --print-build-logs --keep-going '.#protoletariat-image')"
+          docker load -i "$(nix path-info --print-build-logs --keep-going '.#protoletariat-image')"
 
-      - name: Smoke test the image
+      - name: smoke test docker image
         run: |
           set -euo pipefail
 
@@ -163,25 +144,19 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-      - name: Setup buf
-        uses: bufbuild/buf-setup-action@v0.7.0
+      - uses: bufbuild/buf-setup-action@v0.7.0
         if: ${{ matrix.buf == 'buf' }}
         with:
           github_token: ${{ github.token }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install poetry and poetry2conda
-        run: pip3 install poetry2conda poetry
-
-      - name: Set click version
-        run: poetry add '${{ matrix.click-version }}'
+      - run: pip3 install poetry2conda poetry
+      - run: poetry add '${{ matrix.click-version }}'
 
       - name: Generate conda environment file
         run: |
@@ -189,8 +164,7 @@ jobs:
 
           poetry2conda --dev pyproject.toml - | tee environment.yaml
 
-      - name: Setup conda
-        uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v2
         with:
           mamba-version: "*"
           miniforge-variant: Mambaforge
@@ -200,34 +174,24 @@ jobs:
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yaml
 
-      - name: Install grpc-cpp for codegen plugins
-        run: mamba install grpc-cpp
-
-      - name: Install the package locally
-        run: poetry install
-
-      - name: Run tests
-        run: poetry run pytest -ra
+      - run: mamba install grpc-cpp
+      - run: poetry install
+      - run: poetry run pytest -ra
   tensorflow:
     runs-on: ubuntu-latest
     env:
       PYTHON_OUT: /tmp/tensorflow-gen
       TENSORFLOW_HOME: ${{ github.workspace }}/tensorflow
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           path: protoletariat
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@v16
+      - uses: cachix/install-nix-action@v16
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
-          extra_nix_config: |
-            experimental-features = nix-command flakes
 
-      - name: Setup Cachix
-        uses: cachix/cachix-action@v10
+      - uses: cachix/cachix-action@v10
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -239,8 +203,7 @@ jobs:
           repository: tensorflow/tensorflow
           path: tensorflow
 
-      - name: Make generated code directory
-        run: mkdir "$PYTHON_OUT"
+      - run: mkdir -p "$PYTHON_OUT"
 
       - name: Generate tensorflow Python proto code
         working-directory: protoletariat
@@ -266,55 +229,47 @@ jobs:
       - name: Check for absolute imports
         run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
   release:
+    runs-on: ubuntu-latest
     needs:
       - nix
       - conda
       - docker-image
       - pre-commit
       - tensorflow
-    runs-on: ubuntu-latest
     concurrency: release
     steps:
-      - name: Generate a GitHub token
-        uses: tibdex/github-app-token@v1
+      - uses: tibdex/github-app-token@v1
+        if: ${{ github.event_name != 'pull_request' }}
         id: generate_token
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         if: ${{ github.event_name != 'pull_request' }}
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
 
-      - name: Checkout PR
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         if: ${{ github.event_name == 'pull_request' }}
         with:
           fetch-depth: 0
 
-      - name: Configure git for semantic release
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+      - run: git config --global user.name "github-actions"
+      - run: git config --global user.email "github-actions@github.com"
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: "3.x"
 
-      - name: Install poetry and semantic-release
-        run: pip install poetry python-semantic-release
+      - run: pip install poetry python-semantic-release
 
-      - name: Semantic release
+      - run: semantic-release publish --verbosity=DEBUG
         if: ${{ github.event_name != 'pull_request' }}
-        run: semantic-release publish --verbosity=DEBUG
         env:
           GH_TOKEN: ${{ steps.generate_token.outputs.token }}
           PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
 
-      - name: Semantic release
+      - run: semantic-release publish --noop --verbosity=DEBUG
         if: ${{ github.event_name == 'pull_request' }}
-        run: semantic-release publish --noop --verbosity=DEBUG
