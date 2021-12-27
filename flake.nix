@@ -89,6 +89,7 @@
             --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
             "$@"
           '';
+          protoletariatDevEnv = pkgs.protoletariatDevEnv310;
         } // (super.lib.listToAttrs (
           super.lib.concatMap
             (py: [
@@ -246,7 +247,7 @@
           poetry
           prettierTOML
           protobuf
-          protoletariatDevEnv310
+          protoletariatDevEnv
         ];
 
         inherit (self.checks.${system}.pre-commit-check) shellHook;
