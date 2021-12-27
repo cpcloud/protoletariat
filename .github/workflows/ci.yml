@@ -116,7 +116,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-11
+          - macos-latest
           - windows-latest
         python-version:
           - "3.7"
@@ -133,7 +133,7 @@ jobs:
             python-version: "3.9"
             buf: no-buf
             click-version: null
-          - os: macos-11
+          - os: macos-latest
             python-version: "3.9"
             buf: no-buf
             click-version: null
