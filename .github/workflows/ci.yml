@@ -165,7 +165,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          poetry2conda --dev pyproject.toml - | tee /tmp/environment.yml
+          poetry2conda --dev pyproject.toml - | tee environment.yml
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -175,7 +175,7 @@ jobs:
           channel-priority: strict
           activate-environment: protoletariat
           python-version: ${{ matrix.python-version }}
-          environment-file: /tmp/environment.yml
+          environment-file: environment.yml
 
       - run: mamba install grpc-cpp
       - run: poetry install
