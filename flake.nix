@@ -47,8 +47,6 @@
 
             buildInputs = [ pkgs.sqlite ];
 
-            overrides = pkgs.poetry2nix.defaultPoetryOverrides;
-
             checkInputs = with pkgs; [ buf grpc protobuf ];
 
             preCheck = ''
@@ -72,7 +70,6 @@
           value = pkgs.poetry2nix.mkPoetryEnv {
             python = pkgs."python${py}";
             projectDir = ./.;
-            overrides = pkgs.poetry2nix.defaultPoetryOverrides;
             editablePackageSources = {
               protoletariat = ./protoletariat;
             };
