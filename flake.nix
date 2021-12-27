@@ -207,33 +207,31 @@
 
             black = {
               enable = true;
-              entry = lib.mkForce "black --check";
+              entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/black --check";
               types = [ "python" ];
             };
 
             isort = {
               enable = true;
-              language = "python";
-              entry = lib.mkForce "isort --check";
-              types_or = [ "cython" "pyi" "python" ];
+              entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/isort --check";
+              types_or = [ "pyi" "python" ];
             };
 
             flake8 = {
               enable = true;
-              language = "python";
-              entry = "flake8";
+              entry = "${pkgs.protoletariatDevEnv}/bin/flake8";
               types = [ "python" ];
             };
 
             pyupgrade = {
               enable = true;
-              entry = "pyupgrade --py37-plus";
+              entry = "${pkgs.protoletariatDevEnv}/bin/pyupgrade --py37-plus";
               types = [ "python" ];
             };
 
             mypy = {
               enable = true;
-              entry = "mypy";
+              entry = "${pkgs.protoletariatDevEnv}/bin/mypy";
               types = [ "python" ];
             };
           };
