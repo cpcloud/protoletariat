@@ -127,20 +127,20 @@ jobs:
           - buf
         click-version:
           - "click@<8"
-          - "click"
+          - null
         include:
           - os: ubuntu-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: "click"
+            click-version: null
           - os: macos-11
             python-version: "3.9"
             buf: no-buf
-            click-version: "click"
+            click-version: null
           - os: windows-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: "click"
+            click-version: null
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -159,6 +159,7 @@ jobs:
 
       - run: pip3 install poetry2conda poetry
       - run: poetry add '${{ matrix.click-version }}'
+        if: ${{ matrix.click-version != null }}
 
       - name: Generate conda environment file
         run: |
