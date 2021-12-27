@@ -2,7 +2,10 @@
   description = "Python protocol buffers for the rest of us";
 
   inputs = {
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     gitignore = {
       url = "github:hercules-ci/gitignore.nix";
@@ -26,11 +29,11 @@
 
   outputs =
     { self
-    , nixpkgs
     , flake-utils
-    , pre-commit-hooks
-    , poetry2nix
     , gitignore
+    , nixpkgs
+    , poetry2nix
+    , pre-commit-hooks
     }:
     let
       mkApp = { py, pkgs }:
@@ -168,9 +171,9 @@
       packages.protoletariat38 = pkgs.protoletariat38;
       packages.protoletariat39 = pkgs.protoletariat39;
       packages.protoletariat310 = pkgs.protoletariat310;
-      packages.protoletariat = pkgs.protoletariat310;
+      packages.protoletariat = packages.protoletariat310;
 
-      defaultPackage = pkgs.protoletariat;
+      defaultPackage = packages.protoletariat;
 
       apps.protoletariat = flake-utils.lib.mkApp {
         drv = packages.protoletariat;
