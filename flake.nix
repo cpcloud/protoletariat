@@ -50,11 +50,15 @@
             checkInputs = with pkgs; [ buf grpc protobuf ];
 
             preCheck = ''
+              set -euo pipefail
+
               export HOME
               HOME="$(mktemp -d)"
             '';
 
             checkPhase = ''
+              set -euo pipefail
+
               runHook preCheck
               pytest
               runHook postCheck
