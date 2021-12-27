@@ -103,6 +103,8 @@ jobs:
 
           docker load -i "$(nix path-info --print-build-logs --keep-going '.#protoletariat-image')"
 
+      - run: docker images protoletariat
+
       - name: smoke test docker image
         run: |
           set -euo pipefail
