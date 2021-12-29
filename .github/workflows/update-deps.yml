@@ -35,7 +35,7 @@ jobs:
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Update ${{ matrix.input }}
-        uses: cpcloud/flake-update-action@v1.0.1
+        uses: cpcloud/flake-update-action@v1.0.2
         with:
           dependency: ${{ matrix.input }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
