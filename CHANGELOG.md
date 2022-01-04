@@ -1,5 +1,12 @@
 # Release Notes
 
+## [0.7.3](https://github.com/cpcloud/protoletariat/compare/v0.7.2...v0.7.3) (2022-01-04)
+
+
+### Bug Fixes
+
+* fix release token to ensure publishing ([a97e98e](https://github.com/cpcloud/protoletariat/commit/a97e98e8e109c9ab65837ddf445a417e64284cb3))
+
 ## [0.7.2](https://github.com/cpcloud/protoletariat/compare/v0.7.1...v0.7.2) (2022-01-04)
 
 
