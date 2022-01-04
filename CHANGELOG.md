@@ -1,5 +1,12 @@
 # Release Notes
 
+## [0.7.2](https://github.com/cpcloud/protoletariat/compare/v0.7.1...v0.7.2) (2022-01-04)
+
+
+### Bug Fixes
+
+* move to upstream semantic-release ([b742a01](https://github.com/cpcloud/protoletariat/commit/b742a01857ef59085856a331ff77fb6bcdab5dd9))
+
 ## v0.7.1 (2021-12-24)
 ### Documentation
 * Add some info ([`b4c9663`](https://github.com/cpcloud/protoletariat/commit/b4c96636efc65e2b21de7c3d2c4a68535afcdef9))
