@@ -238,40 +238,47 @@ jobs:
       - docker-image
       - pre-commit
       - tensorflow
-    concurrency: release
     steps:
       - uses: tibdex/github-app-token@v1
-        if: ${{ github.event_name != 'pull_request' }}
         id: generate_token
         with:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@v2
-        if: ${{ github.event_name != 'pull_request' }}
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
 
-      - uses: actions/checkout@v2
-        if: ${{ github.event_name == 'pull_request' }}
+      - uses: cachix/install-nix-action@v16
         with:
-          fetch-depth: 0
+          nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - run: git config --global user.name "github-actions"
-      - run: git config --global user.email "github-actions@github.com"
-
-      - uses: actions/setup-python@v2
+      - uses: cachix/cachix-action@v10
         with:
-          python-version: "3.x"
+          name: stupidb
+          extraPullNames: nix-community,poetry2nix
 
-      - run: pip install poetry python-semantic-release
+      - name: setup nodejs
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
 
-      - run: semantic-release publish --verbosity=DEBUG
-        if: ${{ github.event_name != 'pull_request' }}
+      - name: run semantic-release
+        run: |
+          set -euo pipefail
+
+          npx \
+            -p semantic-release \
+            -p "@semantic-release/commit-analyzer" \
+            -p "@semantic-release/release-notes-generator" \
+            -p "@semantic-release/changelog" \
+            -p "@semantic-release/github" \
+            -p "@semantic-release/exec"\
+            -p "@semantic-release/git" \
+            semantic-release \
+            --ci
         env:
-          GH_TOKEN: ${{ steps.generate_token.outputs.token }}
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-
-      - run: semantic-release publish --noop --verbosity=DEBUG
-        if: ${{ github.event_name == 'pull_request' }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+          GIT_CREDENTIALS: ${{ steps.generate_token.outputs.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

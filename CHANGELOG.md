@@ -1,6 +1,4 @@
-# Changelog
-
-<!--next-version-placeholder-->
+# Release Notes
 
 ## v0.7.1 (2021-12-24)
 ### Documentation
