@@ -38,17 +38,6 @@ types-protobuf = "^3.18.1"
 [tool.poetry.scripts]
 protol = "protoletariat.__main__:main"
 
-[tool.semantic_release]
-version_toml = "pyproject.toml:tool.poetry.version"
-version_variable = ["protoletariat/__init__.py:__version__"]
-branch = "main"
-upload_to_pypi = true
-upload_to_release = true
-build_command = "poetry build"
-commit_subject = "chore(release): {version}"
-commit_author = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
-changelog_file = "CHANGELOG.md"
-
 [tool.pytest.ini_options]
 xfail_strict = true
 addopts = [

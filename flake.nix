@@ -234,6 +234,19 @@
               entry = "${pkgs.protoletariatDevEnv}/bin/mypy";
               types = [ "python" ];
             };
+
+            shellcheck = {
+              enable = true;
+              entry = "${pkgs.shellcheck}/bin/shellcheck";
+              files = "\\.sh$";
+              types_or = [ "file" ];
+            };
+
+            shfmt = {
+              enable = true;
+              entry = "${pkgs.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
+              files = "\\.sh$";
+            };
           };
         };
       };
@@ -241,7 +254,6 @@
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           buf
-          commitizen
           grpc
           poetry
           prettierTOML
