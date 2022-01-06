@@ -230,14 +230,34 @@ jobs:
 
       - name: Check for absolute imports
         run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
+  dry-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: cachix/install-nix-action@v16
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable-small
+
+      - uses: cachix/cachix-action@v10
+        with:
+          name: stupidb
+          extraPullNames: nix-community,poetry2nix
+
+      - name: run semantic-release
+        run: ./ci/release/dry_run.sh
   release:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
     needs:
       - nix
       - conda
       - docker-image
       - pre-commit
       - tensorflow
+      - dry-release
     steps:
       - uses: tibdex/github-app-token@v1
         id: generate_token
@@ -259,26 +279,8 @@ jobs:
           name: stupidb
           extraPullNames: nix-community,poetry2nix
 
-      - name: setup nodejs
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16
-
       - name: run semantic-release
-        run: |
-          set -euo pipefail
-
-          npx \
-            -p semantic-release \
-            -p "@semantic-release/commit-analyzer" \
-            -p "@semantic-release/release-notes-generator" \
-            -p "@semantic-release/changelog" \
-            -p "@semantic-release/github" \
-            -p "@semantic-release/exec"\
-            -p "@semantic-release/git" \
-            semantic-release \
-            --ci
+        run: ./ci/release/run.sh
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-          GIT_CREDENTIALS: ${{ steps.generate_token.outputs.token }}
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
