@@ -47,10 +47,9 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - name: Update ${{ matrix.input }}
-        uses: cpcloud/flake-update-action@v1.0.2
+      - uses: cpcloud/flake-update-action@v1.0.2
         with:
-          dependency: ${{ matrix.input }}
+          dependency: ${{ matrix.flake }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-token: ${{ steps.generate-token.outputs.token }}
           pull-request-author: "phillip-ground[bot] <phillip-ground[bot]@users.noreply.github.com>"
