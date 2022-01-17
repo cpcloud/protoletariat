@@ -48,6 +48,7 @@ jobs:
 
       - run: nix develop -c pre-commit run --all-files
   nix:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -59,7 +60,10 @@ jobs:
           - "38"
           - "39"
           - "310"
-    runs-on: ${{ matrix.os }}
+        exclude:
+          # macos python3 3.10 is broken in nixos-unstable-small
+          - os: macos-latest
+            python-version: "310"
     steps:
       - uses: actions/checkout@v2
 
@@ -74,7 +78,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: build package and run tests
-        run: nix build --print-build-logs --keep-going '.#protoletariat${{ matrix.python-version }}' --no-link
+        run: nix build --print-build-logs --no-link --keep-going '.#protoletariat${{ matrix.python-version }}'
 
       - name: show closure info
         run: nix path-info --closure-size --human-readable --recursive '.#protoletariat${{ matrix.python-version }}'
@@ -94,21 +98,23 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: build docker image
-        run: nix build --print-build-logs --keep-going '.#protoletariat-image' --no-link
+        run: nix build --print-build-logs --no-link --keep-going '.#protoletariat-image'
 
-      - name: load docker image
+      - name: get image info
+        id: get-info
         run: |
           set -euo pipefail
 
-          docker load -i "$(nix path-info --print-build-logs --keep-going '.#protoletariat-image')"
+          echo "::set-output name=path::$(nix path-info '.#protoletariat-image')"
+          echo "::set-output name=tag::$(nix eval --raw '.#protoletariat-image.imageTag')"
+
+      - name: load docker image
+        run: docker load -i ${{ steps.get-info.outputs.path }}
 
       - run: docker images protoletariat
 
       - name: smoke test docker image
-        run: |
-          set -euo pipefail
-
-          docker run --rm protoletariat:"$(nix eval --raw '.#protoletariat-image.imageTag')"
+        run: docker run --rm protoletariat:${{ steps.get-info.outputs.tag }}
   conda:
     strategy:
       fail-fast: false
