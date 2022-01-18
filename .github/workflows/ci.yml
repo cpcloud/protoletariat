@@ -249,7 +249,7 @@ jobs:
 
       - uses: cachix/cachix-action@v10
         with:
-          name: stupidb
+          name: protoletariat
           extraPullNames: nix-community,poetry2nix
 
       - name: run semantic-release
@@ -282,7 +282,7 @@ jobs:
 
       - uses: cachix/cachix-action@v10
         with:
-          name: stupidb
+          name: protoletariat
           extraPullNames: nix-community,poetry2nix
 
       - name: run semantic-release
