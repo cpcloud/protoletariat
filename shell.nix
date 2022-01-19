@@ -1,8 +1,8 @@
 (import
   (
     fetchTarball {
-      url = "https://github.com/edolstra/flake-compat/archive/99f1c2157fba4bfe6211a321fd0ee43199025dbf.tar.gz";
-      sha256 = "0x2jn3vrawwv9xp15674wjz9pixwjyj3j771izayl962zziivbx2";
+      url = "https://github.com/edolstra/flake-compat/archive/b7547d3eed6f32d06102ead8991ec52ab0a4f1a7.tar.gz";
+      sha256 = "09ln95rvvjxjsnmvzrvyc2ji2l5lz17s671z51f9z8cl4m23ndp2";
     }
   )
   {

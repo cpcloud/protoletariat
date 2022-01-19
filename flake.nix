@@ -32,58 +32,58 @@
     , flake-utils
     , gitignore
     , nixpkgs
-    , poetry2nix
     , pre-commit-hooks
+    , ...
     }:
     let
-      mkApp = { py, pkgs }:
-        {
-          name = "protoletariat${py}";
-          value = pkgs.poetry2nix.mkPoetryApplication {
-            python = pkgs."python${py}Optimized";
+      mkApp = { py, pkgs }: {
+        name = "protoletariat${py}";
+        value = (pkgs.mkPoetry2Nix pkgs."python${py}Optimized").mkPoetryApplication {
+          python = pkgs."python${py}Optimized";
 
-            projectDir = ./.;
-            src = pkgs.gitignoreSource ./.;
+          projectDir = ./.;
+          src = pkgs.gitignoreSource ./.;
 
-            buildInputs = [ pkgs.sqlite ];
+          buildInputs = [ pkgs.sqlite ];
 
-            checkInputs = with pkgs; [ buf grpc protobuf ];
+          overrides = (pkgs.mkPoetry2Nix pkgs."python${py}Optimized").overrides.withDefaults (
+            import ./poetry-overrides.nix { }
+          );
 
-            preCheck = ''
-              set -euo pipefail
+          checkInputs = with pkgs; [ buf grpc protobuf ];
 
-              export HOME
-              HOME="$(mktemp -d)"
-            '';
+          preCheck = "HOME=$TMPDIR";
 
-            checkPhase = ''
-              set -euo pipefail
+          checkPhase = ''
+            set -euo pipefail
 
-              runHook preCheck
-              pytest
-              runHook postCheck
-            '';
+            runHook preCheck
+            pytest
+            runHook postCheck
+          '';
 
-            pythonImportsCheck = [ "protoletariat" ];
-          };
-
+          pythonImportsCheck = [ "protoletariat" ];
         };
-      mkEnv = { py, pkgs }:
-        {
-          name = "protoletariatDevEnv${py}";
-          value = pkgs.poetry2nix.mkPoetryEnv {
-            python = pkgs."python${py}";
-            projectDir = ./.;
-            editablePackageSources = {
-              protoletariat = ./protoletariat;
-            };
+
+      };
+      mkEnv = { py, pkgs }: {
+        name = "protoletariatDevEnv${py}";
+        value = (pkgs.mkPoetry2Nix pkgs."python${py}").mkPoetryEnv {
+          python = pkgs."python${py}";
+          projectDir = ./.;
+          overrides = (pkgs.mkPoetry2Nix pkgs."python${py}").overrides.withDefaults (
+            import ./poetry-overrides.nix { }
+          );
+          editablePackageSources = {
+            protoletariat = ./protoletariat;
           };
         };
+      };
     in
     {
       overlay = nixpkgs.lib.composeManyExtensions [
         gitignore.overlay
-        poetry2nix.overlay
+        # poetry2nix.overlay
         (pkgs: super: {
           prettierTOML = pkgs.writeShellScriptBin "prettier" ''
             ${pkgs.nodePackages.prettier}/bin/prettier \
@@ -91,6 +91,11 @@
             "$@"
           '';
           protoletariatDevEnv = pkgs.protoletariatDevEnv310;
+          mkPoetry2Nix = python: pkgs.poetry2nix.override {
+            poetry = pkgs.poetry.override {
+              inherit python;
+            };
+          };
         } // (super.lib.listToAttrs (
           super.lib.concatMap
             (py: [
