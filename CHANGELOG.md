@@ -1,5 +1,12 @@
 # Release Notes
 
+## [0.7.4](https://github.com/cpcloud/protoletariat/compare/v0.7.3...v0.7.4) (2022-01-28)
+
+
+### Performance Improvements
+
+* build docker image with musl ([8c21eb5](https://github.com/cpcloud/protoletariat/commit/8c21eb58a80bce375509e1bddcef9aad2741cdcb))
+
 ## [0.7.3](https://github.com/cpcloud/protoletariat/compare/v0.7.2...v0.7.3) (2022-01-04)
 
 
