@@ -180,7 +180,10 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
         new = f"from {leading_dots} import {part}_pb2 as {last_part}"
     else:
         from_ = ".".join(import_parts)
-        as_ = f"{'_dot_'.join(import_parts)}_dot_{last_part}"
+        fake_dotted_path = "_dot_".join(
+            part.replace("_", "__") for part in import_parts
+        )
+        as_ = f"{fake_dotted_path}_dot_{last_part}"
 
         old = f"from {from_} import {part}_pb2 as {as_}"
         new = f"from {leading_dots}{from_} import {part}_pb2 as {as_}"
