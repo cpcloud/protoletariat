@@ -93,6 +93,15 @@ from protoletariat.rewrite import build_rewrites
             ],
             id="self_dep",
         ),
+        pytest.param(
+            "a_b/c",
+            "foo_bar/baz/bizz",
+            [
+                "from ..foo_bar.baz import bizz_pb2 as foo__bar_dot_baz_dot_bizz__pb2",
+                "from .. import foo_bar",
+            ],
+            id="underscore_package",
+        ),
     ],
 )
 def test_build_import_rewrites(proto: str, dep: str, expecteds: Iterable[str]) -> None:
