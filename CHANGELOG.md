@@ -1,5 +1,12 @@
 # Release Notes
 
+## [0.7.5](https://github.com/cpcloud/protoletariat/compare/v0.7.4...v0.7.5) (2022-02-07)
+
+
+### Bug Fixes
+
+* add more underscores for imports ([ff4ca73](https://github.com/cpcloud/protoletariat/commit/ff4ca73fb9eafee247d3a4452085eee5cb188107))
+
 ## [0.7.4](https://github.com/cpcloud/protoletariat/compare/v0.7.3...v0.7.4) (2022-01-28)
 
 

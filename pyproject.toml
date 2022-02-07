@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "protoletariat"
-version = "0.7.4"
+version = "0.7.5"
 packages = [{ include = "protoletariat" }]
 homepage = "https://github.com/cpcloud/protoletariat"
 repository = "https://github.com/cpcloud/protoletariat"
