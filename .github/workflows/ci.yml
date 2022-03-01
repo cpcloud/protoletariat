@@ -16,7 +16,7 @@ jobs:
     if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -34,7 +34,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: cachix/install-nix-action@v16
         with:
@@ -65,7 +65,7 @@ jobs:
           - os: macos-latest
             python-version: "310"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: cachix/install-nix-action@v16
         with:
@@ -85,7 +85,7 @@ jobs:
   docker-image:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: cachix/install-nix-action@v16
         with:
@@ -151,7 +151,7 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: bufbuild/buf-setup-action@v1.1.0
         if: ${{ matrix.buf == 'buf' }}
@@ -191,7 +191,7 @@ jobs:
       PYTHON_OUT: /tmp/tensorflow-gen
       TENSORFLOW_HOME: ${{ github.workspace }}/tensorflow
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           path: protoletariat
 
@@ -206,7 +206,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: Clone Tensorflow
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: tensorflow/tensorflow
           path: tensorflow
@@ -243,7 +243,7 @@ jobs:
   dry-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -275,7 +275,7 @@ jobs:
           app_id: ${{ secrets.APP_ID }}
           private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
           token: ${{ steps.generate_token.outputs.token }}
