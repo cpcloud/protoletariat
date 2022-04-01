@@ -183,8 +183,8 @@ jobs:
           environment-file: environment.yml
 
       - run: mamba install grpc-cpp
-      - run: poetry install
-      - run: poetry run pytest -ra
+      - run: pip3 install .
+      - run: pytest -ra
   tensorflow:
     runs-on: ubuntu-latest
     env:
