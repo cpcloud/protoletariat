@@ -159,9 +159,10 @@ def protoc(
     show_envvar=True,
     help="Path to the `buf` executable",
 )
+@click.argument("input", type=str, default=os.curdir)
 @click.pass_context
-def buf(ctx: click.Context, buf_path: str) -> None:
-    Buf(buf_path=os.fsdecode(buf_path)).fix_imports(**ctx.obj)
+def buf(ctx: click.Context, buf_path: str, input: str) -> None:
+    Buf(buf_path=os.fsdecode(buf_path), input=os.fsdecode(input)).fix_imports(**ctx.obj)
 
 
 @main.command(help="Rewrite imports using FileDescriptorSet bytes from a file or stdin")

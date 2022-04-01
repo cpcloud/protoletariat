@@ -131,7 +131,7 @@ class BufFixture(ProtoletariatFixture):
         else:
             return cli.invoke(
                 main,
-                ["--python-out", str(self.package_dir), *args, "buf"],
+                ["--python-out", str(self.package_dir), *args, "buf", os.getcwd()],
                 catch_exceptions=False,
             )
 

@@ -138,15 +138,18 @@ class Protoc(FileDescriptorSetGenerator):
 class Buf(FileDescriptorSetGenerator):
     """Generate the FileDescriptorSet using `buf`."""
 
-    def __init__(self, *, buf_path: str) -> None:
+    def __init__(self, *, buf_path: str, input: str) -> None:
         """Construct a `buf`-based `FileDescriptorSetGenerator`.
 
         Parameters
         ----------
         buf_path
             Path to buf executable
+        input
+            The source or module to build
         """
         self.buf_path = buf_path
+        self.input = input
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
         return subprocess.check_output(
@@ -155,6 +158,7 @@ class Buf(FileDescriptorSetGenerator):
                 "build",
                 "--as-file-descriptor-set",
                 "--exclude-source-info",
+                self.input,
                 "--output",
                 "-",
             ]
