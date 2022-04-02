@@ -12,58 +12,54 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  commitlint:
-    if: ${{ github.event_name == 'pull_request' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          extraPullNames: nix-community,poetry2nix
-
-      - name: commitlint
-        run: nix shell -L -f '<nixpkgs>' commitlint -c commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }} --verbose
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          extraPullNames: nix-community,poetry2nix
-
-      - run: nix develop -c pre-commit run --all-files
+  # commitlint:
+  #   if: ${{ github.event_name == 'pull_request' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - name: commitlint
+  #       run: nix shell -L -f '<nixpkgs>' commitlint -c commitlint --from=${{ github.event.pull_request.base.sha }} --to=${{ github.sha }} --verbose
+  # pre-commit:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - run: nix develop -c pre-commit run --all-files
   nix:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          # - ubuntu-latest
           - macos-latest
         python-version:
-          - "37"
-          - "38"
-          - "39"
+          # - "37"
+          # - "38"
+          # - "39"
           - "310"
-        exclude:
-          # macos python3 3.10 is broken in nixos-unstable-small
-          - os: macos-latest
-            python-version: "310"
     steps:
       - uses: actions/checkout@v3
 
@@ -82,215 +78,215 @@ jobs:
 
       - name: show closure info
         run: nix path-info --closure-size --human-readable --recursive '.#protoletariat${{ matrix.python-version }}'
-  docker-image:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          extraPullNames: nix-community,poetry2nix
-
-      - name: build docker image
-        run: nix build --print-build-logs --no-link --keep-going '.#protoletariat-image'
-
-      - name: get image info
-        id: get-info
-        run: |
-          set -euo pipefail
-
-          echo "::set-output name=path::$(nix path-info '.#protoletariat-image')"
-          echo "::set-output name=tag::$(nix eval --raw '.#protoletariat-image.imageTag')"
-
-      - name: load docker image
-        run: docker load -i ${{ steps.get-info.outputs.path }}
-
-      - run: docker images protoletariat
-
-      - name: smoke test docker image
-        run: docker run --rm protoletariat:${{ steps.get-info.outputs.tag }}
-  conda:
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        python-version:
-          - "3.7"
-          - "3.8"
-          - "3.9"
-          - "3.10"
-        buf:
-          - buf
-        click-version:
-          - "click@<8"
-          - null
-        include:
-          - os: ubuntu-latest
-            python-version: "3.9"
-            buf: no-buf
-            click-version: null
-          - os: macos-latest
-            python-version: "3.9"
-            buf: no-buf
-            click-version: null
-          - os: windows-latest
-            python-version: "3.9"
-            buf: no-buf
-            click-version: null
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: bufbuild/buf-setup-action@v1.3.1
-        if: ${{ matrix.buf == 'buf' }}
-        with:
-          github_token: ${{ github.token }}
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - run: pip3 install poetry2conda poetry
-      - run: poetry add '${{ matrix.click-version }}'
-        if: ${{ matrix.click-version != null }}
-
-      - name: Generate conda environment file
-        run: |
-          set -euo pipefail
-
-          poetry2conda --dev pyproject.toml - | tee environment.yml
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          channel-priority: strict
-          activate-environment: protoletariat
-          python-version: ${{ matrix.python-version }}
-          environment-file: environment.yml
-
-      - run: mamba install grpc-cpp
-      - run: pip3 install .
-      - run: pytest -ra
-  tensorflow:
-    runs-on: ubuntu-latest
-    env:
-      PYTHON_OUT: /tmp/tensorflow-gen
-      TENSORFLOW_HOME: ${{ github.workspace }}/tensorflow
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          path: protoletariat
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          extraPullNames: nix-community,poetry2nix
-
-      - name: Clone Tensorflow
-        uses: actions/checkout@v3
-        with:
-          repository: tensorflow/tensorflow
-          path: tensorflow
-
-      - run: mkdir -p "$PYTHON_OUT"
-
-      - name: Generate tensorflow Python proto code
-        working-directory: protoletariat
-        run: |
-          set -euo pipefail
-
-          nix develop -c \
-            protoc \
-            --python_out "$PYTHON_OUT" \
-            --proto_path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
-
-      - name: Test tensorflow rewriting
-        working-directory: protoletariat
-        run: |
-          set -euo pipefail
-
-          nix run '.#protoletariat' \
-            -- \
-            --in-place \
-            --create-package \
-            --python-out "$PYTHON_OUT" \
-            protoc \
-            --proto-path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
-
-      - name: Check for absolute imports
-        run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
-  dry-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          extraPullNames: nix-community,poetry2nix
-
-      - name: run semantic-release
-        run: ./ci/release/dry_run.sh
-  release:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
-    needs:
-      - nix
-      - conda
-      - docker-image
-      - pre-commit
-      - tensorflow
-      - dry-release
-    steps:
-      - uses: tibdex/github-app-token@v1
-        id: generate_token
-        with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
-
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          token: ${{ steps.generate_token.outputs.token }}
-
-      - uses: cachix/install-nix-action@v16
-        with:
-          nix_path: nixpkgs=channel:nixos-unstable-small
-
-      - uses: cachix/cachix-action@v10
-        with:
-          name: protoletariat
-          extraPullNames: nix-community,poetry2nix
-
-      - name: run semantic-release
-        run: ./ci/release/run.sh
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
-          GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+  # docker-image:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - name: build docker image
+  #       run: nix build --print-build-logs --no-link --keep-going '.#protoletariat-image'
+  #
+  #     - name: get image info
+  #       id: get-info
+  #       run: |
+  #         set -euo pipefail
+  #
+  #         echo "::set-output name=path::$(nix path-info '.#protoletariat-image')"
+  #         echo "::set-output name=tag::$(nix eval --raw '.#protoletariat-image.imageTag')"
+  #
+  #     - name: load docker image
+  #       run: docker load -i ${{ steps.get-info.outputs.path }}
+  #
+  #     - run: docker images protoletariat
+  #
+  #     - name: smoke test docker image
+  #       run: docker run --rm protoletariat:${{ steps.get-info.outputs.tag }}
+  # conda:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os:
+  #         - ubuntu-latest
+  #         - macos-latest
+  #         - windows-latest
+  #       python-version:
+  #         - "3.7"
+  #         - "3.8"
+  #         - "3.9"
+  #         - "3.10"
+  #       buf:
+  #         - buf
+  #       click-version:
+  #         - "click@<8"
+  #         - null
+  #       include:
+  #         - os: ubuntu-latest
+  #           python-version: "3.9"
+  #           buf: no-buf
+  #           click-version: null
+  #         - os: macos-latest
+  #           python-version: "3.9"
+  #           buf: no-buf
+  #           click-version: null
+  #         - os: windows-latest
+  #           python-version: "3.9"
+  #           buf: no-buf
+  #           click-version: null
+  #   runs-on: ${{ matrix.os }}
+  #   defaults:
+  #     run:
+  #       shell: bash -l {0}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #
+  #     - uses: bufbuild/buf-setup-action@v1.3.1
+  #       if: ${{ matrix.buf == 'buf' }}
+  #       with:
+  #         github_token: ${{ github.token }}
+  #
+  #     - uses: actions/setup-python@v3
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #
+  #     - run: pip3 install poetry2conda poetry
+  #     - run: poetry add '${{ matrix.click-version }}'
+  #       if: ${{ matrix.click-version != null }}
+  #
+  #     - name: Generate conda environment file
+  #       run: |
+  #         set -euo pipefail
+  #
+  #         poetry2conda --dev pyproject.toml - | tee environment.yml
+  #
+  #     - uses: conda-incubator/setup-miniconda@v2
+  #       with:
+  #         mamba-version: "*"
+  #         miniforge-variant: Mambaforge
+  #         miniforge-version: latest
+  #         channel-priority: strict
+  #         activate-environment: protoletariat
+  #         python-version: ${{ matrix.python-version }}
+  #         environment-file: environment.yml
+  #
+  #     - run: mamba install grpc-cpp
+  #     - run: pip3 install .
+  #     - run: pytest -ra
+  # tensorflow:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     PYTHON_OUT: /tmp/tensorflow-gen
+  #     TENSORFLOW_HOME: ${{ github.workspace }}/tensorflow
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         path: protoletariat
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - name: Clone Tensorflow
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: tensorflow/tensorflow
+  #         path: tensorflow
+  #
+  #     - run: mkdir -p "$PYTHON_OUT"
+  #
+  #     - name: Generate tensorflow Python proto code
+  #       working-directory: protoletariat
+  #       run: |
+  #         set -euo pipefail
+  #
+  #         nix develop -c \
+  #           protoc \
+  #           --python_out "$PYTHON_OUT" \
+  #           --proto_path "$TENSORFLOW_HOME" \
+  #           $(find "$TENSORFLOW_HOME" -name '*.proto')
+  #
+  #     - name: Test tensorflow rewriting
+  #       working-directory: protoletariat
+  #       run: |
+  #         set -euo pipefail
+  #
+  #         nix run '.#protoletariat' \
+  #           -- \
+  #           --in-place \
+  #           --create-package \
+  #           --python-out "$PYTHON_OUT" \
+  #           protoc \
+  #           --proto-path "$TENSORFLOW_HOME" \
+  #           $(find "$TENSORFLOW_HOME" -name '*.proto')
+  #
+  #     - name: Check for absolute imports
+  #       run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
+  # dry-release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - name: run semantic-release
+  #       run: ./ci/release/dry_run.sh
+  # release:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ github.event_name != 'pull_request' }}
+  #   needs:
+  #     - nix
+  #     - conda
+  #     - docker-image
+  #     - pre-commit
+  #     - tensorflow
+  #     - dry-release
+  #   steps:
+  #     - uses: tibdex/github-app-token@v1
+  #       id: generate_token
+  #       with:
+  #         app_id: ${{ secrets.APP_ID }}
+  #         private_key: ${{ secrets.APP_PRIVATE_KEY }}
+  #
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #         token: ${{ steps.generate_token.outputs.token }}
+  #
+  #     - uses: cachix/install-nix-action@v16
+  #       with:
+  #         nix_path: nixpkgs=channel:nixos-unstable-small
+  #
+  #     - uses: cachix/cachix-action@v10
+  #       with:
+  #         name: protoletariat
+  #         extraPullNames: nix-community,poetry2nix
+  #
+  #     - name: run semantic-release
+  #       run: ./ci/release/run.sh
+  #       env:
+  #         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+  #         GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
