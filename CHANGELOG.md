@@ -1,5 +1,12 @@
 # Release Notes
 
+# [0.8.0](https://github.com/cpcloud/protoletariat/compare/v0.7.5...v0.8.0) (2022-04-02)
+
+
+### Features
+
+* **buf:** pass input argument through to buf ([aacae63](https://github.com/cpcloud/protoletariat/commit/aacae63c14f71856157b8359abd0316d3a61608f))
+
 ## [0.7.5](https://github.com/cpcloud/protoletariat/compare/v0.7.4...v0.7.5) (2022-02-07)
 
 
