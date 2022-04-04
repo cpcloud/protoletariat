@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import fnmatch
+import itertools
 import re
 import subprocess
 import tempfile
@@ -95,12 +96,8 @@ class FileDescriptorSetGenerator(abc.ABC):
                     overwrite_callback(python_file, new_code)
 
         if create_package:
-            python_out.joinpath("__init__.py").touch(exist_ok=True)
-            if has_pyi:
-                _create_pyi_init(python_out)
-
             # recursively create packages
-            for dir_entry in python_out.rglob("*"):
+            for dir_entry in itertools.chain([python_out], python_out.rglob("*")):
                 if dir_entry.is_dir():
                     dir_entry.joinpath("__init__.py").touch(exist_ok=True)
                     if has_pyi:
