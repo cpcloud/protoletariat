@@ -109,7 +109,7 @@ def _create_pyi_init(root: Path) -> None:
         f.writelines(
             f"from . import {path.stem}\n"
             for path in root.glob("*")
-            if path.stem != "__init__"
+            if path.stem != "__init__" and (path.suffix == ".pyi" or path.is_dir())
         )
 
 
