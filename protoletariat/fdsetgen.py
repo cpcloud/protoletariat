@@ -95,11 +95,22 @@ class FileDescriptorSetGenerator(abc.ABC):
 
         if create_package:
             python_out.joinpath("__init__.py").touch(exist_ok=True)
+            _create_pyi_init(python_out)
 
             # recursively create packages
             for dir_entry in python_out.rglob("*"):
                 if dir_entry.is_dir():
                     dir_entry.joinpath("__init__.py").touch(exist_ok=True)
+                    _create_pyi_init(dir_entry)
+
+
+def _create_pyi_init(root: Path) -> None:
+    with root.joinpath("__init__.pyi").open(mode="a") as f:
+        f.writelines(
+            f"from . import {path.stem}\n"
+            for path in root.glob("*")
+            if path.stem != "__init__"
+        )
 
 
 class Protoc(FileDescriptorSetGenerator):

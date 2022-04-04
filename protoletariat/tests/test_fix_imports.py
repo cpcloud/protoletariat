@@ -121,6 +121,11 @@ def test_grpc_no_imports(  # type: ignore[misc]
     result = no_imports_service.generate(cli, args=["--in-place", "--create-package"])
     assert result.exit_code == 0
 
+    init = no_imports_service.package_dir.joinpath("__init__.pyi")
+    init_lines = init.read_text().splitlines()
+    assert "from . import no_imports_service_pb2" in init_lines
+    assert "from . import no_imports_service_pb2_grpc" in init_lines
+
     service_module_types = no_imports_service.package_dir.joinpath(
         "no_imports_service_pb2_grpc.pyi"
     )
