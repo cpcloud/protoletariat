@@ -61,6 +61,7 @@ class FileDescriptorSetGenerator(abc.ABC):
         """Fix imports from protoc/buf generated code."""
         fdset = FileDescriptorSet.FromString(self.generate_file_descriptor_set_bytes())
 
+        has_pyi = any(suffix.endswith(".pyi") for suffix in module_suffixes)
         for fd in fdset.file:
             if _should_ignore(fd.name, exclude_imports_glob):
                 continue
@@ -95,13 +96,15 @@ class FileDescriptorSetGenerator(abc.ABC):
 
         if create_package:
             python_out.joinpath("__init__.py").touch(exist_ok=True)
-            _create_pyi_init(python_out)
+            if has_pyi:
+                _create_pyi_init(python_out)
 
             # recursively create packages
             for dir_entry in python_out.rglob("*"):
                 if dir_entry.is_dir():
                     dir_entry.joinpath("__init__.py").touch(exist_ok=True)
-                    _create_pyi_init(dir_entry)
+                    if has_pyi:
+                        _create_pyi_init(dir_entry)
 
 
 def _create_pyi_init(root: Path) -> None:
