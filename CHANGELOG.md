@@ -1,5 +1,12 @@
 # Release Notes
 
+# [0.9.0](https://github.com/cpcloud/protoletariat/compare/v0.8.0...v0.9.0) (2022-04-04)
+
+
+### Features
+
+* generate __init__.pyi for mypy ([9d7fe5b](https://github.com/cpcloud/protoletariat/commit/9d7fe5be7ace688e5e469fb474840e53f0f877ad))
+
 # [0.8.0](https://github.com/cpcloud/protoletariat/compare/v0.7.5...v0.8.0) (2022-04-02)
 
 
