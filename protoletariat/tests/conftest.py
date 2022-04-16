@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import contextlib
+import itertools
 import json
 import os
 import shutil
@@ -265,20 +266,21 @@ def cli() -> CliRunner:
     return CliRunner()
 
 
-@pytest.fixture
-def basic_cli_texts() -> list[ProtoFile]:
-    this_code = """
+@pytest.fixture(params=["_", "-"])
+def basic_cli_texts(request: SubRequest) -> list[ProtoFile]:
+    sep = request.param
+    this_code = f"""
 syntax = "proto3";
 
 import "other.proto";
-import "baz/bizz_buzz.proto";
+import "baz/bizz{sep}buzz.proto";
 
 package protoletariat.test;
 
-message Test {
+message Test {{
     Other test = 1;
     protoletariat.test.baz.BuzzBuzz baz = 2;
-}"""
+}}"""
     other_code = """
 syntax = "proto3";
 
@@ -296,7 +298,10 @@ message BuzzBuzz {}
     return [
         ProtoFile(basename="this.proto", code=this_code),
         ProtoFile(basename="other.proto", code=other_code),
-        ProtoFile(basename="baz/bizz_buzz.proto", code=baz_bizz_buzz_code),
+        ProtoFile(
+            basename=f"baz/bizz{sep}buzz.proto",
+            code=baz_bizz_buzz_code,
+        ),
     ]
 
 
@@ -333,8 +338,9 @@ def basic_cli(
     )
 
 
-@pytest.fixture
-def thing_service_texts() -> list[ProtoFile]:
+@pytest.fixture(params=["_", "-"])
+def thing_service_texts(request: SubRequest) -> list[ProtoFile]:
+    sep = request.param
     thing_service_code = """
 syntax = "proto3";
 
@@ -369,7 +375,7 @@ message Thing2 {
 }
 """
     return [
-        ProtoFile(basename="thing_service.proto", code=thing_service_code),
+        ProtoFile(basename=f"thing{sep}service.proto", code=thing_service_code),
         ProtoFile(basename="thing1.proto", code=thing1_code),
         ProtoFile(basename="thing2.proto", code=thing2_code),
     ]
@@ -463,8 +469,9 @@ def nested(
     )
 
 
-@pytest.fixture
-def no_imports_service_texts() -> list[ProtoFile]:
+@pytest.fixture(params=itertools.product("_-", repeat=2))
+def no_imports_service_texts(request: SubRequest) -> list[ProtoFile]:
+    sep1, sep2 = request.param
     code = """
 syntax = "proto3";
 
@@ -477,7 +484,7 @@ service NoImportsService {
     rpc Get(Request) returns (Response) {}
 }
 """
-    return [ProtoFile(basename="no_imports_service.proto", code=code)]
+    return [ProtoFile(basename=f"no{sep1}imports{sep2}service.proto", code=code)]
 
 
 @pytest.fixture(
@@ -530,8 +537,9 @@ def no_imports_service(
     )
 
 
-@pytest.fixture
-def imports_service_texts() -> list[ProtoFile]:
+@pytest.fixture(params=["_", "-"])
+def imports_service_texts(request: SubRequest) -> list[ProtoFile]:
+    sep = request.param
     imports_code = """
 syntax = "proto3";
 
@@ -562,7 +570,7 @@ message PostRequest {}
 message PostResponse {}
 """
     return [
-        ProtoFile(basename="imports_service.proto", code=imports_code),
+        ProtoFile(basename=f"imports{sep}service.proto", code=imports_code),
         ProtoFile(basename="requests/get.proto", code=requests_get_code),
         ProtoFile(basename="requests/post.proto", code=requests_post_code),
     ]
@@ -670,8 +678,9 @@ def long_names(
     )
 
 
-@pytest.fixture
-def ignored_import_texts() -> list[ProtoFile]:
+@pytest.fixture(params=["_", "-"])
+def ignored_import_texts(request: SubRequest) -> list[ProtoFile]:
+    sep = request.param
     ignored_import_code = """
 syntax = "proto3";
 
@@ -682,7 +691,7 @@ message Foo {}
 """
     ignored_code = ""
     return [
-        ProtoFile(basename="ignored_import.proto", code=ignored_import_code),
+        ProtoFile(basename=f"ignored{sep}import.proto", code=ignored_import_code),
         ProtoFile(basename="ignored.proto", code=ignored_code),
     ]
 
