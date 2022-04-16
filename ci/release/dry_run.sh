@@ -28,6 +28,7 @@ npx --yes \
   -p "@semantic-release/changelog" \
   -p "@semantic-release/exec" \
   -p "@semantic-release/git" \
+  -p "conventional-changelog-conventionalcommits" \
   semantic-release \
   --ci \
   --preset conventionalcommits \
