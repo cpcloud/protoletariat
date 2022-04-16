@@ -30,6 +30,7 @@ npx --yes \
   -p "@semantic-release/git" \
   semantic-release \
   --ci \
+  --preset conventionalcommits \
   --dry-run \
   --plugins \
   --analyze-commits "@semantic-release/commit-analyzer" \
