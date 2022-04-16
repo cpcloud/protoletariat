@@ -24,7 +24,7 @@ def _remove_proto_suffix(name: str) -> str:
     >>> _remove_proto_suffix("a/b.proto")
     'a/b'
     """
-    return _PROTO_SUFFIX_PATTERN.sub(r"\1", name)
+    return _PROTO_SUFFIX_PATTERN.sub(r"\1", name).replace("-", "_")
 
 
 def _should_ignore(fd_name: str, patterns: Sequence[str]) -> bool:
