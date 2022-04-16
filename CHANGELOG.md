@@ -1,5 +1,12 @@
 # Release Notes
 
+### [0.9.1](https://github.com/cpcloud/protoletariat/compare/v0.9.0...v0.9.1) (2022-04-16)
+
+
+### Bug Fixes
+
+* replace hyphens with suffixes when cleaning proto filename ([71b9f27](https://github.com/cpcloud/protoletariat/commit/71b9f274b206a4096549acf94d9b9c4d01cd93e2))
+
 # [0.9.0](https://github.com/cpcloud/protoletariat/compare/v0.8.0...v0.9.0) (2022-04-04)
 
 
