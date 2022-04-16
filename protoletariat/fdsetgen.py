@@ -16,13 +16,17 @@ from .rewrite import ASTImportRewriter, build_rewrites
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
 
 
-def _remove_proto_suffix(name: str) -> str:
+def _clean_proto_filename(name: str) -> str:
     """Remove the `.proto` suffix from `name`.
 
     Examples
     --------
-    >>> _remove_proto_suffix("a/b.proto")
+    >>> _clean_proto_filename("a/b.proto")
     'a/b'
+    >>> _clean_proto_filename("a/b-c.proto")
+    'a/b_c'
+    >>> _clean_proto_filename("a/b_c.proto")
+    'a/b_c'
     """
     return _PROTO_SUFFIX_PATTERN.sub(r"\1", name).replace("-", "_")
 
@@ -67,7 +71,7 @@ class FileDescriptorSetGenerator(abc.ABC):
             if _should_ignore(fd.name, exclude_imports_glob):
                 continue
 
-            fd_name = _remove_proto_suffix(fd.name)
+            fd_name = _clean_proto_filename(fd.name)
             rewriter = ASTImportRewriter()
             # services live outside of the corresponding generated Python
             # module, but they import it so we register a rewrite for the
@@ -77,11 +81,11 @@ class FileDescriptorSetGenerator(abc.ABC):
                 rewriter.register_rewrite(repl)
 
             # register proto import rewrites
-            for dep in map(_remove_proto_suffix, fd.dependency):
+            for dep in map(_clean_proto_filename, fd.dependency):
                 if _should_ignore(dep, exclude_imports_glob):
                     continue
 
-                dep_name = _remove_proto_suffix(dep)
+                dep_name = _clean_proto_filename(dep)
                 for repl in build_rewrites(fd_name, dep_name):
                     rewriter.register_rewrite(repl)
 
