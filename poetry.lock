@@ -389,7 +389,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "types-protobuf"
-version = "3.19.16"
+version = "3.19.17"
 description = "Typing stubs for protobuf"
 category = "dev"
 optional = false
@@ -397,11 +397,11 @@ python-versions = "*"
 
 [[package]]
 name = "typing-extensions"
-version = "4.1.1"
-description = "Backported and Experimental Type Hints for Python 3.6+"
+version = "4.2.0"
+description = "Backported and Experimental Type Hints for Python 3.7+"
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [[package]]
 name = "zipp"
@@ -696,12 +696,12 @@ typed-ast = [
     {file = "typed_ast-1.5.3.tar.gz", hash = "sha256:27f25232e2dd0edfe1f019d6bfaaf11e86e657d9bdb7b0956db95f560cceb2b3"},
 ]
 types-protobuf = [
-    {file = "types-protobuf-3.19.16.tar.gz", hash = "sha256:5cf8a20aa9ebb84af2e221dfcd6f82e80c4ada6f624b686e91786ae3774fe2c4"},
-    {file = "types_protobuf-3.19.16-py3-none-any.whl", hash = "sha256:8189b1e7dc7ebd7d2023a4384d289cb7f38acc1b4a3cc359f4dce34a120c6779"},
+    {file = "types-protobuf-3.19.17.tar.gz", hash = "sha256:d0d930326cd76d9e85fd592e18c2248636bdbbf0226618082f57a82f00dd7d25"},
+    {file = "types_protobuf-3.19.17-py3-none-any.whl", hash = "sha256:68e9e7bd9439a7b5ee679ada87a2622f2f7df2c66434ff49a5729007ceebc501"},
 ]
 typing-extensions = [
-    {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},
-    {file = "typing_extensions-4.1.1.tar.gz", hash = "sha256:1a9462dcc3347a79b1f1c0271fbe79e844580bb598bafa1ed208b94da3cdcd42"},
+    {file = "typing_extensions-4.2.0-py3-none-any.whl", hash = "sha256:6657594ee297170d19f67d55c05852a874e7eb634f4f753dbd667855e07c1708"},
+    {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
 ]
 zipp = [
     {file = "zipp-3.8.0-py3-none-any.whl", hash = "sha256:c4f6e5bbf48e74f7a38e7cc5b0480ff42b0ae5178957d564d18932525d5cf099"},
