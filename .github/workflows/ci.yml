@@ -74,9 +74,11 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: build package and run tests
+        continue-on-error: ${{ matrix.os == 'macos-latest' }}
         run: nix build --print-build-logs --no-link --keep-going '.#protoletariat${{ matrix.python-version }}'
 
       - name: show closure info
+        continue-on-error: ${{ matrix.os == 'macos-latest' }}
         run: nix path-info --closure-size --human-readable --recursive '.#protoletariat${{ matrix.python-version }}'
   docker-image:
     runs-on: ubuntu-latest
