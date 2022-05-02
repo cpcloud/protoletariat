@@ -110,14 +110,13 @@ jobs:
 
       - name: smoke test docker image
         run: docker run --rm protoletariat:${{ steps.get-info.outputs.tag }}
-  conda:
+  conda-ubuntu-macos:
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
         python-version:
           - "3.7"
           - "3.8"
@@ -134,10 +133,6 @@ jobs:
             buf: no-buf
             click-version: null
           - os: macos-latest
-            python-version: "3.9"
-            buf: no-buf
-            click-version: null
-          - os: windows-latest
             python-version: "3.9"
             buf: no-buf
             click-version: null
@@ -166,6 +161,57 @@ jobs:
           set -euo pipefail
 
           poetry2conda --dev pyproject.toml - | tee environment.yml
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          mamba-version: "*"
+          miniforge-variant: Mambaforge
+          miniforge-version: latest
+          channel-priority: strict
+          activate-environment: protoletariat
+          python-version: ${{ matrix.python-version }}
+          environment-file: environment.yml
+
+      - run: mamba install grpc-cpp
+      - run: pip3 install .
+      - run: pytest -ra
+  conda-windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+        buf:
+          - buf
+        click-version:
+          - "click@<8"
+          - null
+        include:
+          - python-version: "3.9"
+            buf: no-buf
+            click-version: null
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: bufbuild/buf-setup-action@v1.4.0
+        if: ${{ matrix.buf == 'buf' }}
+        with:
+          github_token: ${{ github.token }}
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: pip3 install poetry2conda poetry
+      - run: poetry add '${{ matrix.click-version }}'
+        if: ${{ matrix.click-version != null }}
+
+      - name: Generate conda environment file
+        run: poetry2conda --dev pyproject.toml - > environment.yml
 
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -258,7 +304,8 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     needs:
       - nix
-      - conda
+      - conda-ubuntu-macos
+      - conda-windows
       - docker-image
       - pre-commit
       - tensorflow
