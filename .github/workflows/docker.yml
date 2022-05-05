@@ -21,7 +21,7 @@ jobs:
       - run: nix build --print-build-logs --keep-going '.#protoletariat-image' --no-link
       - run: docker load -i "$(nix path-info -L '.#protoletariat-image')"
       - run: echo "FROM protoletariat:$(nix eval --raw '.#protoletariat-image.imageTag')" > Dockerfile
-      - uses: docker/metadata-action@v3
+      - uses: docker/metadata-action@v4
         id: meta
         with:
           images: |
