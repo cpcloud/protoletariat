@@ -42,13 +42,18 @@
     [
       "@semantic-release/github",
       {
+        "successComment": false,
         "assets": ["dist/*.whl"]
       }
     ],
     [
       "@semantic-release/git",
       {
-        "assets": ["pyproject.toml", "CHANGELOG.md"],
+        "assets": [
+          "pyproject.toml",
+          "CHANGELOG.md",
+          "protoletariat/__init__.py"
+        ],
         "message": "chore(release): ${nextRelease.version}"
       }
     ]
