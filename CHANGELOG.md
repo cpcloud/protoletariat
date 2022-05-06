@@ -1,5 +1,12 @@
 # Release Notes
 
+### [0.9.2](https://github.com/cpcloud/protoletariat/compare/v0.9.1...v0.9.2) (2022-05-06)
+
+
+### Bug Fixes
+
+* fix version number in `__init__.py` ([fc494c9](https://github.com/cpcloud/protoletariat/commit/fc494c98f6b02ce460fee04c2774e5383cfffaa1))
+
 ### [0.9.1](https://github.com/cpcloud/protoletariat/compare/v0.9.0...v0.9.1) (2022-04-16)
 
 
