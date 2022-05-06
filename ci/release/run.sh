@@ -12,5 +12,6 @@ npx --yes \
   -p "@semantic-release/github" \
   -p "@semantic-release/exec" \
   -p "@semantic-release/git" \
+  -p "@google/semantic-release-replace-plugin" \
   -p "conventional-changelog-conventionalcommits" \
   semantic-release --ci
