@@ -33,6 +33,7 @@ pydocstyle = "^6.1.1"
 pytest = "^7.0.0"
 pytest-randomly = "^3.10.1"
 pyupgrade = "^2.26.0"
+tomli = "^2.0.1"
 types-protobuf = "^3.18.1"
 
 [tool.poetry.scripts]
