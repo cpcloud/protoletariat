@@ -148,7 +148,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -202,7 +202,7 @@ jobs:
         with:
           github_token: ${{ github.token }}
 
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
