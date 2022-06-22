@@ -1,3 +1,4 @@
+import collections
 import importlib
 
 from click.testing import CliRunner
@@ -99,7 +100,7 @@ def test_grpc(  # type: ignore[misc]
     assert "import imports_service_pb2" not in service_module_types_text
     # this line should be in the code twice:
     # once for get_pb2, once for post_pb2
-    assert service_module_types_text.count("from . import requests") == 2
+    assert service_module_types_text.count("from . import requests") == 1
 
     # neither of the following two lines should be in the result
     assert "import requests.get_pb2" not in service_module_types_text
@@ -120,6 +121,25 @@ def test_grpc(  # type: ignore[misc]
         for path in grpc_imports.package_dir.rglob("*.pyi")
         for line in path.read_text().splitlines()
     )
+
+    # the import only shows up in the grpc file because it's used in the
+    # service
+    counts = collections.Counter(
+        grpc_imports.package_dir.joinpath("imports_service_pb2_grpc.pyi")
+        .read_text()
+        .splitlines()
+    )
+
+    assert counts["from . import requests"] == 1
+
+    # notably it *does not* show up in the corresponding proto file unless the
+    # proto uses the message
+    counts = collections.Counter(
+        grpc_imports.package_dir.joinpath("imports_service_pb2.pyi")
+        .read_text()
+        .splitlines()
+    )
+    assert counts["from . import requests"] == 0
 
 
 def test_grpc_no_imports(  # type: ignore[misc]
