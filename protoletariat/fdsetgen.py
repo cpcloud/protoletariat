@@ -102,19 +102,29 @@ class FileDescriptorSetGenerator(abc.ABC):
         if create_package:
             # recursively create packages
             for dir_entry in itertools.chain([python_out], python_out.rglob("*")):
-                if dir_entry.is_dir():
+                if dir_entry.is_dir() and "__pycache__" not in dir_entry.parts:
                     dir_entry.joinpath("__init__.py").touch(exist_ok=True)
                     if has_pyi:
                         _create_pyi_init(dir_entry)
 
 
 def _create_pyi_init(root: Path) -> None:
-    with root.joinpath("__init__.pyi").open(mode="a") as f:
-        f.writelines(
-            f"from . import {path.stem}\n"
-            for path in root.glob("*")
-            if path.stem != "__init__" and (path.suffix == ".pyi" or path.is_dir())
-        )
+    # use a dictionary to preserve order while deduplicating
+    lines_to_write = {
+        f"from . import {path.stem}\n": None
+        for path in root.glob("*")
+        if path.stem not in ("__init__", "__pycache__")
+        if path.suffix == ".pyi" or path.is_dir()
+    }
+    path = root.joinpath("__init__.pyi")
+
+    if not path.exists():
+        path.write_text("".join(lines_to_write))
+    else:
+        #  breakpoint()
+        for line in path.read_text().splitlines():
+            lines_to_write.pop(f"{line}\n", None)
+        path.write_text("".join(lines_to_write))
 
 
 class Protoc(FileDescriptorSetGenerator):
