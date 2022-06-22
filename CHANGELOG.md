@@ -1,5 +1,13 @@
 # Release Notes
 
+## [0.9.4](https://github.com/cpcloud/protoletariat/compare/v0.9.3...v0.9.4) (2022-06-22)
+
+
+### Bug Fixes
+
+* **codegen:** deduplicate generated imports ([e040217](https://github.com/cpcloud/protoletariat/commit/e040217ea9007e01f657cfb4ffcba80a9c8be23f))
+* **codegen:** don't traverse or generate code with `__pycache__` ([0c083d5](https://github.com/cpcloud/protoletariat/commit/0c083d519442fd45bdb43328006818cd5e975df1))
+
 ### [0.9.3](https://github.com/cpcloud/protoletariat/compare/v0.9.2...v0.9.3) (2022-05-06)
 
 
