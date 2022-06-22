@@ -108,6 +108,19 @@ def test_grpc(  # type: ignore[misc]
     with grpc_imports.patched_syspath:
         importlib.import_module(f"{grpc_imports.package_name}.imports_service_pb2_grpc")
 
+    result = grpc_imports.generate(cli, args=["--in-place", "--create-package"])
+    assert result.exit_code == 0
+
+    assert all(
+        "__pycache__" not in p.parts for p in grpc_imports.package_dir.rglob("*.pyi")
+    )
+
+    assert all(
+        "__pycache__" not in line
+        for path in grpc_imports.package_dir.rglob("*.pyi")
+        for line in path.read_text().splitlines()
+    )
+
 
 def test_grpc_no_imports(  # type: ignore[misc]
     cli: CliRunner,
