@@ -121,8 +121,9 @@ def _create_pyi_init(root: Path) -> None:
     if not path.exists():
         path.write_text("".join(lines_to_write))
     else:
-        for line in path.read_text().splitlines():
-            lines_to_write.pop(f"{line}\n", None)
+        with path.open(mode="r") as f:
+            for line in f:
+                lines_to_write.pop(line, None)
         with path.open(mode="a") as f:
             f.writelines(lines_to_write)
 
