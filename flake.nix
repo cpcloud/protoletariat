@@ -7,6 +7,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
+
     gitignore = {
       url = "github:hercules-ci/gitignore.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,6 +39,7 @@
     , nixpkgs
     , pre-commit-hooks
     , poetry2nix
+    , ...
     }:
     let
       mkApp = { py, pkgs }: {
@@ -193,33 +199,16 @@
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
               src = ./.;
               hooks = {
-                nix-linter = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.pkgsBuildBuild.nix-linter}/bin/nix-linter";
-                };
-
-                nixpkgs-fmt = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.pkgsBuildBuild.nixpkgs-fmt}/bin/nixpkgs-fmt --check";
-                };
+                nix-linter.enable = true;
+                nixpkgs-fmt.enable = true;
 
                 prettier = {
                   enable = true;
-                  entry = lib.mkForce "${pkgs.pkgsBuildBuild.prettierTOML}/bin/prettier --check";
                   types_or = [ "json" "markdown" "toml" "yaml" ];
                 };
 
-                black = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/black --check";
-                  types = [ "python" ];
-                };
-
-                isort = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/isort --check";
-                  types_or = [ "pyi" "python" ];
-                };
+                black.enable = true;
+                isort.enable = true;
 
                 flake8 = {
                   enable = true;
@@ -241,7 +230,6 @@
 
                 shellcheck = {
                   enable = true;
-                  entry = "${pkgs.pkgsBuildBuild.shellcheck}/bin/shellcheck";
                   files = "\\.sh$";
                   types_or = [ "file" ];
                 };
@@ -252,6 +240,7 @@
                   files = "\\.sh$";
                 };
               };
+              settings.prettier.binPath = "${pkgs.pkgsBuildBuild.prettierTOML}/bin/prettier";
             };
           };
 
