@@ -1,8 +1,11 @@
 (import
   (
+    let
+      lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+    in
     fetchTarball {
-      url = "https://github.com/edolstra/flake-compat/archive/b7547d3eed6f32d06102ead8991ec52ab0a4f1a7.tar.gz";
-      sha256 = "09ln95rvvjxjsnmvzrvyc2ji2l5lz17s671z51f9z8cl4m23ndp2";
+      url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+      sha256 = lock.nodes.flake-compat.locked.narHash;
     }
   )
   {
