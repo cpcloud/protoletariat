@@ -236,7 +236,7 @@
 
                 shfmt = {
                   enable = true;
-                  entry = "${pkgs.pkgsBuildBuild.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
+                  entry = lib.mkForce "${pkgs.pkgsBuildBuild.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
                   files = "\\.sh$";
                 };
               };
