@@ -242,8 +242,8 @@ python-versions = ">=3.6"
 importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 
 [package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
+testing = ["pytest-benchmark", "pytest"]
+dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "protobuf"
@@ -338,7 +338,7 @@ pytest = "*"
 
 [[package]]
 name = "pyupgrade"
-version = "2.37.1"
+version = "2.37.2"
 description = "A tool to automatically upgrade syntax for newer versions."
 category = "dev"
 optional = false
@@ -641,8 +641,8 @@ pytest-randomly = [
     {file = "pytest_randomly-3.12.0-py3-none-any.whl", hash = "sha256:f4f2e803daf5d1ba036cc22bf4fe9dbbf99389ec56b00e5cba732fb5c1d07fdd"},
 ]
 pyupgrade = [
-    {file = "pyupgrade-2.37.1-py2.py3-none-any.whl", hash = "sha256:dd2a32628d6d2a7dd6c086d98420e234b9e60c1e1d4c55431578491703e762a5"},
-    {file = "pyupgrade-2.37.1.tar.gz", hash = "sha256:3d9cbd88507a0f3d7397c46870617f0d073d61401c451c08a06763d6235d9e7d"},
+    {file = "pyupgrade-2.37.2-py2.py3-none-any.whl", hash = "sha256:5394cd5b1a8e1e4973c98ed2725449492dd2f2a285079c7b62ebaf06095bfce7"},
+    {file = "pyupgrade-2.37.2.tar.gz", hash = "sha256:137d7e624d94e998092d8aa4e0e701e9a6101b2d8b4ee469c41b617a6f98b1d1"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
