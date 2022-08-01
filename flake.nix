@@ -241,6 +241,28 @@
                 };
               };
               settings.prettier.binPath = "${pkgs.pkgsBuildBuild.prettierTOML}/bin/prettier";
+              settings.nix-linter.checks = [
+                "DIYInherit"
+                "EmptyInherit"
+                "EmptyLet"
+                "EtaReduce"
+                "LetInInheritRecset"
+                "ListLiteralConcat"
+                "NegateAtom"
+                "SequentialLet"
+                "SetLiteralUpdate"
+                "UnfortunateArgName"
+                "UnneededRec"
+                "UnusedArg"
+                "UnusedLetBind"
+                "UpdateEmptySet"
+                "BetaReduction"
+                "EmptyVariadicParamSet"
+                "UnneededAntiquote"
+                "no-FreeLetInFunc"
+                "no-AlphabeticalArgs"
+                "no-AlphabeticalBindings"
+              ];
             };
           };
 
