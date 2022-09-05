@@ -164,7 +164,7 @@
             inherit localSystem;
             overlays = [ self.overlay ];
           } // legacyPkgs.lib.optionalAttrs (!legacyPkgs.stdenv.isDarwin) {
-            crossSystem = nixpkgs.lib.systems.examples.musl64 // { useLLVM = false; };
+            crossSystem = nixpkgs.lib.systems.examples.musl64;
           };
           pkgs = import nixpkgs attrs;
           inherit (pkgs) lib;
