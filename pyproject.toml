@@ -19,7 +19,7 @@ classifiers = [
 python = ">=3.8,<3.11"
 astunparse = { version = ">=1.6.3,<2", python = "<3.9" }
 click = ">=7.1.2,<9"
-protobuf = ">=3.19.1,<4"
+protobuf = ">=3.19.1,<5"
 
 [tool.poetry.dev-dependencies]
 black = ">=21.12b0,<24"

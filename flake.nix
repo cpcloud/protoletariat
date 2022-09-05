@@ -47,13 +47,13 @@
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
 
-          propagatedBuildInputs = with pkgs; [ protobuf ];
+          propagatedBuildInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
           overrides = pkgs.poetry2nix.overrides.withDefaults (
             import ./poetry-overrides.nix { }
           );
 
-          checkInputs = with pkgs; [ buf grpc protobuf ];
+          checkInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
           preCheck = "HOME=$TMPDIR";
 
@@ -175,14 +175,6 @@
           packages.protoletariat310 = pkgs.protoletariat310;
           packages.protoletariat = packages.protoletariat310;
 
-          defaultPackage = packages.protoletariat;
-
-          apps.protoletariat = flake-utils.lib.mkApp {
-            drv = packages.protoletariat;
-            exePath = "/bin/protol";
-          };
-          defaultApp = apps.protoletariat;
-
           packages.protoletariat-image = pkgs.pkgsBuildBuild.dockerTools.buildLayeredImage {
             name = "protoletariat";
             config = {
@@ -190,6 +182,14 @@
               Command = [ defaultApp.program ];
             };
           };
+
+          defaultPackage = packages.protoletariat;
+
+          apps.protoletariat = flake-utils.lib.mkApp {
+            drv = packages.protoletariat;
+            exePath = "/bin/protol";
+          };
+          defaultApp = apps.protoletariat;
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
@@ -254,5 +254,6 @@
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
           };
         }
-      ));
+      )
+    );
 }
