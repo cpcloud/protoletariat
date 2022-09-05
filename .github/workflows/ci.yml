@@ -55,7 +55,6 @@ jobs:
         os:
           - ubuntu-latest
         python-version:
-          - "37"
           - "38"
           - "39"
           - "310"
@@ -118,7 +117,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
         python-version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
@@ -180,7 +178,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"

@@ -152,7 +152,7 @@
                 });
               }
             ])
-            [ "37" "38" "39" "310" ]
+            [ "38" "39" "310" ]
         )))
       ];
     } // (
@@ -170,7 +170,6 @@
           inherit (pkgs) lib;
         in
         rec {
-          packages.protoletariat37 = pkgs.protoletariat37;
           packages.protoletariat38 = pkgs.protoletariat38;
           packages.protoletariat39 = pkgs.protoletariat39;
           packages.protoletariat310 = pkgs.protoletariat310;
@@ -215,7 +214,7 @@
 
                 pyupgrade = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/pyupgrade --py37-plus";
+                  entry = "${pkgs.protoletariatDevEnv}/bin/pyupgrade --py38-plus";
                   types = [ "python" ];
                 };
 
