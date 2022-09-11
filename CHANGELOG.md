@@ -1,5 +1,12 @@
 # Release Notes
 
+## [1.0.1](https://github.com/cpcloud/protoletariat/compare/1.0.0...1.0.1) (2022-09-11)
+
+
+### Bug Fixes
+
+* **deps:** support python `protobuf==4` ([bd75812](https://github.com/cpcloud/protoletariat/commit/bd75812df3e0bfb63e0b8f30905ca99e801cada1))
+
 ## [1.0.0](https://github.com/cpcloud/protoletariat/compare/v0.9.4...1.0.0) (2022-09-11)
 
 
