@@ -9,10 +9,8 @@ version="${1}"
 # set version
 poetry version "$version"
 
-./dev/poetry2setup -o setup.py
-
 # build artifacts
 poetry build
 
 # ensure that the built wheel has the correct version number
-unzip -p "dist/ibis_framework-${version}-py3-none-any.whl" ibis/__init__.py | grep -q "__version__ = \"$version\""
+unzip -p "dist/protoletariat-${version}-py3-none-any.whl" protoletariat/__init__.py | grep -q "__version__ = \"$version\""
