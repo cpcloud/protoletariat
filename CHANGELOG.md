@@ -1,5 +1,14 @@
 # Release Notes
 
+## [1.0.0](https://github.com/cpcloud/protoletariat/compare/v0.9.4...1.0.0) (2022-09-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Move to Python 3.8. 0.9.4 is the last version to support Python 3.7
+
+* **deps:** bump python lower bound to 3.8 ([0480117](https://github.com/cpcloud/protoletariat/commit/04801176b74747199adcfe101f65c7c880662f07))
+
 ## [0.9.4](https://github.com/cpcloud/protoletariat/compare/v0.9.3...v0.9.4) (2022-06-22)
 
 
