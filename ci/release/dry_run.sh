@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -I nixpkgs=channel:nixos-unstable-small --pure -p git nodejs nix -i bash
+#!nix-shell -I nixpkgs=channel:nixos-unstable-small --pure -p git jq nodejs nix -i bash
 # shellcheck shell=bash
 
 set -euo pipefail
@@ -12,7 +12,7 @@ git worktree add "$worktree"
 
 function cleanup() {
   cd "$curdir" || exit 1
-  git worktree remove "$worktree"
+  git worktree remove --force "$worktree"
   git worktree prune
   git branch -D "$branch"
 }
@@ -20,6 +20,15 @@ function cleanup() {
 trap cleanup EXIT ERR
 
 cd "$worktree" || exit 1
+
+node <<< 'console.log(JSON.stringify(require("./.releaserc.js")))' |
+  jq '.plugins |= [.[] | select(.[0] != "@semantic-release/github")]' > .releaserc.json
+
+git rm .releaserc.js
+
+git add .releaserc.json
+
+git commit -m 'test: semantic-release dry run' --no-verify --no-gpg-sign
 
 npx --yes \
   -p semantic-release \
@@ -32,12 +41,6 @@ npx --yes \
   -p "conventional-changelog-conventionalcommits" \
   semantic-release \
   --ci \
-  --preset conventionalcommits \
   --dry-run \
-  --plugins \
-  --analyze-commits "@semantic-release/commit-analyzer" \
-  --generate-notes "@semantic-release/release-notes-generator" \
-  --verify-conditions "@semantic-release/changelog,@semantic-release/exec,@semantic-release/git" \
-  --prepare "@semantic-release/changelog,@semantic-release/exec" \
   --branches "$branch" \
   --repository-url "file://$PWD"
