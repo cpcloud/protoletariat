@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: bufbuild/buf-setup-action@v1.7.0
+      - uses: bufbuild/buf-setup-action@v1.8.0
         if: ${{ matrix.buf == 'buf' }}
         with:
           github_token: ${{ github.token }}
@@ -194,7 +194,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: bufbuild/buf-setup-action@v1.7.0
+      - uses: bufbuild/buf-setup-action@v1.8.0
         if: ${{ matrix.buf == 'buf' }}
         with:
           github_token: ${{ github.token }}
