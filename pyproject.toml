@@ -33,7 +33,7 @@ platformdirs = "<2.5.3"
 pydocstyle = ">=6.1.1,<7"
 pytest = ">=7.0.0,<8"
 pytest-randomly = ">=3.10.1,<4"
-pyupgrade = ">=2.26.0,<3"
+pyupgrade = ">=3,<4"
 tomli = ">=1,<3"
 types-protobuf = ">=3.18.1,<4"
 
