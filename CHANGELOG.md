@@ -1,5 +1,12 @@
 # Release Notes
 
+## [1.1.0](https://github.com/cpcloud/protoletariat/compare/1.0.1...1.1.0) (2022-10-29)
+
+
+### Features
+
+* **python:** allow python 3.11 ([1012243](https://github.com/cpcloud/protoletariat/commit/1012243513e512459b3141886e983d56b116dc8e))
+
 ## [1.0.1](https://github.com/cpcloud/protoletariat/compare/1.0.0...1.0.1) (2022-09-11)
 
 
