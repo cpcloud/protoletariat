@@ -403,8 +403,8 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.8,<3.12"
-content-hash = "0dd54576fb915555fbbf5488f08d5c680df6caf02f237ffbd5d4a25b96b61f27"
+python-versions = "^3.8"
+content-hash = "86752f464f467d7835a508a3b9750d7d33b8e67fdaee274fee866fd8baa669ea"
 
 [metadata.files]
 astunparse = [
