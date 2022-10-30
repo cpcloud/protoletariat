@@ -2,6 +2,12 @@
   description = "Python protocol buffers for the rest of us";
 
   inputs = {
+    nix2container = {
+      url = "github:nlewo/nix2container";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
     flake-utils.url = "github:numtide/flake-utils";
 
     flake-compat = {
@@ -36,9 +42,11 @@
     , nixpkgs
     , pre-commit-hooks
     , poetry2nix
+    , nix2container
     , ...
     }:
     let
+      nix2containerPkgs = nix2container.packages.x86_64-linux;
       mkApp = { py, pkgs }: {
         name = "protoletariat${py}";
         value = pkgs.poetry2nix.mkPoetryApplication {
@@ -175,12 +183,13 @@
           packages.protoletariat310 = pkgs.protoletariat310;
           packages.protoletariat = packages.protoletariat310;
 
-          packages.protoletariat-image = pkgs.pkgsBuildBuild.dockerTools.buildLayeredImage {
+          packages.protoletariat-image = nix2containerPkgs.nix2container.buildImage {
             name = "protoletariat";
             config = {
-              Entrypoint = [ defaultApp.program ];
-              Command = [ defaultApp.program ];
+              entrypoint = [ defaultApp.program ];
+              command = [ defaultApp.program ];
             };
+            maxLayers = 300;
           };
 
           defaultPackage = packages.protoletariat;

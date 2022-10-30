@@ -91,24 +91,17 @@ jobs:
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
           extraPullNames: nix-community,poetry2nix
 
-      - name: build docker image
-        run: nix build --print-build-logs --no-link --keep-going '.#protoletariat-image'
-
-      - name: get image info
-        id: get-info
-        run: |
-          set -euo pipefail
-
-          echo "::set-output name=path::$(nix path-info '.#protoletariat-image')"
-          echo "::set-output name=tag::$(nix eval --raw '.#protoletariat-image.imageTag')"
-
-      - name: load docker image
-        run: docker load -i ${{ steps.get-info.outputs.path }}
+      - name: build and load docker image
+        run: nix run --print-build-logs --no-link --keep-going '.#protoletariat-image.copyToDockerDaemon'
 
       - run: docker images protoletariat
 
       - name: smoke test docker image
-        run: docker run --rm protoletariat:${{ steps.get-info.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          imagetag="$(nix eval --raw '.#protoletariat-image.imageTag')"
+          docker run --rm "protoletariat:${imageTag}"
   conda-ubuntu-macos:
     strategy:
       fail-fast: false
