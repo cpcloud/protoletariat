@@ -92,7 +92,7 @@ jobs:
           extraPullNames: nix-community,poetry2nix
 
       - name: build and load docker image
-        run: nix run --print-build-logs --no-link --keep-going '.#protoletariat-image.copyToDockerDaemon'
+        run: nix run --print-build-logs --keep-going '.#protoletariat-image.copyToDockerDaemon'
 
       - run: docker images protoletariat
 
