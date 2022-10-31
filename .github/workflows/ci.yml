@@ -101,7 +101,7 @@ jobs:
           set -euo pipefail
 
           imagetag="$(nix eval --raw '.#protoletariat-image.imageTag')"
-          docker run --rm "protoletariat:${imageTag}"
+          docker run --rm "protoletariat:${imagetag}"
   conda-ubuntu-macos:
     strategy:
       fail-fast: false
