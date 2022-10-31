@@ -189,7 +189,7 @@
               entrypoint = [ defaultApp.program ];
               command = [ defaultApp.program ];
             };
-            maxLayers = 300;
+            maxLayers = 128;
           };
 
           defaultPackage = packages.protoletariat;
