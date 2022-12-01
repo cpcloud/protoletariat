@@ -368,7 +368,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "types-protobuf"
-version = "3.20.4.6"
+version = "4.21.0.1"
 description = "Typing stubs for protobuf"
 category = "dev"
 optional = false
@@ -408,7 +408,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "d5fd43a6287934c95b17c8b1876cb9a1942ae2e27e30d014bc08914030e58138"
+content-hash = "699e1dc03b0f07ba37d8d88460e1d85f631ea4ef128ec55b0665a1bc9f23b7e0"
 
 [metadata.files]
 astunparse = [
@@ -642,8 +642,8 @@ tomli = [
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
 types-protobuf = [
-    {file = "types-protobuf-3.20.4.6.tar.gz", hash = "sha256:ba27443c592bbec1629dd69494a24c84461c63f0d3b7d648ce258aaae9680965"},
-    {file = "types_protobuf-3.20.4.6-py3-none-any.whl", hash = "sha256:ab2d315ba82246b83d28f8797c98dc0fe1dd5cfd187909e56faf87239aedaae3"},
+    {file = "types-protobuf-4.21.0.1.tar.gz", hash = "sha256:d8ce2e1dc54e9b5830e553d31308e87732c916a0b0e288d280bddaa00fa98113"},
+    {file = "types_protobuf-4.21.0.1-py3-none-any.whl", hash = "sha256:80aa071fcbcf1372222aed7deb97a49757095b71a05edcf14ff89cc8caa4a165"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.4.0-py3-none-any.whl", hash = "sha256:16fa4864408f655d35ec496218b85f79b3437c829e93320c7c9215ccfd92489e"},
