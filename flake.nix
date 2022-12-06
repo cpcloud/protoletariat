@@ -176,29 +176,37 @@
           };
           pkgs = import nixpkgs attrs;
           inherit (pkgs) lib;
+          mkImage = program: nix2containerPkgs.nix2container.buildImage {
+            name = "protoletariat";
+            config = {
+              entrypoint = [ program ];
+              command = [ program ];
+            };
+            maxLayers = 128;
+          };
+          mkApp = drv: flake-utils.lib.mkApp {
+            inherit drv;
+            exePath = "/bin/protol";
+          };
         in
         rec {
           packages.protoletariat38 = pkgs.protoletariat38;
           packages.protoletariat39 = pkgs.protoletariat39;
           packages.protoletariat310 = pkgs.protoletariat310;
-          packages.protoletariat = packages.protoletariat310;
+          packages.protoletariat = pkgs.protoletariat310;
+          packages.default = pkgs.protoletariat310;
 
-          packages.protoletariat-image = nix2containerPkgs.nix2container.buildImage {
-            name = "protoletariat";
-            config = {
-              entrypoint = [ defaultApp.program ];
-              command = [ defaultApp.program ];
-            };
-            maxLayers = 128;
-          };
+          packages.protoletariat38-image = mkImage apps.protoletariat38.program;
+          packages.protoletariat39-image = mkImage apps.protoletariat39.program;
+          packages.protoletariat310-image = mkImage apps.protoletariat310.program;
+          packages.protoletariat-image = packages.protoletariat310-image;
 
-          defaultPackage = packages.protoletariat;
+          apps.protoletariat38 = mkApp packages.protoletariat38;
+          apps.protoletariat39 = mkApp packages.protoletariat39;
+          apps.protoletariat310 = mkApp packages.protoletariat310;
 
-          apps.protoletariat = flake-utils.lib.mkApp {
-            drv = packages.protoletariat;
-            exePath = "/bin/protol";
-          };
-          defaultApp = apps.protoletariat;
+          apps.protoletariat = apps.protoletariat310;
+          apps.default = apps.protoletariat;
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
@@ -249,7 +257,7 @@
             };
           };
 
-          devShell = pkgs.pkgsBuildBuild.mkShell {
+          devShells.default = pkgs.pkgsBuildBuild.mkShell {
             nativeBuildInputs = with pkgs.pkgsBuildBuild; [
               buf
               dive
