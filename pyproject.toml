@@ -22,16 +22,19 @@ click = ">=7.1.2,<9"
 protobuf = ">=3.19.1,<5"
 
 [tool.poetry.dev-dependencies]
-black = ">=21.12b0,<24"
-flake8 = ">=6,<7"
+black = ">=22,<24"
+flake8 = [
+  { version = ">=6,<7", python = ">=3.8.1,<4" },
+  { version = ">=5,<7", python = ">=3.8,<3.8.1" }
+]
 grpc-stubs = ">=1.24.7,<2"
 grpcio = ">=1.42.0,<2"
 isort = ">=5.9.3,<6"
 mypy = "^0.991"
-mypy-protobuf = ">=3.0.0,<4"
+mypy-protobuf = ">=3,<4"
 platformdirs = "<2.5.5"
 pydocstyle = ">=6.1.1,<7"
-pytest = ">=7.0.0,<8"
+pytest = ">=7,<8"
 pytest-randomly = ">=3.10.1,<4"
 pyupgrade = ">=3,<4"
 tomli = ">=1,<3"
