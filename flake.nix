@@ -225,7 +225,6 @@
 
                 flake8 = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/flake8";
                   types = [ "python" ];
                 };
 
