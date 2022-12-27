@@ -118,7 +118,7 @@ jobs:
           - buf
         click-version:
           - "click@<8"
-          - null
+          - default
         include:
           - os: ubuntu-latest
             python-version: "3.9"
@@ -131,6 +131,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
+
+      - uses: arduino/setup-protoc@v1.1.2
+        with:
+          version: "3.x"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: bufbuild/buf-setup-action@v1.11.0
         if: matrix.buf == 'buf'
@@ -182,25 +187,16 @@ jobs:
         run: |
           set -euo pipefail
 
-          nix develop -c \
-            protoc \
-            --python_out "$PYTHON_OUT" \
-            --proto_path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
+          mapfile -t files < <(find "$TENSORFLOW_HOME" -name '*.proto')
+          nix develop -c protoc --python_out "$PYTHON_OUT" --proto_path "$TENSORFLOW_HOME" "${files[@]}"
 
       - name: Test tensorflow rewriting
         working-directory: protoletariat
         run: |
           set -euo pipefail
 
-          nix run '.#protoletariat' \
-            -- \
-            --in-place \
-            --create-package \
-            --python-out "$PYTHON_OUT" \
-            protoc \
-            --proto-path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
+          mapfile -t files < <(find "$TENSORFLOW_HOME" -name '*.proto')
+          nix run '.#protoletariat' -- --in-place --create-package --python-out "$PYTHON_OUT" protoc --proto-path "$TENSORFLOW_HOME" "${files[@]}"
 
       - name: Check for absolute imports
         run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"
@@ -240,8 +236,7 @@ jobs:
     if: github.event_name != 'pull_request'
     needs:
       - nix
-      - conda-ubuntu-macos
-      - conda-windows
+      - test
       - docker-image
       - pre-commit
       - tensorflow

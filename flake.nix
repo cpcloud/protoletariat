@@ -218,6 +218,7 @@
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
               src = ./.;
               hooks = {
+                actionlint.enable = true;
                 black.enable = true;
                 flake8.enable = true;
                 isort.enable = true;
