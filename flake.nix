@@ -51,15 +51,18 @@
         name = "protoletariat${py}";
         value = pkgs.poetry2nix.mkPoetryApplication {
           python = pkgs."python${py}Optimized";
+          preferWheels = true;
 
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
+          checkGroups = [ "dev" "test" ];
 
           propagatedBuildInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
-          overrides = pkgs.poetry2nix.overrides.withDefaults (
-            import ./poetry-overrides.nix { }
-          );
+          overrides = [
+            (import ./poetry-overrides.nix)
+            pkgs.poetry2nix.defaultPoetryOverrides
+          ];
 
           checkInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
@@ -82,9 +85,12 @@
         value = pkgs.poetry2nix.mkPoetryEnv {
           python = pkgs."python${py}";
           projectDir = ./.;
-          overrides = pkgs.poetry2nix.overrides.withDefaults (
-            import ./poetry-overrides.nix { }
-          );
+          preferWheels = true;
+          groups = [ "dev" "test" "docs" ];
+          overrides = [
+            (import ./poetry-overrides.nix)
+            pkgs.poetry2nix.defaultPoetryOverrides
+          ];
           editablePackageSources = {
             protoletariat = ./protoletariat;
           };
@@ -212,20 +218,16 @@
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
               src = ./.;
               hooks = {
-                nix-linter.enable = true;
+                black.enable = true;
+                flake8.enable = true;
+                isort.enable = true;
                 nixpkgs-fmt.enable = true;
+                shellcheck.enable = true;
+                statix.enable = true;
 
                 prettier = {
                   enable = true;
                   types_or = [ "json" "markdown" "toml" "yaml" ];
-                };
-
-                black.enable = true;
-                isort.enable = true;
-
-                flake8 = {
-                  enable = true;
-                  types = [ "python" ];
                 };
 
                 pyupgrade = {
@@ -240,18 +242,12 @@
                   types = [ "python" ];
                 };
 
-                shellcheck = {
-                  enable = true;
-                  files = "\\.sh$";
-                  types_or = [ "file" ];
-                };
-
                 shfmt = {
                   enable = true;
                   entry = lib.mkForce "${pkgs.pkgsBuildBuild.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
-                  files = "\\.sh$";
                 };
               };
+
               settings.prettier.binPath = "${pkgs.pkgsBuildBuild.prettierTOML}/bin/prettier";
             };
           };
