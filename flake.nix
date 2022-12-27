@@ -55,7 +55,7 @@
 
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
-          checkGroups = [ "dev" "test" ];
+          checkGroups = [ "types" "test" ];
 
           propagatedBuildInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
@@ -86,7 +86,7 @@
           python = pkgs."python${py}";
           projectDir = ./.;
           preferWheels = true;
-          groups = [ "dev" "test" "docs" ];
+          groups = [ "dev" "types" "test" ];
           overrides = [
             (import ./poetry-overrides.nix)
             pkgs.poetry2nix.defaultPoetryOverrides
@@ -219,21 +219,19 @@
               src = ./.;
               hooks = {
                 black.enable = true;
-                flake8.enable = true;
-                isort.enable = true;
                 nixpkgs-fmt.enable = true;
                 shellcheck.enable = true;
                 statix.enable = true;
 
+                ruff = {
+                  enable = true;
+                  entry = "${pkgs.protoletariatDevEnv}/bin/ruff";
+                  types = [ "python" ];
+                };
+
                 prettier = {
                   enable = true;
                   types_or = [ "json" "markdown" "toml" "yaml" ];
-                };
-
-                pyupgrade = {
-                  enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/pyupgrade --py38-plus";
-                  types = [ "python" ];
                 };
 
                 mypy = {

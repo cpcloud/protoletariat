@@ -114,23 +114,6 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
-name = "flake8"
-version = "5.0.4"
-description = "the modular source code checker: pep8 pyflakes and co"
-category = "dev"
-optional = false
-python-versions = ">=3.6.1"
-files = [
-    {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
-    {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
-]
-
-[package.dependencies]
-mccabe = ">=0.7.0,<0.8.0"
-pycodestyle = ">=2.9.0,<2.10.0"
-pyflakes = ">=2.5.0,<2.6.0"
-
-[[package]]
 name = "grpc-stubs"
 version = "1.24.11"
 description = "Mypy stubs for gRPC"
@@ -233,36 +216,6 @@ python-versions = "*"
 files = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
-]
-
-[[package]]
-name = "isort"
-version = "5.11.4"
-description = "A Python utility / library to sort Python imports."
-category = "dev"
-optional = false
-python-versions = ">=3.7.0"
-files = [
-    {file = "isort-5.11.4-py3-none-any.whl", hash = "sha256:c033fd0edb91000a7f09527fe5c75321878f98322a77ddcc81adbd83724afb7b"},
-    {file = "isort-5.11.4.tar.gz", hash = "sha256:6db30c5ded9815d813932c04c2f85a360bcdd35fed496f4d8f35495ef0a261b6"},
-]
-
-[package.extras]
-colors = ["colorama (>=0.4.3,<0.5.0)"]
-pipfile-deprecated-finder = ["pipreqs", "requirementslib"]
-plugins = ["setuptools"]
-requirements-deprecated-finder = ["pip-api", "pipreqs"]
-
-[[package]]
-name = "mccabe"
-version = "0.7.0"
-description = "McCabe checker, plugin for flake8"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "mccabe-0.7.0-py2.py3-none-any.whl", hash = "sha256:6c2d30ab6be0e4a46919781807b4f0d834ebdd6c6e3dca0bda5a15f863427b6e"},
-    {file = "mccabe-0.7.0.tar.gz", hash = "sha256:348e0240c33b60bbdf4e523192ef919f28cb2c3d7d5c7794f74009290f236325"},
 ]
 
 [[package]]
@@ -425,48 +378,6 @@ files = [
 ]
 
 [[package]]
-name = "pycodestyle"
-version = "2.9.1"
-description = "Python style guide checker"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
-    {file = "pycodestyle-2.9.1.tar.gz", hash = "sha256:2c9607871d58c76354b697b42f5d57e1ada7d261c261efac224b664affdc5785"},
-]
-
-[[package]]
-name = "pydocstyle"
-version = "6.1.1"
-description = "Python docstring style checker"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pydocstyle-6.1.1-py3-none-any.whl", hash = "sha256:6987826d6775056839940041beef5c08cc7e3d71d63149b48e36727f70144dc4"},
-    {file = "pydocstyle-6.1.1.tar.gz", hash = "sha256:1d41b7c459ba0ee6c345f2eb9ae827cab14a7533a88c5c6f7e94923f72df92dc"},
-]
-
-[package.dependencies]
-snowballstemmer = "*"
-
-[package.extras]
-toml = ["toml"]
-
-[[package]]
-name = "pyflakes"
-version = "2.5.0"
-description = "passive checker of Python programs"
-category = "dev"
-optional = false
-python-versions = ">=3.6"
-files = [
-    {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
-    {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
-]
-
-[[package]]
 name = "pytest"
 version = "7.2.0"
 description = "pytest: simple powerful testing with Python"
@@ -507,19 +418,30 @@ importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""
 pytest = "*"
 
 [[package]]
-name = "pyupgrade"
-version = "3.3.1"
-description = "A tool to automatically upgrade syntax for newer versions."
+name = "ruff"
+version = "0.0.195"
+description = "An extremely fast Python linter, written in Rust."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyupgrade-3.3.1-py2.py3-none-any.whl", hash = "sha256:3b93641963df022d605c78aeae4b5956a5296ea24701eafaef9c487527b77e60"},
-    {file = "pyupgrade-3.3.1.tar.gz", hash = "sha256:f88bce38b0ba92c2a9a5063c8629e456e8d919b67d2d42c7ecab82ff196f9813"},
+    {file = "ruff-0.0.195-py3-none-macosx_10_7_x86_64.whl", hash = "sha256:017eec05d8ecab5779f3909a26c828513cb21ce9deecdb54c80b3f98af59424d"},
+    {file = "ruff-0.0.195-py3-none-macosx_10_9_x86_64.macosx_11_0_arm64.macosx_10_9_universal2.whl", hash = "sha256:7246082881e1400ad1c3ddd5fe9c71bc334dd75bde5cb5a09d1eedbec264fc70"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:30cc4229ac286237b643fe2f5d15913c8e76769be166821559151017073ca028"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:c5caac1fb7f7c1b199b64d0c14c2ebb8d5962f0814d3cc516c5f94d06dbfd992"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:6ff52b888fa24edec2c3899d9584977e7fadaa0ae7408b5fd6bcffd1cde05d22"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:334421d2715e5bff714e29eec69829ab457e0b1325c17643c258e6abab7a4909"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:0b772d1113faa09116d511496102c563158fbea62390523b3a87ca839a1ea8f4"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:593dce34f9be9273bc90f76c570aa902462c0b4f935eaffe918bf2292eff399f"},
+    {file = "ruff-0.0.195-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1daccdb085e6675b185e9e90f3b96bb2a075c3bad3ca41bd8f1c3bcfedbead29"},
+    {file = "ruff-0.0.195-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:f5e45ad07631c702eb203b533eab28c8299d2dd31612e9881d3da26f43e1d3aa"},
+    {file = "ruff-0.0.195-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:c73e1eae37dcbd2717ab6708605739c0c3c93e242ea7b7513fafef6a71218788"},
+    {file = "ruff-0.0.195-py3-none-musllinux_1_2_i686.whl", hash = "sha256:9b3616567c5a6021dab0257139d96183aa84107e1ba2f1ee77fa87aafb9a3a7e"},
+    {file = "ruff-0.0.195-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:f7ec731c058f1c222c45166008cc00ee2ca59ff4d9de8b5668d0841800c4cf18"},
+    {file = "ruff-0.0.195-py3-none-win32.whl", hash = "sha256:f64619e415feed563940311703abfe0e08ddfa1cc5c3972ace715e963cf28bc8"},
+    {file = "ruff-0.0.195-py3-none-win_amd64.whl", hash = "sha256:e8626f897b1e52f9881baafb608b74d38a46433a5ffff7f6b486b82d665e8dc3"},
+    {file = "ruff-0.0.195.tar.gz", hash = "sha256:4a2c6cdb83aff517c3278cf4d52ae12741a5694edfebd62b5e2c10cf6ac44df0"},
 ]
-
-[package.dependencies]
-tokenize-rt = ">=3.2.0"
 
 [[package]]
 name = "six"
@@ -531,30 +453,6 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
-]
-
-[[package]]
-name = "snowballstemmer"
-version = "2.2.0"
-description = "This package provides 29 stemmers for 28 languages generated from Snowball algorithms."
-category = "dev"
-optional = false
-python-versions = "*"
-files = [
-    {file = "snowballstemmer-2.2.0-py2.py3-none-any.whl", hash = "sha256:c8e1716e83cc398ae16824e5572ae04e0d9fc2c6b985fb0f900f5f0c96ecba1a"},
-    {file = "snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
-]
-
-[[package]]
-name = "tokenize-rt"
-version = "5.0.0"
-description = "A wrapper around the stdlib `tokenize` which roundtrips."
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "tokenize_rt-5.0.0-py2.py3-none-any.whl", hash = "sha256:c67772c662c6b3dc65edf66808577968fb10badfc2042e3027196bed4daf9e5a"},
-    {file = "tokenize_rt-5.0.0.tar.gz", hash = "sha256:3160bc0c3e8491312d0485171dea861fc160a240f5f5766b72a1165408d10740"},
 ]
 
 [[package]]
@@ -627,4 +525,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "6bee72e90f804445f4743d14848248bcc497ff99e54ca56c778594bd2cee8b0e"
+content-hash = "0be64be0eb864ec80c55fdf2393330910acc77d7084124ded4cdc8a7833cf724"
