@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   commitlint:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -102,13 +102,14 @@ jobs:
 
           imagetag="$(nix eval --raw '.#protoletariat-image.imageTag')"
           docker run --rm "protoletariat:${imagetag}"
-  conda-ubuntu-macos:
+  test:
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
+          - windows-latest
         python-version:
           - "3.8"
           - "3.9"
@@ -122,20 +123,17 @@ jobs:
           - os: ubuntu-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: null
+            click-version: default
           - os: macos-latest
             python-version: "3.9"
             buf: no-buf
-            click-version: null
+            click-version: default
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v3
 
       - uses: bufbuild/buf-setup-action@v1.11.0
-        if: ${{ matrix.buf == 'buf' }}
+        if: matrix.buf == 'buf'
         with:
           github_token: ${{ github.token }}
 
@@ -143,79 +141,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - run: pip3 install poetry2conda poetry
+      - run: pip install -U pip poetry
+
       - run: poetry add '${{ matrix.click-version }}'
-        if: ${{ matrix.click-version != null }}
+        if: matrix.click-version != 'default'
 
-      - name: Generate conda environment file
-        run: |
-          set -euo pipefail
+      - run: poetry install --without=docs
+      - run: poetry run pytest -ra
 
-          poetry2conda --dev pyproject.toml - | tee environment.yml
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          channel-priority: strict
-          activate-environment: protoletariat
-          python-version: ${{ matrix.python-version }}
-          environment-file: environment.yml
-
-      - run: mamba install grpc-cpp
-      - run: pip3 install .
-      - run: pytest -ra
-  conda-windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version:
-          - "3.8"
-          - "3.9"
-          - "3.10"
-        buf:
-          - buf
-        click-version:
-          - "click@<8"
-          - null
-        include:
-          - python-version: "3.9"
-            buf: no-buf
-            click-version: null
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: bufbuild/buf-setup-action@v1.11.0
-        if: ${{ matrix.buf == 'buf' }}
-        with:
-          github_token: ${{ github.token }}
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - run: pip3 install poetry2conda poetry
-      - run: poetry add '${{ matrix.click-version }}'
-        if: ${{ matrix.click-version != null }}
-
-      - name: Generate conda environment file
-        run: poetry2conda --dev pyproject.toml - > environment.yml
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
-          mamba-version: "*"
-          miniforge-variant: Mambaforge
-          miniforge-version: latest
-          channel-priority: strict
-          activate-environment: protoletariat
-          python-version: ${{ matrix.python-version }}
-          environment-file: environment.yml
-
-      - run: mamba install grpc-cpp
-      - run: pip3 install .
-      - run: pytest -ra
   tensorflow:
     runs-on: ubuntu-latest
     env:
@@ -304,7 +237,7 @@ jobs:
         run: ./ci/release/dry_run.sh
   release:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' }}
+    if: github.event_name != 'pull_request'
     needs:
       - nix
       - conda-ubuntu-macos
