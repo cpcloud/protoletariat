@@ -124,6 +124,14 @@ def main(
     ),
     help="Protobuf file search path(s). Accepts multiple values.",
 )
+@click.option(
+    "-d",
+    "--descriptor-set-in",
+    required=False,
+    type=str,
+    default=None,
+    help="Descriptor set input file list.",
+)
 @click.argument(
     "proto_files",
     nargs=-1,
@@ -141,11 +149,13 @@ def protoc(
     protoc_path: str,
     proto_paths: list[Path],
     proto_files: list[Path],
+    descriptor_set_in: str | None,
 ) -> None:
     Protoc(
         protoc_path=os.fsdecode(protoc_path),
         proto_files=[Path(os.fsdecode(proto_file)) for proto_file in proto_files],
         proto_paths=[Path(os.fsdecode(proto_path)) for proto_path in proto_paths],
+        descriptor_set_in=descriptor_set_in,
     ).fix_imports(**ctx.obj)
 
 
