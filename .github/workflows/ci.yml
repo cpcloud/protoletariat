@@ -164,7 +164,7 @@ jobs:
           environment-file: environment.yml
 
       - run: mamba install grpc-cpp
-      - run: pip3 install .
+      - run: pip install .
       - run: pytest -ra
   conda-windows:
     strategy:
@@ -213,8 +213,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yml
 
-      - run: mamba install grpc-cpp
-      - run: pip3 install .
+      - run: mamba install grpc-cpp pip
+      - run: pip install .
       - run: pytest -ra
   tensorflow:
     runs-on: ubuntu-latest
@@ -249,25 +249,25 @@ jobs:
         run: |
           set -euo pipefail
 
+          mapfile -t files < <(find "$TENSORFLOW_HOME" -name '*.proto')
           nix develop -c \
             protoc \
             --python_out "$PYTHON_OUT" \
-            --proto_path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
+            --proto_path "$TENSORFLOW_HOME" "${files[@]}"
 
       - name: Test tensorflow rewriting
         working-directory: protoletariat
         run: |
           set -euo pipefail
 
+          mapfile -t files < <(find "$TENSORFLOW_HOME" -name '*.proto')
           nix run '.#protoletariat' \
             -- \
             --in-place \
             --create-package \
             --python-out "$PYTHON_OUT" \
             protoc \
-            --proto-path "$TENSORFLOW_HOME" \
-            $(find "$TENSORFLOW_HOME" -name '*.proto')
+            --proto-path "$TENSORFLOW_HOME" "${files[@]}"
 
       - name: Check for absolute imports
         run: grep -vq -R '^import tensorflow' "$PYTHON_OUT"

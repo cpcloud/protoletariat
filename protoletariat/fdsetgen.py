@@ -52,7 +52,7 @@ class FileDescriptorSetGenerator(abc.ABC):
 
     @abc.abstractmethod
     def generate_file_descriptor_set_bytes(self) -> bytes:
-        """Generate the bytes of a `FileDescriptorSet`"""
+        """Generate the bytes of a `FileDescriptorSet`."""
 
     def fix_imports(
         self,

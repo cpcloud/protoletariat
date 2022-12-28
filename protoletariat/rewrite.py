@@ -130,7 +130,7 @@ class ASTRewriter:
         >>> rewritten = rewriter.rewrite(node)
         >>> print(astunparse(rewritten))  # doctest: +NORMALIZE_WHITESPACE
         x = 2
-        """  # noqa: E501
+        """
         try:
             return next(
                 func(node) for pattern, func in self.funcs if matches(node, pattern)
@@ -163,7 +163,7 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
     >>> pprint(build_rewrites(proto, dep))
     [Replacement(old='from foo import bar_pb2 as foo_dot_bar__pb2', new='from ...foo import bar_pb2 as foo_dot_bar__pb2'),
      Replacement(old='import foo.bar_pb2', new='from ... import foo')]
-    """  # noqa: E501
+    """
     parts = dep.split("/")
 
     *import_parts, part = parts
