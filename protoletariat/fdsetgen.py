@@ -4,6 +4,7 @@ import abc
 import fnmatch
 import itertools
 import re
+import shlex
 import subprocess
 import tempfile
 from pathlib import Path
@@ -154,7 +155,7 @@ class Protoc(FileDescriptorSetGenerator):
             filename = Path(f.name)
             subprocess.check_output(
                 [
-                    self.protoc_path,
+                    *shlex.split(self.protoc_path),
                     "--include_imports",
                     f"--descriptor_set_out={filename}",
                     *map("--proto_path={}".format, self.proto_paths),
