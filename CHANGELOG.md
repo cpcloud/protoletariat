@@ -1,5 +1,14 @@
 # Release Notes
 
+## [2.0.0](https://github.com/cpcloud/protoletariat/compare/1.1.0...2.0.0) (2022-12-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** click 8 is now required
+
+* **deps:** bump lower bound of click to 8 ([113c347](https://github.com/cpcloud/protoletariat/commit/113c347ae8765acd99bd50f8ab982eb582d66e6b))
+
 ## [1.1.0](https://github.com/cpcloud/protoletariat/compare/1.0.1...1.1.0) (2022-10-29)
 
 
