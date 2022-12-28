@@ -61,7 +61,6 @@
 
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
-          checkGroups = [ "dev" "test" ];
 
           propagatedBuildInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
@@ -92,7 +91,6 @@
           python = pkgs."python${py}";
           projectDir = ./.;
           preferWheels = true;
-          groups = [ "dev" "test" "docs" ];
           overrides = [
             (import ./poetry-overrides.nix)
             pkgs.poetry2nix.defaultPoetryOverrides
@@ -232,7 +230,7 @@
 
                 ruff = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv.pkgs.ruff}/bin/ruff --force-exclude";
+                  entry = "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
                 };
 
                 prettier = {
@@ -242,7 +240,7 @@
 
                 mypy = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv.pkgs.mypy}/bin/mypy";
+                  entry = "${pkgs.protoletariatDevEnv}/bin/mypy";
                   types = [ "python" ];
                 };
 
