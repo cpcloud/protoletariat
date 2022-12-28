@@ -4,8 +4,10 @@
   inputs = {
     nix2container = {
       url = "github:nlewo/nix2container";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     flake-utils.url = "github:numtide/flake-utils";
@@ -24,14 +26,18 @@
 
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     poetry2nix = {
       url = "github:nix-community/poetry2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
   };
 
@@ -51,15 +57,18 @@
         name = "protoletariat${py}";
         value = pkgs.poetry2nix.mkPoetryApplication {
           python = pkgs."python${py}Optimized";
+          preferWheels = true;
 
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
+          checkGroups = [ "dev" "test" ];
 
           propagatedBuildInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
-          overrides = pkgs.poetry2nix.overrides.withDefaults (
-            import ./poetry-overrides.nix { }
-          );
+          overrides = [
+            (import ./poetry-overrides.nix)
+            pkgs.poetry2nix.defaultPoetryOverrides
+          ];
 
           checkInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
@@ -82,9 +91,12 @@
         value = pkgs.poetry2nix.mkPoetryEnv {
           python = pkgs."python${py}";
           projectDir = ./.;
-          overrides = pkgs.poetry2nix.overrides.withDefaults (
-            import ./poetry-overrides.nix { }
-          );
+          preferWheels = true;
+          groups = [ "dev" "test" "docs" ];
+          overrides = [
+            (import ./poetry-overrides.nix)
+            pkgs.poetry2nix.defaultPoetryOverrides
+          ];
           editablePackageSources = {
             protoletariat = ./protoletariat;
           };
@@ -96,9 +108,9 @@
         gitignore.overlay
         poetry2nix.overlay
         (pkgs: super: {
-          prettierTOML = pkgs.pkgsBuildBuild.writeShellScriptBin "prettier" ''
-            ${pkgs.pkgsBuildBuild.nodePackages.prettier}/bin/prettier \
-            --plugin-search-dir "${pkgs.pkgsBuildBuild.nodePackages.prettier-plugin-toml}/lib" \
+          prettierTOML = pkgs.writeShellScriptBin "prettier" ''
+            ${pkgs.nodePackages.prettier}/bin/prettier \
+            --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
             "$@"
           '';
           protoletariatDevEnv = pkgs.protoletariatDevEnv310;
@@ -107,8 +119,7 @@
             (py: [
               (mkApp { inherit py pkgs; })
               (mkEnv {
-                inherit py;
-                pkgs = pkgs.pkgsBuildBuild;
+                inherit py pkgs;
               })
               {
                 name = "python${py}Optimized";
@@ -171,8 +182,6 @@
           attrs = {
             inherit localSystem;
             overlays = [ self.overlay ];
-          } // legacyPkgs.lib.optionalAttrs (!legacyPkgs.stdenv.isDarwin) {
-            crossSystem = nixpkgs.lib.systems.examples.musl64;
           };
           pkgs = import nixpkgs attrs;
           inherit (pkgs) lib;
@@ -190,81 +199,71 @@
           };
         in
         rec {
-          packages.protoletariat38 = pkgs.protoletariat38;
-          packages.protoletariat39 = pkgs.protoletariat39;
-          packages.protoletariat310 = pkgs.protoletariat310;
-          packages.protoletariat = pkgs.protoletariat310;
-          packages.default = pkgs.protoletariat310;
+          packages = {
+            inherit (pkgs) protoletariat38 protoletariat39 protoletariat310;
+            protoletariat = pkgs.protoletariat310;
+            default = pkgs.protoletariat310;
 
-          packages.protoletariat38-image = mkImage apps.protoletariat38.program;
-          packages.protoletariat39-image = mkImage apps.protoletariat39.program;
-          packages.protoletariat310-image = mkImage apps.protoletariat310.program;
-          packages.protoletariat-image = packages.protoletariat310-image;
+            protoletariat38-image = mkImage apps.protoletariat38.program;
+            protoletariat39-image = mkImage apps.protoletariat39.program;
+            protoletariat310-image = mkImage apps.protoletariat310.program;
+            protoletariat-image = packages.protoletariat310-image;
+          };
 
-          apps.protoletariat38 = mkApp packages.protoletariat38;
-          apps.protoletariat39 = mkApp packages.protoletariat39;
-          apps.protoletariat310 = mkApp packages.protoletariat310;
 
-          apps.protoletariat = apps.protoletariat310;
-          apps.default = apps.protoletariat;
+          apps = {
+            protoletariat38 = mkApp packages.protoletariat38;
+            protoletariat39 = mkApp packages.protoletariat39;
+            protoletariat310 = mkApp packages.protoletariat310;
+
+            protoletariat = apps.protoletariat310;
+            default = apps.protoletariat;
+          };
 
           checks = {
             pre-commit-check = pre-commit-hooks.lib.${localSystem}.run {
               src = ./.;
               hooks = {
-                nix-linter.enable = true;
+                actionlint.enable = true;
+                black.enable = true;
                 nixpkgs-fmt.enable = true;
+                shellcheck.enable = true;
+                statix.enable = true;
+
+                ruff = {
+                  enable = true;
+                  entry = "${pkgs.protoletariatDevEnv.pkgs.ruff}/bin/ruff --force-exclude";
+                };
 
                 prettier = {
                   enable = true;
                   types_or = [ "json" "markdown" "toml" "yaml" ];
                 };
 
-                black.enable = true;
-                isort.enable = true;
-
-                flake8 = {
-                  enable = true;
-                  types = [ "python" ];
-                };
-
-                pyupgrade = {
-                  enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/pyupgrade --py38-plus";
-                  types = [ "python" ];
-                };
-
                 mypy = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/mypy";
+                  entry = "${pkgs.protoletariatDevEnv.pkgs.mypy}/bin/mypy";
                   types = [ "python" ];
-                };
-
-                shellcheck = {
-                  enable = true;
-                  files = "\\.sh$";
-                  types_or = [ "file" ];
                 };
 
                 shfmt = {
                   enable = true;
-                  entry = lib.mkForce "${pkgs.pkgsBuildBuild.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
-                  files = "\\.sh$";
+                  entry = lib.mkForce "${pkgs.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
                 };
               };
-              settings.prettier.binPath = "${pkgs.pkgsBuildBuild.prettierTOML}/bin/prettier";
+
+              settings.prettier.binPath = "${pkgs.prettierTOML}/bin/prettier";
             };
           };
 
-          devShells.default = pkgs.pkgsBuildBuild.mkShell {
-            nativeBuildInputs = with pkgs.pkgsBuildBuild; [
+          devShells.default = pkgs.mkShell {
+            nativeBuildInputs = with pkgs; [
               buf
-              dive
               grpc
-              poetry
               prettierTOML
               protobuf
               protoletariatDevEnv
+              protoletariatDevEnv.pkgs.poetry
             ];
 
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
