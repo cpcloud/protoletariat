@@ -5,8 +5,10 @@ import contextlib
 import itertools
 import json
 import os
+import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 from functools import partial
 from pathlib import Path
@@ -138,6 +140,8 @@ class BufFixture(ProtoletariatFixture):
 
 
 class ProtocFixture(ProtoletariatFixture):
+    protoc_exe = ("protoc",)
+
     def __init__(
         self,
         *,
@@ -161,7 +165,7 @@ class ProtocFixture(ProtoletariatFixture):
 
     def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
         protoc_args = [
-            "protoc",
+            *self.protoc_exe,
             "--proto_path",
             str(self.base_dir),
             "--python_out",
@@ -190,12 +194,18 @@ class ProtocFixture(ProtoletariatFixture):
                 str(self.package_dir),
                 *args,
                 "protoc",
+                "--protoc-path",
+                shlex.join(self.protoc_exe),
                 "--proto-path",
                 str(self.base_dir),
                 *(str(filename) for filename, _ in self.proto_texts),
             ],
             catch_exceptions=False,
         )
+
+
+class GrpcIoToolsFixture(ProtocFixture):
+    protoc_exe = sys.executable, "-m", "grpc_tools.protoc"
 
 
 class RawFixture(ProtoletariatFixture):
@@ -320,6 +330,10 @@ message BuzzBuzz {}
             id="basic_cli_protoc",
         ),
         pytest.param(
+            partial(GrpcIoToolsFixture, package="basic_cli"),
+            id="basic_cli_grpc_io_tools",
+        ),
+        pytest.param(
             partial(RawFixture, package="basic_cli"),
             id="basic_cli_raw",
         ),
@@ -399,6 +413,10 @@ message Thing2 {
             id="thing_service_protoc",
         ),
         pytest.param(
+            partial(GrpcIoToolsFixture, package="thing_service", grpc=True),
+            id="thing_service_grpc_io_tools",
+        ),
+        pytest.param(
             partial(RawFixture, package="thing_service", grpc=True),
             id="thing_service_raw",
         ),
@@ -453,6 +471,9 @@ message Thing2 {
             id="nested_buf",
         ),
         pytest.param(partial(ProtocFixture, package="nested"), id="nested_protoc"),
+        pytest.param(
+            partial(GrpcIoToolsFixture, package="nested"), id="nested_grpc_io_tools"
+        ),
         pytest.param(partial(RawFixture, package="nested"), id="nested_raw"),
     ]
 )
@@ -511,6 +532,16 @@ service NoImportsService {
                 mypy_grpc=True,
             ),
             id="no_imports_service_protoc",
+        ),
+        pytest.param(
+            partial(
+                GrpcIoToolsFixture,
+                package="no_imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="no_imports_service_grpc_io_tools",
         ),
         pytest.param(
             partial(
@@ -603,6 +634,16 @@ message PostResponse {}
         ),
         pytest.param(
             partial(
+                GrpcIoToolsFixture,
+                package="imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="imports_service_grpc_io_tools",
+        ),
+        pytest.param(
+            partial(
                 RawFixture,
                 package="imports_service",
                 grpc=True,
@@ -660,6 +701,10 @@ message FunctionSignature {
             id="long_names_protoc",
         ),
         pytest.param(
+            partial(GrpcIoToolsFixture, package="long_names", mypy=True),
+            id="long_names_grpc_io_tools",
+        ),
+        pytest.param(
             partial(RawFixture, package="long_names", mypy=True),
             id="long_names_raw",
         ),
@@ -709,6 +754,10 @@ message Foo {}
         pytest.param(
             partial(ProtocFixture, package="ignored_imports"),
             id="ignored_imports_protoc",
+        ),
+        pytest.param(
+            partial(GrpcIoToolsFixture, package="ignored_imports"),
+            id="ignored_imports_grpc_io_tools",
         ),
         pytest.param(
             partial(RawFixture, package="ignored_imports"),

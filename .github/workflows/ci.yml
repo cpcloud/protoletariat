@@ -158,7 +158,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yml
 
-      - run: mamba install grpc-cpp
+      - run: mamba install grpc-cpp grpcio-tools
       - run: pip install .
       - run: pytest -ra
   conda-windows:
@@ -203,7 +203,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           environment-file: environment.yml
 
-      - run: mamba install grpc-cpp pip
+      - run: mamba install grpc-cpp grpcio-tools pip
       - run: pip install .
       - run: pytest -ra
   tensorflow:
