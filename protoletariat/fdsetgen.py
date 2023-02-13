@@ -112,7 +112,7 @@ def _create_pyi_init(root: Path) -> None:
     # use a dictionary to preserve order while deduplicating
     lines_to_write = {
         f"from . import {path.stem}\n": None
-        for path in root.glob("*")
+        for path in sorted(root.glob("*"))
         if path.stem not in ("__init__", "__pycache__")
         if path.suffix == ".pyi" or path.is_dir()
     }
