@@ -1,5 +1,12 @@
 # Release Notes
 
+## [2.1.0](https://github.com/cpcloud/protoletariat/compare/2.0.0...2.1.0) (2023-02-14)
+
+
+### Features
+
+* ensure consistent ordering in generated `__init__.pyi` files ([9fca603](https://github.com/cpcloud/protoletariat/commit/9fca60323021fa710ecd024fbb7a40d00892ff79))
+
 ## [2.0.0](https://github.com/cpcloud/protoletariat/compare/1.1.0...2.0.0) (2022-12-28)
 
 
