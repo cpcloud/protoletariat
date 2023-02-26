@@ -113,7 +113,7 @@
             --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
             "$@"
           '';
-          protoletariatDevEnv = pkgs.protoletariatDevEnv310;
+          protoletariatDevEnv = pkgs.protoletariatDevEnv311;
         } // (super.lib.listToAttrs (
           super.lib.concatMap
             (py: [
@@ -171,7 +171,7 @@
                 });
               }
             ])
-            [ "38" "39" "310" ]
+            [ "38" "39" "310" "311" ]
         )))
       ];
     } // (
@@ -200,14 +200,16 @@
         in
         rec {
           packages = {
-            inherit (pkgs) protoletariat38 protoletariat39 protoletariat310;
-            protoletariat = pkgs.protoletariat310;
-            default = pkgs.protoletariat310;
+            inherit (pkgs) protoletariat38 protoletariat39 protoletariat310 protoletariat311;
+            protoletariat = pkgs.protoletariat311;
+            default = pkgs.protoletariat311;
 
             protoletariat38-image = mkImage apps.protoletariat38.program;
             protoletariat39-image = mkImage apps.protoletariat39.program;
             protoletariat310-image = mkImage apps.protoletariat310.program;
-            protoletariat-image = packages.protoletariat310-image;
+            protoletariat311-image = mkImage apps.protoletariat311.program;
+
+            protoletariat-image = packages.protoletariat311-image;
           };
 
 
@@ -215,8 +217,9 @@
             protoletariat38 = mkApp packages.protoletariat38;
             protoletariat39 = mkApp packages.protoletariat39;
             protoletariat310 = mkApp packages.protoletariat310;
+            protoletariat311 = mkApp packages.protoletariat311;
 
-            protoletariat = apps.protoletariat310;
+            protoletariat = apps.protoletariat311;
             default = apps.protoletariat;
           };
 
