@@ -54,7 +54,7 @@ class FileDescriptorSetGenerator(abc.ABC):
     def generate_file_descriptor_set_bytes(self) -> bytes:
         """Generate the bytes of a `FileDescriptorSet`."""
 
-    def fix_imports(
+    def fix_imports(  # noqa: PLR0912
         self,
         *,
         python_out: Path,
