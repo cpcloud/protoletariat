@@ -93,7 +93,7 @@ class BufFixture(ProtoletariatFixture):
         base_dir: Path,
         package: str,
         proto_texts: Iterable[ProtoFile],
-        plugins: Sequence[Plugin] = (Plugin(name="python"),),
+        plugins: Sequence[Plugin] = (),
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
         super().__init__(
@@ -114,7 +114,7 @@ class BufFixture(ProtoletariatFixture):
         )
 
         plugin_specs = []
-        for plugin in plugins:
+        for plugin in plugins or (Plugin(name="python"),):
             plugin_spec = {"name": plugin.name, "out": str(self.package_dir)}
             if plugin.path is not None:
                 plugin_spec["path"] = str(plugin.path)

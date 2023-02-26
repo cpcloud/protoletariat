@@ -58,6 +58,7 @@
         value = pkgs.poetry2nix.mkPoetryApplication {
           python = pkgs."python${py}Optimized";
           preferWheels = true;
+          checkGroups = [ "dev" "test" ];
 
           projectDir = ./.;
           src = pkgs.gitignoreSource ./.;
@@ -90,6 +91,7 @@
         value = pkgs.poetry2nix.mkPoetryEnv {
           python = pkgs."python${py}";
           projectDir = ./.;
+          groups = [ "dev" "test" ];
           preferWheels = true;
           overrides = [
             (import ./poetry-overrides.nix)
@@ -231,6 +233,7 @@
                 ruff = {
                   enable = true;
                   entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
+                  types = [ "python" ];
                 };
 
                 prettier = {
@@ -242,6 +245,7 @@
                   enable = true;
                   entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/mypy";
                   types = [ "python" ];
+                  excludes = [ ".+/tests/.+\\.py$" ];
                 };
 
                 shfmt = {

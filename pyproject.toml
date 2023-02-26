@@ -27,14 +27,13 @@ protobuf = ">=3.19.1,<5"
 [tool.poetry.dev-dependencies]
 black = ">=22,<24"
 grpc-stubs = ">=1.24.7,<2"
+grpcio = ">=1.42,<2"
 mypy = ">=1,<2"
 mypy-protobuf = ">=3,<4"
-types-protobuf = ">=4.21,<5"
-grpcio = ">=1.42,<2"
 pytest = ">=7,<8"
 pytest-randomly = ">=3.10.1,<4"
 ruff = ">=0.0.198,<1"
-tomli = ">=1,<3"
+types-protobuf = ">=4.21,<5"
 
 [tool.poetry.scripts]
 protol = "protoletariat.__main__:main"
@@ -59,27 +58,37 @@ line-length = 88
 [tool.ruff]
 line-length = 88
 select = [
+  "B", # flake8-bugbear
+  "BLE", # flake8-blind-except
+  "C4", # comprehensions
   "D", # pydocstyle
   "E", # pycodestyle
-  "W", # pycodestyle
   "F", # pyflakes
   "I", # isort
-  "UP", # pyupgrade
-  "RUF", # ruff-specific rules
-  "TID", # flake8-tidy-imports
-  "T10", # flake8-debugger
+  "ICN", # flake8-import-conventions
+  "ISC", # flake8-implicit-str-concat
   "PGH", # pygrep-hooks
   "PLC", # pylint
-  "T20", # flake8-print
-  "ICN", # flake8-import-conventions
+  "PLE", # pylint
+  "PLR", # pylint import style
+  "PLW", # pylint
   "RET", # flake8-return
-  "BLE", # flake8-blind-except
+  "RUF", # ruff-specific rules
+  "SIM", # flake8-simplify
+  "T10", # flake8-debugger
+  "T20", # flake8-print
+  "TID", # flake8-tidy-imports
+  "UP", # pyupgrade
+  "W", # pycodestyle
+  "YTT", # flake8-2020
 
 ]
 respect-gitignore = true
 ignore = [
+  "C408", # dict(...) as literal
   "E501",
   "PGH003",
+  "PLR0913", # too many arguments
   "RET504",
   "RET505",
   "RET506",
@@ -99,13 +108,20 @@ ignore = [
   "D417", # Missing argument descriptions
 
 ]
-exclude = ["*_py310.py", "ibis/tests/*/snapshots/*"]
 target-version = "py38"
+unfixable = [
+  "T201", # print statements
+  "F401", # unused imports
+  "RUF100", # unused noqa comments
+  "F841", # unused variables
+
+]
 
 [tool.ruff.per-file-ignores]
 "*test*.py" = ["D"] # ignore all docstring lints in tests
 
 [tool.mypy]
+exclude = ".+/tests/.+\\.py$"
 ignore_missing_imports = true
 # untyped things
 disallow_untyped_calls = true
