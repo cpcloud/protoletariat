@@ -77,16 +77,23 @@ class FileDescriptorSetGenerator(abc.ABC):
             # module, but they import it so we register a rewrite for the
             # current proto as a dependency of itself to handle the case
             # of services
-            for repl in build_rewrites(fd_name, fd_name):
+            for repl in build_rewrites(fd_name, fd_name, is_public=False):
                 rewriter.register_rewrite(repl)
 
             # register proto import rewrites
-            for dep in map(_clean_proto_filename, fd.dependency):
+
+            # construct a frozenset for dependencies to check whether need to
+            # rewrite using star imports
+            public_deps = frozenset(fd.public_dependency)
+
+            for i, dep in enumerate(map(_clean_proto_filename, fd.dependency)):
                 if _should_ignore(dep, exclude_imports_glob):
                     continue
 
                 dep_name = _clean_proto_filename(dep)
-                for repl in build_rewrites(fd_name, dep_name):
+                for repl in build_rewrites(
+                    fd_name, dep_name, is_public=i in public_deps
+                ):
                     rewriter.register_rewrite(repl)
 
             for suffix in module_suffixes:

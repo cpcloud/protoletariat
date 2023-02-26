@@ -357,7 +357,7 @@ service ThingService {
     thing1_code = """
 syntax = "proto3";
 
-import "thing2.proto";
+import public "thing2.proto";
 
 package things;
 

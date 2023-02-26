@@ -139,7 +139,9 @@ class ASTRewriter:
             return node
 
 
-def build_rewrites(proto: str, dep: str) -> list[Replacement]:
+def build_rewrites(
+    proto: str, dep: str, *, is_public: bool = False
+) -> list[Replacement]:
     """Construct a replacement import for `dep`.
 
     Parameters
@@ -149,6 +151,9 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
     dep
         The `name` field of a `FileDescriptorProto` message, stripped
         of its ``.proto`` suffix.
+    is_public
+        Whether the dependency is public. We generate star imports like protoc
+        if this is `True`.
 
     Returns
     -------
@@ -174,12 +179,13 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
     leading_dots = "." * num_leading_dots
     last_part = "__".join(f"{part}_pb2".split("_"))
 
+    from_ = ".".join(import_parts)
+
     if not import_parts:
         # underscores are doubled by codegen
         old = f"import {part}_pb2 as {last_part}"
         new = f"from {leading_dots} import {part}_pb2 as {last_part}"
     else:
-        from_ = ".".join(import_parts)
         fake_dotted_path = "_dot_".join(
             part.replace("_", "__") for part in import_parts
         )
@@ -188,7 +194,7 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
         old = f"from {from_} import {part}_pb2 as {as_}"
         new = f"from {leading_dots}{from_} import {part}_pb2 as {as_}"
 
-    return [
+    replacements = [
         Replacement(old=old, new=new),
         Replacement(
             old=f"import {'.'.join(parts)}_pb2",
@@ -198,6 +204,14 @@ def build_rewrites(proto: str, dep: str) -> list[Replacement]:
             ),
         ),
     ]
+    if is_public:
+        replacements.append(
+            Replacement(
+                old=f"from {'.'.join(parts)}_pb2 import *",
+                new=f"from {'.' * (num_leading_dots - 1)}{from_}.{part}_pb2 import *",
+            ),
+        )
+    return replacements
 
 
 class ImportNodeTransformer(ast.NodeTransformer):

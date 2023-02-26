@@ -71,6 +71,11 @@ def test_thing_service(  # type: ignore[misc]
     assert "from . import thing2_pb2 as thing2__pb2" in lines
     assert "import thing2_pb2 as thing2__pb2" not in lines
 
+    # check that `import public` generates star imports
+    thing1 = thing_service.package_dir.joinpath("thing1_pb2.py")
+    thing1_lines = thing1.read_text().splitlines()
+    assert "from .thing2_pb2 import *" in thing1_lines
+
     # check that we can import the thing
     with thing_service.patched_syspath:
         importlib.import_module(f"{thing_service.package_name}.thing1_pb2")
