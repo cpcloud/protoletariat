@@ -69,7 +69,7 @@
             pkgs.poetry2nix.defaultPoetryOverrides
           ];
 
-          checkInputs = with pkgs; [ buf grpc protobuf3_21 ];
+          nativeCheckInputs = with pkgs; [ buf grpc protobuf3_21 ];
 
           preCheck = "HOME=$TMPDIR";
 
