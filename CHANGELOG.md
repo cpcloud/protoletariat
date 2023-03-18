@@ -1,5 +1,21 @@
 # Release Notes
 
+## [3.0.0](https://github.com/cpcloud/protoletariat/compare/2.1.1...3.0.0) (2023-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* The container binary's Python version is now 3.11. Please report any downstream breakages upstream.
+
+### Features
+
+* add Python 3.11 support and make it the default ([c9c82eb](https://github.com/cpcloud/protoletariat/commit/c9c82eb568c34f66d667c76758f23260f426e9ff))
+
+
+### Documentation
+
+* add module docstring ([47c5052](https://github.com/cpcloud/protoletariat/commit/47c50524d72e985e1be8f1e60510df63d50d9cb6))
+
 ## [2.1.1](https://github.com/cpcloud/protoletariat/compare/2.1.0...2.1.1) (2023-03-16)
 
 
