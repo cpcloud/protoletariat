@@ -230,7 +230,7 @@
 
                 ruff = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
+                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
                 };
 
                 prettier = {
@@ -240,7 +240,7 @@
 
                 mypy = {
                   enable = true;
-                  entry = "${pkgs.protoletariatDevEnv}/bin/mypy";
+                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/mypy";
                   types = [ "python" ];
                 };
 
