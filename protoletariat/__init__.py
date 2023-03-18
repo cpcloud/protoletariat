@@ -1,3 +1,3 @@
 """Protocol buffers for the rest of us."""
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"

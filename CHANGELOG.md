@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.0.1](https://github.com/cpcloud/protoletariat/compare/3.0.0...3.0.1) (2023-03-18)
+
+
+### Bug Fixes
+
+* rewrite `import public` imports in generated code ([30f39ab](https://github.com/cpcloud/protoletariat/commit/30f39abc75fe516dc89694895c50fefdbe8a7ba9))
+
 ## [3.0.0](https://github.com/cpcloud/protoletariat/compare/2.1.1...3.0.0) (2023-03-18)
 
 
