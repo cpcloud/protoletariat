@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.1.0](https://github.com/cpcloud/protoletariat/compare/3.0.1...3.1.0) (2023-03-19)
+
+
+### Features
+
+* **protoc:** support using `grpc_tools.protoc` ([eb152b0](https://github.com/cpcloud/protoletariat/commit/eb152b0c5e7badaf46461e55df2002d508f9af66))
+
 ## [3.0.1](https://github.com/cpcloud/protoletariat/compare/3.0.0...3.0.1) (2023-03-18)
 
 
