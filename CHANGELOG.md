@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.2.0](https://github.com/cpcloud/protoletariat/compare/3.1.0...3.2.0) (2023-03-19)
+
+
+### Features
+
+* **protoc:** forward protoc arguments to protoc generator ([2a0e96a](https://github.com/cpcloud/protoletariat/commit/2a0e96a4c53f75338d6829f68a603111bbbfc9e8))
+
 ## [3.1.0](https://github.com/cpcloud/protoletariat/compare/3.0.1...3.1.0) (2023-03-19)
 
 
