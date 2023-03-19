@@ -208,6 +208,83 @@ class GrpcIoToolsFixture(ProtocFixture):
     protoc_exe = sys.executable, "-m", "grpc_tools.protoc"
 
 
+class RawProtocFixture(ProtoletariatFixture):
+    protoc_exe = ("protoc",)
+
+    def __init__(
+        self,
+        *,
+        base_dir: Path,
+        package: str,
+        proto_texts: Iterable[ProtoFile],
+        monkeypatch: pytest.MonkeyPatch,
+        grpc: bool = False,
+        mypy: bool = False,
+        mypy_grpc: bool = False,
+    ) -> None:
+        super().__init__(
+            base_dir=base_dir,
+            package=package,
+            proto_texts=proto_texts,
+            monkeypatch=monkeypatch,
+        )
+        self.grpc = grpc
+        self.mypy = mypy
+        self.mypy_grpc = mypy_grpc
+
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
+        with tempfile.NamedTemporaryFile(delete=False) as f:
+            filename = f.name
+
+            protoc_args = [
+                "protoc",
+                "--include_imports",
+                f"--descriptor_set_out={filename}",
+                "--proto_path",
+                str(self.base_dir),
+                "--python_out",
+                str(self.package_dir),
+                *(str(fn) for fn, _ in self.proto_texts),
+            ]
+
+            if self.grpc:
+                # XXX: why isn't this found? PATH is set properly
+                grpc_python_plugin = shutil.which("grpc_python_plugin")
+                protoc_args.extend(
+                    (
+                        f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
+                        "--grpc_python_out",
+                        str(self.package_dir),
+                    )
+                )
+            if self.mypy:
+                protoc_args.extend(("--mypy_out", str(self.package_dir)))
+            if self.mypy_grpc:
+                protoc_args.extend(("--mypy_grpc_out", str(self.package_dir)))
+
+            subprocess.check_call(protoc_args)
+
+        try:
+            return cli.invoke(
+                main,
+                [
+                    "--python-out",
+                    str(self.package_dir),
+                    *args,
+                    "protoc",
+                    "--protoc-path",
+                    shlex.join(self.protoc_exe),
+                    "--proto-path",
+                    str(self.base_dir),
+                    f"--descriptor_set_in={filename}",
+                    *(str(filename) for filename, _ in self.proto_texts),
+                ],
+                catch_exceptions=False,
+            )
+        finally:
+            os.unlink(filename)
+
+
 class RawFixture(ProtoletariatFixture):
     def __init__(
         self,
@@ -337,6 +414,10 @@ message BuzzBuzz {}
             partial(RawFixture, package="basic_cli"),
             id="basic_cli_raw",
         ),
+        pytest.param(
+            partial(RawProtocFixture, package="basic_cli"),
+            id="basic_cli_raw_protoc",
+        ),
     ]
 )
 def basic_cli(
@@ -420,6 +501,10 @@ message Thing2 {
             partial(RawFixture, package="thing_service", grpc=True),
             id="thing_service_raw",
         ),
+        pytest.param(
+            partial(RawProtocFixture, package="thing_service", grpc=True),
+            id="thing_service_raw_protoc",
+        ),
     ]
 )
 def thing_service(
@@ -475,6 +560,9 @@ message Thing2 {
             partial(GrpcIoToolsFixture, package="nested"), id="nested_grpc_io_tools"
         ),
         pytest.param(partial(RawFixture, package="nested"), id="nested_raw"),
+        pytest.param(
+            partial(RawProtocFixture, package="nested"), id="nested_raw_protoc"
+        ),
     ]
 )
 def nested(
@@ -552,6 +640,16 @@ service NoImportsService {
                 mypy_grpc=True,
             ),
             id="no_imports_service_raw",
+        ),
+        pytest.param(
+            partial(
+                RawProtocFixture,
+                package="no_imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="no_imports_service_raw_protoc",
         ),
     ]
 )
@@ -652,6 +750,16 @@ message PostResponse {}
             ),
             id="imports_service_raw",
         ),
+        pytest.param(
+            partial(
+                RawProtocFixture,
+                package="imports_service",
+                grpc=True,
+                mypy=True,
+                mypy_grpc=True,
+            ),
+            id="imports_service_raw_protoc",
+        ),
     ]
 )
 def grpc_imports(
@@ -708,6 +816,10 @@ message FunctionSignature {
             partial(RawFixture, package="long_names", mypy=True),
             id="long_names_raw",
         ),
+        pytest.param(
+            partial(RawProtocFixture, package="long_names", mypy=True),
+            id="long_names_raw_protoc",
+        ),
     ]
 )
 def long_names(
@@ -762,6 +874,10 @@ message Foo {}
         pytest.param(
             partial(RawFixture, package="ignored_imports"),
             id="ignored_imports_raw",
+        ),
+        pytest.param(
+            partial(RawProtocFixture, package="ignored_imports"),
+            id="ignored_imports_raw_protoc",
         ),
     ]
 )
