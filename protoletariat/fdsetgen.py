@@ -143,25 +143,24 @@ class Protoc(FileDescriptorSetGenerator):
         self,
         *,
         protoc_path: str,
-        proto_files: Iterable[Path],
         proto_paths: Iterable[Path],
+        protoc_args: Iterable[str],
     ) -> None:
         self.protoc_path = protoc_path
-        self.proto_files = proto_files
         self.proto_paths = proto_paths
+        self.protoc_args = protoc_args
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
         with tempfile.NamedTemporaryFile(delete=False) as f:
             filename = Path(f.name)
-            subprocess.check_output(
-                [
-                    *shlex.split(self.protoc_path),
-                    "--include_imports",
-                    f"--descriptor_set_out={filename}",
-                    *map("--proto_path={}".format, self.proto_paths),
-                    *map(str, self.proto_files),
-                ]
-            )
+            args = [
+                *shlex.split(self.protoc_path),
+                "--include_imports",
+                f"--descriptor_set_out={filename}",
+                *map("--proto_path={}".format, self.proto_paths),
+                *self.protoc_args,
+            ]
+            subprocess.check_output(args)
 
         try:
             return filename.read_bytes()

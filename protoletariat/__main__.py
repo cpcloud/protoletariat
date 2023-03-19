@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import IO
+from typing import IO, Iterable
 
 import click
 
@@ -100,7 +100,10 @@ def main(
     )
 
 
-@main.command(help="Use protoc to generate the FileDescriptorSet blob")
+@main.command(
+    context_settings=dict(ignore_unknown_options=True),
+    help="Use protoc to generate the FileDescriptorSet blob",
+)
 @click.option(
     "--protoc-path",
     envvar="PROTOC_PATH",
@@ -124,28 +127,18 @@ def main(
     ),
     help="Protobuf file search path(s). Accepts multiple values.",
 )
-@click.argument(
-    "proto_files",
-    nargs=-1,
-    required=True,
-    type=click.Path(
-        file_okay=True,
-        dir_okay=False,
-        exists=True,
-        path_type=Path,
-    ),
-)
+@click.argument("protoc_args", nargs=-1, type=click.UNPROCESSED)
 @click.pass_context
 def protoc(
     ctx: click.Context,
     protoc_path: str,
     proto_paths: list[Path],
-    proto_files: list[Path],
+    protoc_args: Iterable[str],
 ) -> None:
     Protoc(
         protoc_path=os.fsdecode(protoc_path),
-        proto_files=[Path(os.fsdecode(proto_file)) for proto_file in proto_files],
         proto_paths=[Path(os.fsdecode(proto_path)) for proto_path in proto_paths],
+        protoc_args=list(protoc_args),
     ).fix_imports(**ctx.obj)
 
 
