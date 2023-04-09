@@ -129,14 +129,14 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "grpc-stubs"
-version = "1.24.12.1"
+version = "1.53.0.1"
 description = "Mypy stubs for gRPC"
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "grpc-stubs-1.24.12.1.tar.gz", hash = "sha256:971e0a8ed8f299cacc85b591738254841a1db09757c254420c61f89de1ed1d00"},
-    {file = "grpc_stubs-1.24.12.1-py3-none-any.whl", hash = "sha256:144f2731f0f97c6240cac421369f2ce486ddfe72e8d31b5426c510ac8ebd2e3a"},
+    {file = "grpc-stubs-1.53.0.1.tar.gz", hash = "sha256:766637997b19e2b3323b70e5f008141d4578bc5cce01a4f770b7d165f74ef651"},
+    {file = "grpc_stubs-1.53.0.1-py3-none-any.whl", hash = "sha256:bc42cfd4e5ce1beebb109f04bdb9568c1b7832a2748698ce32ff4316b818e1dc"},
 ]
 
 [package.dependencies]
