@@ -167,7 +167,8 @@ def build_rewrites(
     >>> dep = "foo/bar"
     >>> pprint(build_rewrites(proto, dep))
     [Replacement(old='from foo import bar_pb2 as foo_dot_bar__pb2', new='from ...foo import bar_pb2 as foo_dot_bar__pb2'),
-     Replacement(old='import foo.bar_pb2', new='from ... import foo')]
+     Replacement(old='import foo.bar_pb2', new='from ... import foo'),
+     Replacement(old='from foo import bar_pb2 as _bar_pb2', new='from ...foo import _bar_pb2 as _bar_pb2')]
     """
     parts = dep.split("/")
 
@@ -202,6 +203,10 @@ def build_rewrites(
                 f"from {leading_dots or '.'} import {parts[0]}"
                 + "_pb2" * (not import_parts)
             ),
+        ),
+        Replacement(
+            old=f"from {from_} import {part}_pb2 as _{part}_pb2",
+            new=f"from {leading_dots}{from_} import _{part}_pb2 as _{part}_pb2",
         ),
     ]
     if is_public:
