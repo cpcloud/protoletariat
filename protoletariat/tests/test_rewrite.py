@@ -33,6 +33,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from .foo import bar_pb2 as foo_dot_bar__pb2",
                 "from . import foo",
+                "from .foo import _bar_pb2",
             ],
             id="dep_one_level",
         ),
@@ -42,6 +43,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from ..foo import bar_pb2 as foo_dot_bar__pb2",
                 "from .. import foo",
+                "from ..foo import _bar_pb2",
             ],
             id="both_one_level",
         ),
@@ -51,6 +53,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from .foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
                 "from . import foo",
+                "from .foo.bar import _baz_pb2",
             ],
             id="dep_two_levels",
         ),
@@ -60,6 +63,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from ..foo.bar import baz_pb2 as foo_dot_bar_dot_baz__pb2",
                 "from .. import foo",
+                "from ..foo.bar import _baz_pb2",
             ],
             id="proto_one_level_dep_two_levels",
         ),
@@ -69,6 +73,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from .foo.bar import bizz_buzz_pb2 as foo_dot_bar_dot_bizz__buzz__pb2",
                 "from . import foo",
+                "from .foo.bar import _bizz_buzz_pb2",
             ],
             id="dep_three_levels",
         ),
@@ -81,6 +86,7 @@ from protoletariat.rewrite import build_rewrites
                     "foo_dot_bar_dot_bizz__buzz__pb2"
                 ),
                 "from .. import foo",
+                "from ..foo.bar import _bizz_buzz_pb2",
             ],
             id="proto_one_level_dep_three_levels",
         ),
@@ -90,6 +96,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from ..a import b_pb2 as a_dot_b__pb2",
                 "from .. import a",
+                "from ..a import _b_pb2",
             ],
             id="self_dep",
         ),
@@ -99,6 +106,7 @@ from protoletariat.rewrite import build_rewrites
             [
                 "from ..foo_bar.baz import bizz_pb2 as foo__bar_dot_baz_dot_bizz__pb2",
                 "from .. import foo_bar",
+                "from ..foo_bar.baz import _bizz_pb2",
             ],
             id="underscore_package",
         ),
