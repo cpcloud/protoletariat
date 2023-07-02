@@ -156,11 +156,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1687314785,
-        "narHash": "sha256-8LSbjAFFfh6X/DcZt9QJARqv+JRd/pHU4Kgkhrccazc=",
+        "lastModified": 1688216310,
+        "narHash": "sha256-Vv1VFAkbb9HEFPGzy/TzgQbSG5OSmcOOZMtYioijC0w=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "4f91d45e39cf64b642c6d2725c7bd50d6fcb544b",
+        "rev": "215afa14f7077ca0610882d6d18ac3454f48fa65",
         "type": "github"
       },
       "original": {
