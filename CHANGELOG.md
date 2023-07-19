@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.2.13](https://github.com/cpcloud/protoletariat/compare/3.2.12...3.2.13) (2023-07-19)
+
+
+### Bug Fixes
+
+* **deps:** update dependency click to v8.1.6 ([0b257c0](https://github.com/cpcloud/protoletariat/commit/0b257c06d586ab8d5e802e0e473c65ffbe5b3ae9))
+
 ## [3.2.12](https://github.com/cpcloud/protoletariat/compare/3.2.11...3.2.12) (2023-07-07)
 
 
