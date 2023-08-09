@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.2.15](https://github.com/cpcloud/protoletariat/compare/3.2.14...3.2.15) (2023-08-09)
+
+
+### Bug Fixes
+
+* **deps:** update dependency protobuf to v4.24.0 ([36e8cd6](https://github.com/cpcloud/protoletariat/commit/36e8cd6863b2d270806adc05448985bd61d11aca))
+
 ## [3.2.14](https://github.com/cpcloud/protoletariat/compare/3.2.13...3.2.14) (2023-07-19)
 
 
