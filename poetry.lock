@@ -444,14 +444,14 @@ testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "no
 
 [[package]]
 name = "pytest-randomly"
-version = "3.14.0"
+version = "3.15.0"
 description = "Pytest plugin to randomly order tests and control random.seed."
 category = "dev"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest_randomly-3.14.0-py3-none-any.whl", hash = "sha256:f3c7234cda4658534b50fe73a493732e114867101ae6a47db3853b75d13f524c"},
-    {file = "pytest_randomly-3.14.0.tar.gz", hash = "sha256:9d18daaa54915466b56767ac4015256cb7ed7519c9fbe869f5c23b465a1e65d7"},
+    {file = "pytest_randomly-3.15.0-py3-none-any.whl", hash = "sha256:0516f4344b29f4e9cdae8bce31c4aeebf59d0b9ef05927c33354ff3859eeeca6"},
+    {file = "pytest_randomly-3.15.0.tar.gz", hash = "sha256:b908529648667ba5e54723088edd6f82252f540cc340d748d1fa985539687047"},
 ]
 
 [package.dependencies]
