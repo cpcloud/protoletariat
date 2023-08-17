@@ -1,5 +1,12 @@
 # Release Notes
 
+## [3.2.17](https://github.com/cpcloud/protoletariat/compare/3.2.16...3.2.17) (2023-08-17)
+
+
+### Bug Fixes
+
+* **deps:** update dependency click to v8.1.7 ([f6b4c34](https://github.com/cpcloud/protoletariat/commit/f6b4c34089b8aa1cb74209be857ef8629f04fe7f))
+
 ## [3.2.16](https://github.com/cpcloud/protoletariat/compare/3.2.15...3.2.16) (2023-08-10)
 
 
