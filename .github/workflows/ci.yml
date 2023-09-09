@@ -304,7 +304,7 @@ jobs:
       - tensorflow
       - dry-release
     steps:
-      - uses: tibdex/github-app-token@v1
+      - uses: tibdex/github-app-token@v2
         id: generate_token
         with:
           app_id: ${{ secrets.APP_ID }}
