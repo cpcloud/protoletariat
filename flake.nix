@@ -104,9 +104,9 @@
       };
     in
     {
-      overlay = nixpkgs.lib.composeManyExtensions [
+      overlays.default = nixpkgs.lib.composeManyExtensions [
         gitignore.overlay
-        poetry2nix.overlay
+        poetry2nix.overlays.default
         (pkgs: super: {
           prettierTOML = pkgs.writeShellScriptBin "prettier" ''
             ${pkgs.nodePackages.prettier}/bin/prettier \
@@ -181,7 +181,7 @@
           legacyPkgs = nixpkgs.legacyPackages.${localSystem};
           attrs = {
             inherit localSystem;
-            overlays = [ self.overlay ];
+            overlays = [ self.overlays.default ];
           };
           pkgs = import nixpkgs attrs;
           inherit (pkgs) lib;
@@ -268,7 +268,7 @@
               prettierTOML
               protobuf
               protoletariatDevEnv
-              protoletariatDevEnv.pkgs.poetry
+              poetry
             ];
 
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
