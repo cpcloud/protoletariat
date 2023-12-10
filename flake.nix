@@ -228,14 +228,20 @@
               src = ./.;
               hooks = {
                 actionlint.enable = true;
-                black.enable = true;
                 nixpkgs-fmt.enable = true;
                 shellcheck.enable = true;
                 statix.enable = true;
+                taplo.enable = true;
 
                 ruff = {
                   enable = true;
                   entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
+                  types = [ "python" ];
+                };
+
+                ruff-format = {
+                  enable = true;
+                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff format";
                   types = [ "python" ];
                 };
 
@@ -265,10 +271,11 @@
             nativeBuildInputs = with pkgs; [
               buf
               grpc
+              poetry
               prettierTOML
               protobuf
               protoletariatDevEnv
-              poetry
+              taplo-cli
             ];
 
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
