@@ -104,9 +104,9 @@
       };
     in
     {
-      overlay = nixpkgs.lib.composeManyExtensions [
+      overlays.default = nixpkgs.lib.composeManyExtensions [
         gitignore.overlay
-        poetry2nix.overlay
+        poetry2nix.overlays.default
         (pkgs: super: {
           prettierTOML = pkgs.writeShellScriptBin "prettier" ''
             ${pkgs.nodePackages.prettier}/bin/prettier \
@@ -181,7 +181,7 @@
           legacyPkgs = nixpkgs.legacyPackages.${localSystem};
           attrs = {
             inherit localSystem;
-            overlays = [ self.overlay ];
+            overlays = [ self.overlays.default ];
           };
           pkgs = import nixpkgs attrs;
           inherit (pkgs) lib;
@@ -228,14 +228,21 @@
               src = ./.;
               hooks = {
                 actionlint.enable = true;
-                black.enable = true;
+                commitizen.enable = true;
                 nixpkgs-fmt.enable = true;
                 shellcheck.enable = true;
                 statix.enable = true;
+                taplo.enable = true;
 
                 ruff = {
                   enable = true;
                   entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
+                  types = [ "python" ];
+                };
+
+                ruff-format = {
+                  enable = true;
+                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff format";
                   types = [ "python" ];
                 };
 
@@ -265,10 +272,11 @@
             nativeBuildInputs = with pkgs; [
               buf
               grpc
+              poetry
               prettierTOML
               protobuf
               protoletariatDevEnv
-              protoletariatDevEnv.pkgs.poetry
+              taplo-cli
             ];
 
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
