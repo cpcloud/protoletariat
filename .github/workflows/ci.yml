@@ -304,11 +304,11 @@ jobs:
       - tensorflow
       - dry-release
     steps:
-      - uses: tibdex/github-app-token@v1
+      - uses: actions/create-github-app-token@v1.9.0
         id: generate_token
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
         with:
