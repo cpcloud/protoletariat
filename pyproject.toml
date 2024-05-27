@@ -26,7 +26,7 @@ protol = "protoletariat.__main__:main"
 python = "^3.8"
 astunparse = { version = ">=1.6.3,<2", python = "<3.9" }
 click = ">=8,<9"
-protobuf = ">=3.19.1,<5"
+protobuf = ">=3.19.1,<6"
 grpcio-tools = { version = ">=1.42.0,<2", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -38,7 +38,7 @@ mypy-protobuf = ">=3,<4"
 pytest = ">=7,<8"
 pytest-randomly = ">=3.10.1,<4"
 ruff = ">=0.0.198,<1"
-types-protobuf = ">=4.21,<5"
+types-protobuf = ">=4.21,<6"
 
 [tool.poetry.extras]
 grpcio-tools = ["grpcio-tools"]
