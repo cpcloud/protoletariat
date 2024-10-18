@@ -90,6 +90,16 @@ class ProtoletariatFixture(abc.ABC):
         assert py_files
         assert all(path.read_text() for path in py_files)
 
+    def get_grpc_args(self) -> tuple[str, ...]:
+        grpc_python_plugin = shutil.which("grpc_python_plugin")
+        if grpc_python_plugin is None:
+            pytest.skip("grpc_python_plugin not found")
+        return (
+            f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
+            "--grpc_python_out",
+            str(self.package_dir),
+        )
+
 
 class BufFixture(ProtoletariatFixture):
     def __init__(
@@ -122,6 +132,8 @@ class BufFixture(ProtoletariatFixture):
         for plugin in plugins or (Plugin(name="python"),):
             plugin_spec = {"name": plugin.name, "out": str(self.package_dir)}
             if plugin.path is not None:
+                if shutil.which(plugin.path) is None:
+                    pytest.skip(f"{plugin.path} not found")
                 plugin_spec["path"] = str(plugin.path)
             plugin_specs.append(plugin_spec)
 
@@ -176,15 +188,7 @@ class ProtocFixture(ProtoletariatFixture):
             *(str(filename) for filename, _ in self.proto_texts),
         ]
         if self.grpc:
-            # XXX: why isn't this found? PATH is set properly
-            grpc_python_plugin = shutil.which("grpc_python_plugin")
-            protoc_args.extend(
-                (
-                    f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
-                    "--grpc_python_out",
-                    str(self.package_dir),
-                )
-            )
+            protoc_args.extend(self.get_grpc_args())
         if self.mypy:
             protoc_args.extend(("--mypy_out", str(self.package_dir)))
         if self.mypy_grpc:
@@ -209,6 +213,13 @@ class ProtocFixture(ProtoletariatFixture):
 
 class GrpcIoToolsFixture(ProtocFixture):
     protoc_exe = sys.executable, "-m", "grpc_tools.protoc"
+
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
+        pytest.importorskip("grpc_tools")
+        return super().do_generate(cli, args=args)
+
+    def get_grpc_args(self) -> tuple[str, ...]:
+        return ("--grpc_python_out", str(self.package_dir))
 
 
 class RawProtocFixture(ProtoletariatFixture):
@@ -251,15 +262,7 @@ class RawProtocFixture(ProtoletariatFixture):
             ]
 
             if self.grpc:
-                # XXX: why isn't this found? PATH is set properly
-                grpc_python_plugin = shutil.which("grpc_python_plugin")
-                protoc_args.extend(
-                    (
-                        f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
-                        "--grpc_python_out",
-                        str(self.package_dir),
-                    )
-                )
+                protoc_args.extend(self.get_grpc_args())
             if self.mypy:
                 protoc_args.extend(("--mypy_out", str(self.package_dir)))
             if self.mypy_grpc:
@@ -327,15 +330,7 @@ class RawFixture(ProtoletariatFixture):
             ]
 
             if self.grpc:
-                # XXX: why isn't this found? PATH is set properly
-                grpc_python_plugin = shutil.which("grpc_python_plugin")
-                protoc_args.extend(
-                    (
-                        f"--plugin=protoc-gen-grpc_python={grpc_python_plugin}",
-                        "--grpc_python_out",
-                        str(self.package_dir),
-                    )
-                )
+                protoc_args.extend(self.get_grpc_args())
             if self.mypy:
                 protoc_args.extend(("--mypy_out", str(self.package_dir)))
             if self.mypy_grpc:
