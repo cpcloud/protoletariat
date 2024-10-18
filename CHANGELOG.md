@@ -1,5 +1,15 @@
 # Release Notes
 
+## [3.3.0](https://github.com/cpcloud/protoletariat/compare/3.2.19...3.3.0) (2024-10-18)
+
+### Features
+
+* **deps:** support protobuf 5 ([5661046](https://github.com/cpcloud/protoletariat/commit/5661046f5f3376739fbbbe903dcd87ddd0c6253a))
+
+### Bug Fixes
+
+* **python:** continue to support python 3.8 ([64fc00e](https://github.com/cpcloud/protoletariat/commit/64fc00e06be9b1b790d3ee09f885819e147bce0a))
+
 ## [3.2.19](https://github.com/cpcloud/protoletariat/compare/3.2.18...3.2.19) (2023-08-27)
 
 
