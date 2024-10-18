@@ -8,11 +8,14 @@ import shlex
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Callable, Iterable, Sequence
+from typing import TYPE_CHECKING, Callable
 
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
 from .rewrite import ASTImportRewriter, build_rewrites
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 
 _PROTO_SUFFIX_PATTERN = re.compile(r"^(.+)\.proto$")
 
@@ -55,7 +58,7 @@ class FileDescriptorSetGenerator(abc.ABC):
     def generate_file_descriptor_set_bytes(self) -> bytes:
         """Generate the bytes of a `FileDescriptorSet`."""
 
-    def fix_imports(  # noqa: PLR0912
+    def fix_imports(
         self,
         *,
         python_out: Path,
@@ -160,7 +163,7 @@ class Protoc(FileDescriptorSetGenerator):
                 *map("--proto_path={}".format, self.proto_paths),
                 *self.protoc_args,
             ]
-            subprocess.check_output(args)
+            subprocess.run(args, check=True)  # noqa: S603
 
         try:
             return filename.read_bytes()
@@ -185,17 +188,16 @@ class Buf(FileDescriptorSetGenerator):
         self.input = input
 
     def generate_file_descriptor_set_bytes(self) -> bytes:
-        return subprocess.check_output(
-            [
-                self.buf_path,
-                "build",
-                "--as-file-descriptor-set",
-                "--exclude-source-info",
-                self.input,
-                "--output",
-                "-",
-            ]
-        )
+        args = [
+            self.buf_path,
+            "build",
+            "--as-file-descriptor-set",
+            "--exclude-source-info",
+            self.input,
+            "--output",
+            "-",
+        ]
+        return subprocess.run(args, check=True, capture_output=True).stdout  # noqa: S603
 
 
 class Raw(FileDescriptorSetGenerator):

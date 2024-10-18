@@ -5,7 +5,8 @@ import collections
 import collections.abc
 import typing
 from ast import AST
-from typing import Any, Callable, MutableSet, NamedTuple, Sequence, Union
+from collections.abc import MutableSet, Sequence
+from typing import Any, Callable, NamedTuple, Union
 
 try:
     from ast import unparse as astunparse
@@ -66,7 +67,7 @@ def matches(value: Node, pattern: Node) -> bool:
     False
     """
     # types must match exactly
-    if type(value) != type(pattern):
+    if type(value) is not type(pattern):
         return False
 
     # recur into non-str sequences

@@ -11,14 +11,18 @@ import subprocess
 import sys
 import tempfile
 from functools import partial
-from pathlib import Path
-from typing import Generator, Iterable, NamedTuple, Sequence
+from typing import TYPE_CHECKING, NamedTuple
 
 import pytest
-from _pytest.fixtures import SubRequest
 from click.testing import CliRunner, Result
 
 from protoletariat.__main__ import main
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable, Sequence
+    from pathlib import Path
+
+    from _pytest.fixtures import SubRequest
 
 
 class Plugin(NamedTuple):
@@ -72,8 +76,7 @@ class ProtoletariatFixture(abc.ABC):
         return result
 
     @abc.abstractmethod
-    def do_generate(self, cli: CliRunner, *, args: Iterable[str]) -> Result:
-        ...
+    def do_generate(self, cli: CliRunner, *, args: Iterable[str]) -> Result: ...
 
     @property  # type: ignore[misc]
     @contextlib.contextmanager
@@ -128,7 +131,7 @@ class BufFixture(ProtoletariatFixture):
 
     def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
         try:
-            subprocess.check_call(["buf", "generate"], cwd=str(self.base_dir))
+            subprocess.run(["buf", "generate"], cwd=str(self.base_dir), check=True)  # noqa: S603, S607
         except FileNotFoundError:
             pytest.skip("buf executable not found")
         else:
@@ -140,7 +143,7 @@ class BufFixture(ProtoletariatFixture):
 
 
 class ProtocFixture(ProtoletariatFixture):
-    protoc_exe = ("protoc",)
+    protoc_exe: tuple[str, ...] = ("protoc",)
 
     def __init__(
         self,
@@ -186,7 +189,7 @@ class ProtocFixture(ProtoletariatFixture):
             protoc_args.extend(("--mypy_out", str(self.package_dir)))
         if self.mypy_grpc:
             protoc_args.extend(("--mypy_grpc_out", str(self.package_dir)))
-        subprocess.check_call(protoc_args)
+        subprocess.run(protoc_args, check=True)  # noqa: S603
         return cli.invoke(
             main,
             [
@@ -262,7 +265,7 @@ class RawProtocFixture(ProtoletariatFixture):
             if self.mypy_grpc:
                 protoc_args.extend(("--mypy_grpc_out", str(self.package_dir)))
 
-            subprocess.check_call(protoc_args)
+            subprocess.run(protoc_args, check=True)  # noqa: S603
 
         try:
             return cli.invoke(
@@ -338,7 +341,7 @@ class RawFixture(ProtoletariatFixture):
             if self.mypy_grpc:
                 protoc_args.extend(("--mypy_grpc_out", str(self.package_dir)))
 
-            subprocess.check_call(protoc_args)
+            subprocess.run(protoc_args, check=True)  # noqa: S603
 
         protol_args = ["--python-out", str(self.package_dir), *args, "raw", filename]
 

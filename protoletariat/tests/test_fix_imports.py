@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import collections
 import importlib
-
-from click.testing import CliRunner
+from typing import TYPE_CHECKING
 
 from .conftest import ProtoletariatFixture, check_import_lines
+
+if TYPE_CHECKING:
+    from click.testing import CliRunner
 
 
 def test_basic_cli(cli: CliRunner, basic_cli: ProtoletariatFixture) -> None:
