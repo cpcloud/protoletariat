@@ -24,7 +24,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           extraPullNames: nix-community,poetry2nix
@@ -40,7 +40,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -66,7 +66,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -86,7 +86,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -220,7 +220,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
@@ -272,7 +272,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           extraPullNames: nix-community,poetry2nix
@@ -319,7 +319,7 @@ jobs:
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: protoletariat
           extraPullNames: nix-community,poetry2nix
