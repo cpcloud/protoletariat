@@ -58,6 +58,7 @@ jobs:
           - "39"
           - "310"
           - "311"
+          - "312"
     steps:
       - uses: actions/checkout@v4
 
