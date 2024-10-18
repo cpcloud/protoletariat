@@ -60,7 +60,7 @@ name = "protoletariat"
 line-length = 88
 respect-gitignore = true
 exclude = [".direnv", "result-*"]
-target-version = "py39"
+target-version = "py38"
 
 [tool.ruff.lint]
 select = [
