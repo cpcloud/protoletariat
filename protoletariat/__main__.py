@@ -5,11 +5,14 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import IO, Iterable
+from typing import IO, TYPE_CHECKING
 
 import click
 
 from .fdsetgen import Buf, Protoc, Raw
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def _overwrite(python_file: Path, code: str) -> None:

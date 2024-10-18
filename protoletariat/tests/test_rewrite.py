@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import itertools
-from typing import Iterable
+from typing import TYPE_CHECKING
 
 import pytest
 
 from protoletariat.rewrite import build_rewrites
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @pytest.mark.parametrize(
