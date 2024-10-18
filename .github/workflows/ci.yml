@@ -55,7 +55,6 @@ jobs:
         os:
           - ubuntu-latest
         python-version:
-          - "38"
           - "39"
           - "310"
           - "311"

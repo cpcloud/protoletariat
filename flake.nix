@@ -26,10 +26,7 @@
 
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     poetry2nix = {
@@ -106,14 +103,14 @@
     {
       overlay = nixpkgs.lib.composeManyExtensions [
         gitignore.overlay
-        poetry2nix.overlay
+        poetry2nix.overlays.default
         (pkgs: super: {
           prettierTOML = pkgs.writeShellScriptBin "prettier" ''
             ${pkgs.nodePackages.prettier}/bin/prettier \
             --plugin-search-dir "${pkgs.nodePackages.prettier-plugin-toml}/lib" \
             "$@"
           '';
-          protoletariatDevEnv = pkgs.protoletariatDevEnv311;
+          protoletariatDevEnv = pkgs.protoletariatDevEnv312;
         } // (super.lib.listToAttrs (
           super.lib.concatMap
             (py: [
@@ -140,8 +137,8 @@
                   sqlite = null;
                   configd = null;
                   tzdata = null;
-                  # we could reduce the size even futher (< 40MB for the
-                  # entire closure) but there's a performance penality:
+                  # we could reduce the size even further (< 40MB for the
+                  # entire closure) but there's a performance penalty:
                   # stripBytecode == true + rebuildBytecode == false means
                   # *no* bytecode on disk until import. Probably not a big
                   # issue for a long running service, but horrible for a CLI
@@ -171,14 +168,13 @@
                 });
               }
             ])
-            [ "38" "39" "310" "311" ]
+            [ "39" "310" "311" "312" ]
         )))
       ];
     } // (
       flake-utils.lib.eachDefaultSystem (
         localSystem:
         let
-          legacyPkgs = nixpkgs.legacyPackages.${localSystem};
           attrs = {
             inherit localSystem;
             overlays = [ self.overlay ];
@@ -200,26 +196,26 @@
         in
         rec {
           packages = {
-            inherit (pkgs) protoletariat38 protoletariat39 protoletariat310 protoletariat311;
-            protoletariat = pkgs.protoletariat311;
-            default = pkgs.protoletariat311;
+            inherit (pkgs) protoletariat39 protoletariat310 protoletariat311 protoletariat312;
+            protoletariat = pkgs.protoletariat312;
+            default = pkgs.protoletariat312;
 
-            protoletariat38-image = mkImage apps.protoletariat38.program;
             protoletariat39-image = mkImage apps.protoletariat39.program;
             protoletariat310-image = mkImage apps.protoletariat310.program;
             protoletariat311-image = mkImage apps.protoletariat311.program;
+            protoletariat312-image = mkImage apps.protoletariat312.program;
 
-            protoletariat-image = packages.protoletariat311-image;
+            protoletariat-image = packages.protoletariat312-image;
           };
 
 
           apps = {
-            protoletariat38 = mkApp packages.protoletariat38;
             protoletariat39 = mkApp packages.protoletariat39;
             protoletariat310 = mkApp packages.protoletariat310;
             protoletariat311 = mkApp packages.protoletariat311;
+            protoletariat312 = mkApp packages.protoletariat312;
 
-            protoletariat = apps.protoletariat311;
+            protoletariat = apps.protoletariat312;
             default = apps.protoletariat;
           };
 
@@ -228,47 +224,48 @@
               src = ./.;
               hooks = {
                 actionlint.enable = true;
-                black.enable = true;
                 nixpkgs-fmt.enable = true;
                 shellcheck.enable = true;
                 statix.enable = true;
-
-                ruff = {
-                  enable = true;
-                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/ruff --force-exclude";
-                  types = [ "python" ];
-                };
+                taplo.enable = true;
+                ruff.enable = true;
+                ruff-format.enable = true;
+                deadnix.enable = true;
 
                 prettier = {
                   enable = true;
-                  types_or = [ "json" "markdown" "toml" "yaml" ];
+                  types_or = [ "json" "markdown" "yaml" ];
                 };
 
                 mypy = {
                   enable = true;
-                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/mypy";
+                  entry = lib.mkForce "${pkgs.protoletariatDevEnv}/bin/mypy --config-file ${./pyproject.toml}";
                   types = [ "python" ];
-                  excludes = [ ".+/tests/.+\\.py$" ];
                 };
 
                 shfmt = {
                   enable = true;
                   entry = lib.mkForce "${pkgs.shfmt}/bin/shfmt -i 2 -sr -d -s -l";
                 };
+                prettier.settings.binPath = "${pkgs.prettierTOML}/bin/prettier";
               };
 
-              settings.prettier.binPath = "${pkgs.prettierTOML}/bin/prettier";
             };
+          };
+
+          devShells.release = pkgs.mkShell {
+            name = "release";
+            nativeBuildInputs = with pkgs; [ git poetry nodejs_20 unzip gnugrep ];
           };
 
           devShells.default = pkgs.mkShell {
             nativeBuildInputs = with pkgs; [
+              poetry
               buf
               grpc
               prettierTOML
               protobuf
               protoletariatDevEnv
-              protoletariatDevEnv.pkgs.poetry
             ];
 
             inherit (self.checks.${localSystem}.pre-commit-check) shellHook;
