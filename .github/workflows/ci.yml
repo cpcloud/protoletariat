@@ -148,7 +148,7 @@ jobs:
 
           poetry2conda --dev pyproject.toml - | tee environment.yml
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           mamba-version: "*"
           miniforge-variant: Mambaforge
@@ -193,7 +193,7 @@ jobs:
       - name: Generate conda environment file
         run: poetry2conda --dev pyproject.toml - > environment.yml
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           mamba-version: "*"
           miniforge-variant: Mambaforge
