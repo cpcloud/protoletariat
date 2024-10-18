@@ -53,7 +53,7 @@
       mkApp = { py, pkgs }: {
         name = "protoletariat${py}";
         value = pkgs.poetry2nix.mkPoetryApplication {
-          python = pkgs."python${py}Optimized";
+          python = pkgs."python${py}";
           preferWheels = true;
           checkGroups = [ "dev" "test" ];
 
@@ -115,58 +115,7 @@
           super.lib.concatMap
             (py: [
               (mkApp { inherit py pkgs; })
-              (mkEnv {
-                inherit py pkgs;
-              })
-              {
-                name = "python${py}Optimized";
-                value = (super."python${py}".override {
-                  # remove python-config, this contributes around 30MB to the closure
-                  stripConfig = true;
-                  # remove the IDLE GUI
-                  stripIdlelib = true;
-                  # remove tests
-                  stripTests = true;
-                  # remove tkinter things
-                  stripTkinter = true;
-                  # remove a bunch of unused modules
-                  ncurses = null;
-                  readline = null;
-                  openssl = null;
-                  gdbm = null;
-                  sqlite = null;
-                  configd = null;
-                  tzdata = null;
-                  # we could reduce the size even further (< 40MB for the
-                  # entire closure) but there's a performance penalty:
-                  # stripBytecode == true + rebuildBytecode == false means
-                  # *no* bytecode on disk until import. Probably not a big
-                  # issue for a long running service, but horrible for a CLI
-                  # tool
-                  stripBytecode = true;
-                  rebuildBytecode = true;
-                  # no need for site customize in the application
-                  includeSiteCustomize = false;
-                  # unused in protoletariat
-                  mimetypesSupport = false;
-                }).overrideAttrs (attrs: {
-                  # compile the python interpreter without -Os because we care
-                  # about startup time; protoletariat is a CLI tool after all
-                  preConfigure = ''
-                    ${attrs.preConfigure or ""}
-                  '' + (super.lib.optionalString (!super.stdenv.isDarwin) ''
-                    export NIX_LDFLAGS+=" --strip-all"
-                  '');
-                  # remove optimized bytecode; shaves about 15MB
-                  #
-                  # the application will never be run with any optimization
-                  # level so we don't need it
-                  postInstall = ''
-                    ${attrs.postInstall or ""}
-                    find $out -name '*.opt-?.pyc' -exec rm '{}' +
-                  '';
-                });
-              }
+              (mkEnv { inherit py pkgs; })
             ])
             [ "39" "310" "311" "312" ]
         )))
