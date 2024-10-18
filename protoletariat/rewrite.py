@@ -5,15 +5,17 @@ import collections
 import collections.abc
 import typing
 from ast import AST
-from collections.abc import MutableSet, Sequence
-from typing import Any, Callable, NamedTuple, Union
+from typing import TYPE_CHECKING, Any, Callable, NamedTuple, Sequence, Union
 
 try:
     from ast import unparse as astunparse
 except ImportError:
     from astunparse import unparse as astunparse  # type: ignore[no-redef]
 
-Node = Union[AST, Sequence[AST]]
+if TYPE_CHECKING:
+    from collections.abc import MutableSet
+
+    Node = Union[AST, Sequence[AST]]
 
 
 class Replacement(NamedTuple):
