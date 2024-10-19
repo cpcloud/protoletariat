@@ -54,6 +54,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - macos-latest
         python-version:
           - "39"
           - "310"
