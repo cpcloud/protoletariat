@@ -1,5 +1,11 @@
 # Release Notes
 
+## [3.3.4](https://github.com/cpcloud/protoletariat/compare/3.3.3...3.3.4) (2024-12-04)
+
+### Bug Fixes
+
+* **deps:** update dependency grpcio-tools to v1.68.1 ([0c1842b](https://github.com/cpcloud/protoletariat/commit/0c1842b0b19423c79ec42ca608ffed24bb358e92))
+
 ## [3.3.3](https://github.com/cpcloud/protoletariat/compare/3.3.2...3.3.3) (2024-12-04)
 
 ### Bug Fixes
