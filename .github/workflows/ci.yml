@@ -128,7 +128,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: bufbuild/buf-setup-action@v1.49.0
+      - uses: bufbuild/buf-setup-action@v1.50.0
         if: matrix.buf
         with:
           github_token: ${{ github.token }}
