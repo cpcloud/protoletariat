@@ -253,7 +253,7 @@ jobs:
       - tensorflow
       - dry-release
     steps:
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: generate_token
         with:
           app-id: ${{ secrets.APP_ID }}
