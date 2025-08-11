@@ -14,7 +14,7 @@ jobs:
     outputs:
       matrix: ${{ steps.get-flakes.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
@@ -34,7 +34,7 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.get-flakes.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: cachix/install-nix-action@v31
         with:
           nix_path: nixpkgs=channel:nixos-unstable-small
