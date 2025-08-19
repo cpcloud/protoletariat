@@ -57,7 +57,7 @@ def _echo(_: Path, code: str) -> None:
     "--module-suffixes",
     type=str,
     multiple=True,
-    default=["_pb2.py", "_pb2.pyi", "_pb2_grpc.py", "_pb2_grpc.pyi"],
+    default=["_pb2.py", "_pb2.pyi", "_pb2_grpc.py", "_pb2_grpc.pyi", "_pb2_connect.py"],
     help="Suffixes of Python/mypy modules to process",
     show_default=True,
 )
