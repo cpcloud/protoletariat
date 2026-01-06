@@ -13,31 +13,31 @@ classifiers = [
   "Operating System :: OS Independent",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14"
 ]
 
 [tool.poetry.scripts]
 protol = "protoletariat.__main__:main"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-astunparse = { version = ">=1.6.3,<2", python = "<3.9" }
+python = "^3.10"
 click = ">=8,<9"
-protobuf = ">=3.19.1,<6"
+protobuf = ">=3.19.1,<7"
 grpcio-tools = { version = ">=1.42.0,<2", optional = true }
 
 [tool.poetry.dev-dependencies]
 grpc-stubs = ">=1.24.7,<2"
 grpcio = ">=1.42,<2"
 mypy = ">=1,<2"
-mypy-protobuf = ">=3,<4"
+mypy-protobuf = ">=4,<5"
 pytest = ">=8,<9"
 pytest-randomly = ">=3.10.1,<4"
 ruff = ">=0.6.0,<1"
-types-protobuf = ">=5,<6"
+types-protobuf = ">=5,<7"
 
 [tool.poetry.extras]
 grpcio-tools = ["grpcio-tools"]
@@ -153,7 +153,6 @@ ignore = [
   "SIM118",  # remove .keys() calls from dictionaries
   "SIM300",  # yoda conditions
   "UP007",   # Optional[str] -> str | None
-  "UP038",   # non-pep604-isinstance, results in slower code
 ]
 unfixable = [
   "T201",   # print statements
