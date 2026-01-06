@@ -143,7 +143,7 @@ class BufFixture(ProtoletariatFixture):
 
     def do_generate(self, cli: CliRunner, *, args: Iterable[str] = ()) -> Result:
         try:
-            subprocess.run(["buf", "generate"], cwd=str(self.base_dir), check=True)  # noqa: S603, S607
+            subprocess.run(["buf", "generate"], cwd=str(self.base_dir), check=True)  # noqa: S607
         except FileNotFoundError:
             pytest.skip("buf executable not found")
         else:

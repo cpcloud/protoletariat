@@ -25,7 +25,7 @@ class Replacement(NamedTuple):
     new: str
 
 
-def _is_iterable(value: Any) -> bool:  # type: ignore[misc]
+def _is_iterable(value: Any) -> bool:  # type: ignore[explicit-any]
     """Return whether `value` is a non-string iterable.
 
     Examples
@@ -242,8 +242,8 @@ class ASTImportRewriter:
 
     def register_rewrite(self, replacement: Replacement) -> None:
         """Register a rewrite rule for turning `old` into `new`."""
-        (old_node,) = typing.cast(ast.Module, ast.parse(replacement.old)).body
-        (new_node,) = typing.cast(ast.Module, ast.parse(replacement.new)).body
+        (old_node,) = typing.cast("ast.Module", ast.parse(replacement.old)).body
+        (new_node,) = typing.cast("ast.Module", ast.parse(replacement.new)).body
 
         def _rewrite(_: AST, repl: AST = new_node) -> AST:
             return repl
